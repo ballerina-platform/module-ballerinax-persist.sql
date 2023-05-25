@@ -29,15 +29,6 @@ public type SQLMetadata record {|
     map<JoinMetadata> joinMetadata?;
 |};
 
-# Represents the metadata associated with a simple field in the entity record.
-#
-# + columnName - The name of the spreadsheet column to which the field is mapped
-# + columnId - The alphabetical Id of the column
-public type SimpleSheetFieldMetadata record {|
-    string columnName;
-    string columnId;
-|};
-
 # Represents the metadata associated with a field from a related entity.
 #
 # + relation - The relational metadata associated with the field

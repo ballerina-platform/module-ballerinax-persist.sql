@@ -77,6 +77,11 @@ public class PersistSQLStream {
     }
 
     public isolated function close() returns persist:Error? {
-        check closeSQLEntityStream(self.anydataStream);
+        if self.anydataStream is stream<anydata, sql:Error?> {
+            error? e = (<stream<anydata, sql:Error?>>self.anydataStream).close();
+            if e is error {
+                return <persist:Error>error(e.message());
+            }
+        }
     }
 }

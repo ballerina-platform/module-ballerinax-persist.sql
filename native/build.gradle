@@ -124,7 +124,7 @@ publishing {
     publications {
         mavenJava(MavenPublication) {
             groupId project.group
-            artifactId "persist-native"
+            artifactId "persist.sql-native"
             version = project.version
             artifact jar
         }

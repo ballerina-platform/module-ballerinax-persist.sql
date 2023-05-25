@@ -1,0 +1,22 @@
+[package]
+org = "ballerinax"
+name = "persist.sql"
+version = "1.0.0"
+authors = ["Ballerina"]
+keywords = ["persist", "sql"]
+repository = "https://github.com/ballerina-platform/module-ballerinas-persist.sql"
+icon = "icon.png"
+license = ["Apache-2.0"]
+distribution = "2201.6.0"
+
+[[platform.java11.dependency]]
+groupId = "io.ballerinax.persist.sql"
+artifactId = "persist.sql-native"
+version = "1.0.0"
+path = "../native/build/libs/persist.sql-native-1.0.0-SNAPSHOT.jar"
+
+[[platform.java11.dependency]]
+groupId = "io.ballerina.stdlib.persist"
+artifactId = "persist-native"
+version = "1.0.0"
+path = "./lib/persist-native-1.0.0-SNAPSHOT.jar"

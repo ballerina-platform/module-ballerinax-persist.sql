@@ -23,7 +23,7 @@ plugins {
     id 'maven-publish'
 }
 
-description = 'Ballerina - Persist SQL Java Native'
+description = 'Ballerina Persist - SQL Extension Java Native'
 
 configurations {
     jacocoRuntime

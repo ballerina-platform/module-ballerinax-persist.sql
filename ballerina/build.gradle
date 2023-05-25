@@ -32,6 +32,8 @@ buildscript {
     }
 }
 
+description = 'Ballerina Persist - SQL Extension'
+
 def packageName = 'persist.sql'
 def packageOrg = 'ballerinax'
 def tomlVersion = stripBallerinaExtensionVersion("${project.version}")

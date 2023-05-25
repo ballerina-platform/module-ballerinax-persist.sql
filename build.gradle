@@ -22,7 +22,7 @@ plugins {
     id "net.researchgate.release" version "${researchgateReleaseVersion}"
 }
 
-description = 'Ballerina - Persist'
+description = 'Ballerina Persist - SQL Extension'
 
 def packageName = "persist.sql"
 

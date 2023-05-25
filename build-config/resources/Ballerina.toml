@@ -10,13 +10,13 @@ license = ["Apache-2.0"]
 distribution = "2201.6.0"
 
 [[platform.java11.dependency]]
-groupId = "io.ballerinax.persist.sql"
+groupId = "io.ballerina.stdlib"
 artifactId = "persist.sql-native"
 version = "@toml.version@"
 path = "../native/build/libs/persist.sql-native-@project.version@.jar"
 
 [[platform.java11.dependency]]
-groupId = "io.ballerina.stdlib.persist"
+groupId = "io.ballerina.stdlib"
 artifactId = "persist-native"
 version = "@persist.version@"
 path = "./lib/persist-native-@persist.native.version@.jar"

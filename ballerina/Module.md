@@ -1,10 +1,10 @@
 # Module Overview
 
-This module consists of Ballerina `persist` Tooling, which provides functionality to store and query data conveniently through a data model instead of SQL query language.
+This package includes Ballerina `persist` support, which provides functionality to store and query data from a relational database conveniently through a data model instead of using SQL query language.
 
 The `persist` tools provides following functionalities,
 1. Define and validate the entity data model definitions in the `persist` folder
-2. Initialize the Ballerina Persistence Layer for every model definitions in the `persist` folder
+2. Initialize the Ballerina Persistence Layer for every model definition in the `persist` folder
 3. Generate persistence derived entity types and clients 
 4. Push persistence schema to the data store
 

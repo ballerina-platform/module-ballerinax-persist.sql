@@ -134,7 +134,7 @@ publishing {
     repositories {
         maven {
             name = "GitHubPackages"
-            url = uri("https://maven.pkg.github.com/ballerina-platform/module-ballerina-persist")
+            url = uri("https://maven.pkg.github.com/ballerina-platform/module-ballerinax-persist.sql")
             credentials {
                 username = System.getenv("publishUser")
                 password = System.getenv("publishPAT")

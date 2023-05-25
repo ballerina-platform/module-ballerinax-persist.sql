@@ -15,7 +15,6 @@
 // under the License.
 
 import ballerina/sql;
-import ballerina/jballerina.java;
 import ballerina/persist;
 
 isolated function stringToParameterizedQuery(string queryStr) returns sql:ParameterizedQuery {
@@ -35,10 +34,6 @@ isolated function getKeyFromAlreadyExistsErrorMessage(string errorMessage) retur
     string key = errorMessage.substring(startIndex + 18, endIndex);
     return key;
 }
-
-isolated function convertToArray(typedesc<record {}> elementType, record {}[] arr) returns elementType[] = @java:Method {
-    'class: "io.ballerina.stdlib.persist.Utils"
-} external;
 
 isolated function arrayToParameterizedQuery(string[] arr, sql:ParameterizedQuery delimiter = `,`) returns sql:ParameterizedQuery {
     sql:ParameterizedQuery query = stringToParameterizedQuery(arr[0]);

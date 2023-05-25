@@ -192,7 +192,7 @@ public isolated client class SQLClient {
                 return <persist:Error>error(arr.message());
             }
 
-            'object[joinMetadata.fieldName] = convertToArray(joinRelationTypedesc, arr);
+            'object[joinMetadata.fieldName] = persist:convertToArray(joinRelationTypedesc, arr);
         }
     }
 

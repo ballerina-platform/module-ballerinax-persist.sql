@@ -382,11 +382,11 @@ public isolated client class SQLClient {
     }
 
     private isolated function getUpdateQuery(record {} updateRecord) returns sql:ParameterizedQuery|persist:Error {
-        return sql:queryConcat(`UPDATE `, stringToParameterizedQuery(self.tableName), stringToParameterizedQuery(" " + self.entityName), ` SET `, check self.getSetClauses(updateRecord));
+        return sql:queryConcat(`UPDATE `, stringToParameterizedQuery(self.tableName), ` SET `, check self.getSetClauses(updateRecord));
     }
 
     private isolated function getDeleteQuery() returns sql:ParameterizedQuery {
-        return sql:queryConcat(`DELETE FROM `, stringToParameterizedQuery(self.tableName), stringToParameterizedQuery(" " + self.entityName));
+        return sql:queryConcat(`DELETE FROM `, stringToParameterizedQuery(self.tableName));
     }
 
     private isolated function getJoinFields(string[] include) returns string[] {

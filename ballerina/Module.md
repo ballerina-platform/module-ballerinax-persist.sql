@@ -51,7 +51,7 @@ password = ""
 database = ""
 ```
 
-Additionally, you can set values for the following advanced configuration parameters in the Config.toml file in your project to use the MySQL data store. Please refer to the MySQL Connector documentation for more information on these parameters.
+Additionally, you can set values for advanced configuration parameters in the `Config.toml` file in your project to use the MySQL data store. Please refer to the [MySQL Connector documentation](https://lib.ballerina.io/ballerinax/mysql/latest) for more information on these parameters.
 
 ## How to Setup
 

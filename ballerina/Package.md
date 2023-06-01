@@ -67,7 +67,7 @@ Select one of the methods below to set up a MySQL server.
 
 ### Run the script to create the database and tables
 
-The persist generate command generates a script.sql file in the generated directory of your project. This file contains the SQL script to create the tables required for your application. You need to run this script to create the database and tables in the MySQL server using a MySQL client such as MySQL Workbench or the MySQL command line client.
+The `bal persist generate` command generates a script.sql file in the generated directory of your project. This file contains the SQL script to create the tables required for your application. You need to run this script to create the database and tables in the MySQL server using a MySQL client such as MySQL Workbench or the MySQL command line client.
 
 ## Report issues
 

@@ -10,7 +10,7 @@ Ballerina Persist - SQL Library
 
 This library provides relation database support for the `bal persist` feature, which provides functionality to store and query data conveniently through a data model instead of using relational databases.
 
-The `persist` command will make it easy to enable Ballerina Persistence Layer in a bal project. With this support, users need not worry about the persistence layer in a project. Users can define an entity data model, validate the model and generate `persist` clients for SQL, which provide convenient APIs to store and query data in a data store.
+The `persist` command will make it easy to enable `bal persist` feature in a Ballerina project. With this support, users need not worry about the persistence in a project. Users can define an entity data model, validate the model and generate `persist` clients for SQL, which provide convenient APIs to store and query data in a data store.
 
 For more information, see [`persist.sql` API Documentation](https://lib.ballerina.io/ballerinax/persist.sql/latest).
 

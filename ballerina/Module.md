@@ -1,6 +1,6 @@
 # Module Overview
 
-This package includes relation database support for the `bal persist` feature, which provides functionality to store and query data from a relational database conveniently through a data model instead of using SQL query language.
+This module provides relation database support for the `bal persist` feature, which provides functionality to store and query data from a relational database conveniently through a data model instead of using SQL query language.
 
 Currently, this package supports only MySQL as the relational database. However, you are planning to add support for other relational databases such as PostgreSQL, Oracle, and Microsoft SQL Server.
 

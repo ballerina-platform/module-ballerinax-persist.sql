@@ -2,7 +2,7 @@
 
 This package provides relation database support for the `bal persist` feature, which provides functionality to store and query data from a relational database conveniently through a data model instead of using SQL query language.
 
-Currently, this package supports only MySQL as the relational database. However, you are planning to add support for other relational databases such as PostgreSQL, Oracle, and Microsoft SQL Server.
+Currently, this package supports only MySQL as the relational database. However, we are planning to add support for other relational databases such as PostgreSQL, Oracle, and Microsoft SQL Server.
 
 The MySQL data store is a relational database management system that stores data in tables. The MySQL data store is useful for storing data in a relational format. The MySQL data store is not the default data store for the `bal persist` feature. Therefore, you need to explicitly specify the data store when initializing `bal persist` in your application. as follows,
 
@@ -67,7 +67,7 @@ Select one of the methods below to set up a MySQL server.
 
 ### Run the script to create the database and tables
 
-The persist generate command generates a script.sql file in the generated directory of your project. This file contains the SQL script to create the tables required for your application. You need to run this script to create the database and tables in the MySQL server using a MySQL client such as MySQL Workbench or the MySQL command line client.
+The `bal persist generate` command generates a script.sql file in the generated directory of your project. This file contains the SQL script to create the tables required for your application. You need to run this script to create the database and tables in the MySQL server using a MySQL client such as MySQL Workbench or the MySQL command line client.
 
 ## Report issues
 

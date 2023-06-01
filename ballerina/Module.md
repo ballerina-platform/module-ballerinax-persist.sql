@@ -4,7 +4,7 @@ This module provides relation database support for the `bal persist` feature, wh
 
 Currently, this package supports only MySQL as the relational database. However, you are planning to add support for other relational databases such as PostgreSQL, Oracle, and Microsoft SQL Server.
 
-The MySQL data store is a relational database management system that stores data in tables. The MySQL data store is useful for storing data in a relational format. The MySQL data store is not the default data store for the `bal persist`. Therefore, you need to explicitly specify the data store when initializing Ballerina Persistence in your application. like below,
+The MySQL data store is a relational database management system that stores data in tables. The MySQL data store is useful for storing data in a relational format. The MySQL data store is not the default data store for the `bal persist` feature. Therefore, you need to explicitly specify the data store when initializing `bal persist` in your application. as follows,
 
 ```
 $ bal persist init --datastore mysql

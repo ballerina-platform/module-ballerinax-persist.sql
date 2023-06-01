@@ -58,11 +58,11 @@ Execute the commands below to build from source.
 
    **Tip:** The following groups of test cases are available.
 
-   Groups | Test cases
-      ---| ---
-   basic | basic
-   associations | associations <br> one-to-many
-   composite-keys | composite-keys
+|     Groups      |          Test cases           |
+|:---------------:|:-----------------------------:|
+|      basic      |             basic             |
+|  associations   | associations <br> one-to-many |
+| composite-keys  |        composite-keys         |
 
 5. To disable some specific test groups:
 

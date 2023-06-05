@@ -8,9 +8,9 @@ Ballerina Persist - SQL Library
 [![GitHub Last Commit](https://img.shields.io/github/last-commit/ballerina-platform/module-ballerinax-persist.sql.svg)](https://github.com/ballerina-platform/module-ballerinax-persist.sql/commits/main)
 [![GitHub Issues](https://img.shields.io/github/issues/ballerina-platform/ballerina-standard-library/module/persist.sql.svg?label=Open%20Issues)](https://github.com/ballerina-platform/ballerina-standard-library/labels/module%2Fpersist.sql)
 
-This library provides Ballerina `persist` tooling for SQL, which provides functionality to store and query data conveniently through a data model instead of using relational databases.
+This library provides relation database support for the `bal persist` feature, which provides functionality to store and query data conveniently through a data model instead of using SQL query language.
 
-The `persist` command will make it easy to enable Ballerina Persistence Layer in a bal project. With this support, users need not worry about the persistence layer in a project. Users can define an entity data model, validate the model and generate `persist` clients for SQL, which provide convenient APIs to store and query data in a data store.
+The `persist` command will make it easy to enable `bal persist` feature in a Ballerina project. With this support, users need not worry about the persistence in a project. Users can define an entity data model, validate the model and generate `persist` clients for SQL, which provide convenient APIs to store and query data in a data store.
 
 For more information, see [`persist.sql` API Documentation](https://lib.ballerina.io/ballerinax/persist.sql/latest).
 
@@ -57,11 +57,11 @@ Execute the commands below to build from source.
 
    **Tip:** The following groups of test cases are available.
 
-   Groups | Test cases
-      ---| ---
-   basic | basic
-   associations | associations <br> one-to-many
-   composite-keys | composite-keys
+|     Groups      |          Test cases           |
+|:---------------:|:-----------------------------:|
+|      basic      |             basic             |
+|  associations   | associations <br> one-to-many |
+| composite-keys  |        composite-keys         |
 
 5. To disable some specific test groups:
 

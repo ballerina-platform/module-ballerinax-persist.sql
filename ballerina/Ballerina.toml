@@ -13,10 +13,10 @@ distribution = "2201.6.0"
 groupId = "io.ballerina.stdlib"
 artifactId = "persist.sql-native"
 version = "1.0.0"
-path = "../native/build/libs/persist.sql-native-1.0.0-SNAPSHOT.jar"
+path = "../native/build/libs/persist.sql-native-1.0.0.jar"
 
 [[platform.java11.dependency]]
 groupId = "io.ballerina.stdlib"
 artifactId = "persist-native"
 version = "1.0.0"
-path = "./lib/persist-native-1.0.0-SNAPSHOT.jar"
+path = "./lib/persist-native-1.0.0.jar"

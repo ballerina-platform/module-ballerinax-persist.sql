@@ -165,7 +165,7 @@ function sqlAllTypesReadOneTestNegative() returns error? {
 
     AllTypes|persist:Error allTypesRetrieved = testEntitiesClient->/alltypes/[4].get();
     if allTypesRetrieved is persist:NotFoundError {
-        test:assertEquals(allTypesRetrieved.message(), "A record does not exist for 'AllTypes' for key 4.");
+        test:assertEquals(allTypesRetrieved.message(), "A record with the key '4' does not exist for the entity 'AllTypes'.");
     }
     else {
         test:assertFail("persist:NotFoundError expected.");

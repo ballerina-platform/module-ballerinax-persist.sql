@@ -86,7 +86,7 @@ function sqlBuildingReadOneTestNegative() returns error? {
 
     Building|error buildingRetrieved = rainierClient->/buildings/["invalid-building-code"].get();
     if buildingRetrieved is persist:NotFoundError {
-        test:assertEquals(buildingRetrieved.message(), "A record does not exist for 'Building' for key \"invalid-building-code\".");
+        test:assertEquals(buildingRetrieved.message(), "A record with the key 'invalid-building-code' does not exist for the entity 'Building'.");
     } else {
         test:assertFail("persist:NotFoundError expected.");
     }
@@ -162,7 +162,7 @@ function sqlBuildingUpdateTestNegative1() returns error? {
     });
 
     if building is persist:NotFoundError {
-        test:assertEquals(building.message(), "A record does not exist for 'Building' for key \"invalid-building-code\".");
+        test:assertEquals(building.message(), "A record with the key 'invalid-building-code' does not exist for the entity 'Building'.");
     } else {
         test:assertFail("persist:NotFoundError expected.");
     }
@@ -218,7 +218,7 @@ function sqlBuildingDeleteTestNegative() returns error? {
     Building|error building = rainierClient->/buildings/[building1.buildingCode].delete();
 
     if building is error {
-        test:assertEquals(building.message(), string `A record does not exist for 'Building' for key "${building1.buildingCode}".`);
+        test:assertEquals(building.message(), string `A record with the key '${building1.buildingCode}' does not exist for the entity 'Building'.`);
     } else {
         test:assertFail("persist:NotFoundError expected.");
     }

@@ -24,7 +24,7 @@ const BUILDING = "buildings";
 const DEPARTMENT = "departments";
 const ORDER_ITEM = "orderitems";
 
-public isolated client class SQLRainierClient {
+public isolated client class MySQLRainierClient {
     *persist:AbstractPersistClient;
 
     private final mysql:Client dbClient;
@@ -133,7 +133,7 @@ public isolated client class SQLRainierClient {
     };
 
     public isolated function init() returns persist:Error? {
-        mysql:Client|error dbClient = new (host = host, user = user, password = password, database = database, port = port);
+        mysql:Client|error dbClient = new (host = mysql.host, user = mysql.user, password = mysql.password, database = mysql.database, port = mysql.port);
         if dbClient is error {
             return <persist:Error>error(dbClient.message());
         }

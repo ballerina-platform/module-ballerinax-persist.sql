@@ -27,7 +27,7 @@ const BOOLEAN_ID_RECORD = "booleanidrecords";
 const COMPOSITE_ASSOCIATION_RECORD = "compositeassociationrecords";
 const ALL_TYPES_ID_RECORD = "alltypesidrecords";
 
-public isolated client class SQLTestEntitiesClient {
+public isolated client class MySQLTestEntitiesClient {
     *persist:AbstractPersistClient;
 
     private final mysql:Client dbClient;
@@ -152,7 +152,7 @@ public isolated client class SQLTestEntitiesClient {
     };
 
     public isolated function init() returns persist:Error? {
-        mysql:Client|error dbClient = new (host = host, user = user, password = password, database = database, port = port);
+        mysql:Client|error dbClient = new (host = mysql.host, user = mysql.user, password = mysql.password, database = mysql.database, port = mysql.port);
         if dbClient is error {
             return <persist:Error>error(dbClient.message());
         }

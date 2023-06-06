@@ -54,10 +54,10 @@ Building building33Updated = {
 };
 
 @test:Config {
-    groups: ["transactions", "sql"]
+    groups: ["transactions", "mysql"]
 }
-function sqlTransactionTest() returns error? {
-    SQLRainierClient rainierClient = check new ();
+function mysqlTransactionTest() returns error? {
+    MySQLRainierClient rainierClient = check new ();
 
     transaction {
         string[] buildingCodes = check rainierClient->/buildings.post([building31, building32]);
@@ -79,10 +79,10 @@ function sqlTransactionTest() returns error? {
 }
 
 @test:Config {
-    groups: ["transactions", "sql"]
+    groups: ["transactions", "mysql"]
 }
-function sqlTransactionTest2() returns error? {
-    SQLRainierClient rainierClient = check new ();
+function mysqlTransactionTest2() returns error? {
+    MySQLRainierClient rainierClient = check new ();
 
     _ = check rainierClient->/buildings.post([building33]);
     Building buildingRetrieved = check rainierClient->/buildings/[building33.buildingCode].get();

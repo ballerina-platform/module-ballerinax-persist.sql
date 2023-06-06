@@ -18,11 +18,11 @@ import ballerina/test;
 import ballerina/persist;
 
 @test:Config {
-    groups: ["employee", "sql"],
-    dependsOn: [sqlWorkspaceDeleteTestNegative, sqlDepartmentDeleteTestNegative]
+    groups: ["employee", "mysql"],
+    dependsOn: [mysqlWorkspaceDeleteTestNegative, mysqlDepartmentDeleteTestNegative]
 }
-function sqlEmployeeCreateTest() returns error? {
-    SQLRainierClient rainierClient = check new ();
+function mysqlEmployeeCreateTest() returns error? {
+    MySQLRainierClient rainierClient = check new ();
 
     string[] empNos = check rainierClient->/employees.post([employee1]);
     test:assertEquals(empNos, [employee1.empNo]);
@@ -33,11 +33,11 @@ function sqlEmployeeCreateTest() returns error? {
 }
 
 @test:Config {
-    groups: ["employee", "sql"],
-    dependsOn: [sqlWorkspaceDeleteTestNegative, sqlDepartmentDeleteTestNegative]
+    groups: ["employee", "mysql"],
+    dependsOn: [mysqlWorkspaceDeleteTestNegative, mysqlDepartmentDeleteTestNegative]
 }
-function sqlEmployeeCreateTest2() returns error? {
-    SQLRainierClient rainierClient = check new ();
+function mysqlEmployeeCreateTest2() returns error? {
+    MySQLRainierClient rainierClient = check new ();
 
     string[] empNos = check rainierClient->/employees.post([employee2, employee3]);
 
@@ -52,10 +52,10 @@ function sqlEmployeeCreateTest2() returns error? {
 }
 
 @test:Config {
-    groups: ["employee", "sql"]
+    groups: ["employee", "mysql"]
 }
-function sqlEmployeeCreateTestNegative() returns error? {
-    SQLRainierClient rainierClient = check new ();
+function mysqlEmployeeCreateTestNegative() returns error? {
+    MySQLRainierClient rainierClient = check new ();
 
     string[]|error employee = rainierClient->/employees.post([invalidEmployee]);
     if employee is persist:Error {
@@ -67,11 +67,11 @@ function sqlEmployeeCreateTestNegative() returns error? {
 }
 
 @test:Config {
-    groups: ["employee", "sql"],
-    dependsOn: [sqlEmployeeCreateTest]
+    groups: ["employee", "mysql"],
+    dependsOn: [mysqlEmployeeCreateTest]
 }
-function sqlEmployeeReadOneTest() returns error? {
-    SQLRainierClient rainierClient = check new ();
+function mysqlEmployeeReadOneTest() returns error? {
+    MySQLRainierClient rainierClient = check new ();
 
     Employee employeeRetrieved = check rainierClient->/employees/[employee1.empNo].get();
     test:assertEquals(employeeRetrieved, employee1);
@@ -79,11 +79,11 @@ function sqlEmployeeReadOneTest() returns error? {
 }
 
 @test:Config {
-    groups: ["employee", "sql"],
-    dependsOn: [sqlEmployeeCreateTest]
+    groups: ["employee", "mysql"],
+    dependsOn: [mysqlEmployeeCreateTest]
 }
-function sqlEmployeeReadOneTestNegative() returns error? {
-    SQLRainierClient rainierClient = check new ();
+function mysqlEmployeeReadOneTestNegative() returns error? {
+    MySQLRainierClient rainierClient = check new ();
 
     Employee|error employeeRetrieved = rainierClient->/employees/["invalid-employee-id"].get();
     if employeeRetrieved is persist:NotFoundError {
@@ -95,11 +95,11 @@ function sqlEmployeeReadOneTestNegative() returns error? {
 }
 
 @test:Config {
-    groups: ["employee", "sql"],
-    dependsOn: [sqlEmployeeCreateTest, sqlEmployeeCreateTest2]
+    groups: ["employee", "mysql"],
+    dependsOn: [mysqlEmployeeCreateTest, mysqlEmployeeCreateTest2]
 }
-function sqlEmployeeReadManyTest() returns error? {
-    SQLRainierClient rainierClient = check new ();
+function mysqlEmployeeReadManyTest() returns error? {
+    MySQLRainierClient rainierClient = check new ();
 
     stream<Employee, persist:Error?> employeeStream = rainierClient->/employees.get();
     Employee[] employees = check from Employee employee in employeeStream
@@ -111,10 +111,10 @@ function sqlEmployeeReadManyTest() returns error? {
 
 @test:Config {
     groups: ["dependent", "employee"],
-    dependsOn: [sqlEmployeeCreateTest, sqlEmployeeCreateTest2]
+    dependsOn: [mysqlEmployeeCreateTest, mysqlEmployeeCreateTest2]
 }
-function sqlEmployeeReadManyDependentTest1() returns error? {
-    SQLRainierClient rainierClient = check new ();
+function mysqlEmployeeReadManyDependentTest1() returns error? {
+    MySQLRainierClient rainierClient = check new ();
 
     stream<EmployeeName, persist:Error?> employeeStream = rainierClient->/employees.get();
     EmployeeName[] employees = check from EmployeeName employee in employeeStream
@@ -130,10 +130,10 @@ function sqlEmployeeReadManyDependentTest1() returns error? {
 
 @test:Config {
     groups: ["dependent", "employee"],
-    dependsOn: [sqlEmployeeCreateTest, sqlEmployeeCreateTest2]
+    dependsOn: [mysqlEmployeeCreateTest, mysqlEmployeeCreateTest2]
 }
-function sqlEmployeeReadManyDependentTest2() returns error? {
-    SQLRainierClient rainierClient = check new ();
+function mysqlEmployeeReadManyDependentTest2() returns error? {
+    MySQLRainierClient rainierClient = check new ();
 
     stream<EmployeeInfo2, persist:Error?> employeeStream = rainierClient->/employees.get();
     EmployeeInfo2[] employees = check from EmployeeInfo2 employee in employeeStream
@@ -148,11 +148,11 @@ function sqlEmployeeReadManyDependentTest2() returns error? {
 }
 
 @test:Config {
-    groups: ["employee", "sql"],
-    dependsOn: [sqlEmployeeReadOneTest, sqlEmployeeReadManyTest, sqlEmployeeReadManyDependentTest1, sqlEmployeeReadManyDependentTest2]
+    groups: ["employee", "mysql"],
+    dependsOn: [mysqlEmployeeReadOneTest, mysqlEmployeeReadManyTest, mysqlEmployeeReadManyDependentTest1, mysqlEmployeeReadManyDependentTest2]
 }
-function sqlEmployeeUpdateTest() returns error? {
-    SQLRainierClient rainierClient = check new ();
+function mysqlEmployeeUpdateTest() returns error? {
+    MySQLRainierClient rainierClient = check new ();
 
     Employee employee = check rainierClient->/employees/[employee1.empNo].put({
         lastName: "Jones",
@@ -168,11 +168,11 @@ function sqlEmployeeUpdateTest() returns error? {
 }
 
 @test:Config {
-    groups: ["employee", "sql"],
-    dependsOn: [sqlEmployeeReadOneTest, sqlEmployeeReadManyTest, sqlEmployeeReadManyDependentTest1, sqlEmployeeReadManyDependentTest2]
+    groups: ["employee", "mysql"],
+    dependsOn: [mysqlEmployeeReadOneTest, mysqlEmployeeReadManyTest, mysqlEmployeeReadManyDependentTest1, mysqlEmployeeReadManyDependentTest2]
 }
-function sqlEmployeeUpdateTestNegative1() returns error? {
-    SQLRainierClient rainierClient = check new ();
+function mysqlEmployeeUpdateTestNegative1() returns error? {
+    MySQLRainierClient rainierClient = check new ();
 
     Employee|error employee = rainierClient->/employees/["invalid-employee-id"].put({
         lastName: "Jones"
@@ -187,11 +187,11 @@ function sqlEmployeeUpdateTestNegative1() returns error? {
 }
 
 @test:Config {
-    groups: ["employee", "sql"],
-    dependsOn: [sqlEmployeeReadOneTest, sqlEmployeeReadManyTest, sqlEmployeeReadManyDependentTest1, sqlEmployeeReadManyDependentTest2]
+    groups: ["employee", "mysql"],
+    dependsOn: [mysqlEmployeeReadOneTest, mysqlEmployeeReadManyTest, mysqlEmployeeReadManyDependentTest1, mysqlEmployeeReadManyDependentTest2]
 }
-function sqlEmployeeUpdateTestNegative2() returns error? {
-    SQLRainierClient rainierClient = check new ();
+function mysqlEmployeeUpdateTestNegative2() returns error? {
+    MySQLRainierClient rainierClient = check new ();
 
     Employee|error employee = rainierClient->/employees/[employee1.empNo].put({
         firstName: "unncessarily-long-employee-name-to-force-error-on-update"
@@ -206,11 +206,11 @@ function sqlEmployeeUpdateTestNegative2() returns error? {
 }
 
 @test:Config {
-    groups: ["employee", "sql"],
-    dependsOn: [sqlEmployeeReadOneTest, sqlEmployeeReadManyTest, sqlEmployeeReadManyDependentTest1, sqlEmployeeReadManyDependentTest2]
+    groups: ["employee", "mysql"],
+    dependsOn: [mysqlEmployeeReadOneTest, mysqlEmployeeReadManyTest, mysqlEmployeeReadManyDependentTest1, mysqlEmployeeReadManyDependentTest2]
 }
-function sqlEmployeeUpdateTestNegative3() returns error? {
-    SQLRainierClient rainierClient = check new ();
+function mysqlEmployeeUpdateTestNegative3() returns error? {
+    MySQLRainierClient rainierClient = check new ();
 
     Employee|error employee = rainierClient->/employees/[employee1.empNo].put({
         workspaceWorkspaceId: "invalid-workspaceWorkspaceId"
@@ -226,11 +226,11 @@ function sqlEmployeeUpdateTestNegative3() returns error? {
 }
 
 @test:Config {
-    groups: ["employee", "sql"],
-    dependsOn: [sqlEmployeeUpdateTest, sqlEmployeeUpdateTestNegative2, sqlEmployeeUpdateTestNegative3]
+    groups: ["employee", "mysql"],
+    dependsOn: [mysqlEmployeeUpdateTest, mysqlEmployeeUpdateTestNegative2, mysqlEmployeeUpdateTestNegative3]
 }
-function sqlEmployeeDeleteTest() returns error? {
-    SQLRainierClient rainierClient = check new ();
+function mysqlEmployeeDeleteTest() returns error? {
+    MySQLRainierClient rainierClient = check new ();
 
     Employee employee = check rainierClient->/employees/[employee1.empNo].delete();
     test:assertEquals(employee, updatedEmployee1);
@@ -244,11 +244,11 @@ function sqlEmployeeDeleteTest() returns error? {
 }
 
 @test:Config {
-    groups: ["employee", "sql"],
-    dependsOn: [sqlEmployeeDeleteTest]
+    groups: ["employee", "mysql"],
+    dependsOn: [mysqlEmployeeDeleteTest]
 }
-function sqlEmployeeDeleteTestNegative() returns error? {
-    SQLRainierClient rainierClient = check new ();
+function mysqlEmployeeDeleteTestNegative() returns error? {
+    MySQLRainierClient rainierClient = check new ();
 
     Employee|error employee = rainierClient->/employees/[employee1.empNo].delete();
 

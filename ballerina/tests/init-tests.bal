@@ -40,7 +40,8 @@ configurable record {|
 |} mssql = ?;
 
 @test:BeforeSuite
-function truncate() returns error? {
+function initTests() returns error? {
+    // MySQL
     mysql:Client mysqlDbClient = check new (host = mysql.host, user = mysql.user, password = mysql.password, database = mysql.database, port = mysql.port);
     _ = check mysqlDbClient->execute(`SET FOREIGN_KEY_CHECKS = 0`);
     _ = check mysqlDbClient->execute(`TRUNCATE Employee`);
@@ -59,23 +60,64 @@ function truncate() returns error? {
     _ = check mysqlDbClient->execute(`SET FOREIGN_KEY_CHECKS = 1`);
     check mysqlDbClient.close();
 
-    mssql:Client mssqlDbClient = check new (host = mssql.host, user = mssql.user, password = mssql.password, database = mssql.database, port = mssql.port);
-    // _ = check mssqlDbClient->execute(`EXEC sp_MSforeachtable 'ALTER TABLE ? NOCHECK CONSTRAINT all'`);
-    _ = check mssqlDbClient->execute(`DELETE FROM Employee`);
-    _ = check mssqlDbClient->execute(`DELETE FROM Workspace`);
-    _ = check mssqlDbClient->execute(`DELETE FROM Building`);
-    _ = check mssqlDbClient->execute(`DELETE FROM Department`);
-    _ = check mssqlDbClient->execute(`DELETE FROM OrderItem`);
-    // _ = check mssqlDbClient->execute(`DELETE FROM AllTypes`);
-    // _ = check mssqlDbClient->execute(`DELETE FROM FloatIdRecord`);
-    // _ = check mssqlDbClient->execute(`DELETE FROM StringIdRecord`);
-    // _ = check mssqlDbClient->execute(`DELETE FROM DecimalIdRecord`);
-    // _ = check mssqlDbClient->execute(`DELETE FROM BooleanIdRecord`);
-    // _ = check mssqlDbClient->execute(`DELETE FROM IntIdRecord`);
-    // _ = check mssqlDbClient->execute(`DELETE FROM AllTypesIdRecord`);
-    // _ = check mssqlDbClient->execute(`DELETE FROM CompositeAssociationRecord`);
-    // _ = check mssqlDbClient->execute(`EXEC sp_MSforeachtable 'ALTER TABLE ? WITH CHECK CHECK CONSTRAINT all'`);
+    // MSSQL
+    mssql:Client mssqlDbClient = check new (host = mssql.host, user = mssql.user, password = mssql.password, port = mssql.port);
+    _ = check mssqlDbClient->execute(`DROP DATABASE IF EXISTS test;`);
+    _ = check mssqlDbClient->execute(`CREATE DATABASE test`);
     check mssqlDbClient.close();
+
+    mssqlDbClient = check new (host = mssql.host, user = mssql.user, password = mssql.password, database = mssql.database, port = mssql.port);
+    _ = check mssqlDbClient->execute(`
+        CREATE TABLE Building (
+            buildingCode VARCHAR(36) PRIMARY KEY,
+            city VARCHAR(50),
+            state VARCHAR(50),
+            country VARCHAR(50),
+            postalCode VARCHAR(50),
+            type VARCHAR(50)
+        )
+    `);
+
+    _ = check mssqlDbClient->execute(`
+        CREATE TABLE Workspace (
+            workspaceId VARCHAR(36) PRIMARY KEY,
+            workspaceType VARCHAR(10),
+            locationBuildingCode VARCHAR(36),
+            FOREIGN KEY (locationBuildingCode) REFERENCES Building(buildingCode)
+        )
+    `);
+
+    _ = check mssqlDbClient->execute(`
+        CREATE TABLE Department (
+            deptNo VARCHAR(36) PRIMARY KEY,
+            deptName VARCHAR(30)
+        )
+    `);
+
+    _ = check mssqlDbClient->execute(`
+        CREATE TABLE Employee (
+            empNo VARCHAR(36) PRIMARY KEY,
+            firstName VARCHAR(30),
+            lastName VARCHAR(30),
+            birthDate DATE,
+            gender VARCHAR(6) CHECK (gender IN ('MALE', 'FEMALE')) NOT NULL,
+            hireDate DATE,
+            departmentDeptNo VARCHAR(36),
+            workspaceWorkspaceId VARCHAR(36),
+            FOREIGN KEY (departmentDeptNo) REFERENCES Department(deptNo),
+            FOREIGN KEY (workspaceWorkspaceId) REFERENCES Workspace(workspaceId)
+        )
+    `);
+
+    _ = check mssqlDbClient->execute(`
+        CREATE TABLE OrderItem (
+            orderId VARCHAR(36),
+            itemId VARCHAR(30),
+            quantity INTEGER,
+            notes VARCHAR(255),
+            PRIMARY KEY(orderId, itemId)
+        )
+    `);
 }
 
 AllTypes allTypes1 = {

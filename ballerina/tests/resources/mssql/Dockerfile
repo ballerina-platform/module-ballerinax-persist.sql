@@ -12,7 +12,10 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-FROM mcr.microsoft.com/azure-sql-edge
+# Use this if testing on an M1 machine
+# FROM mcr.microsoft.com/azure-sql-edge
+
+FROM mcr.microsoft.com/mssql/server:2019-latest
 
 ENV ACCEPT_EULA=Y
 ENV SA_PASSWORD=DefaultPassword123

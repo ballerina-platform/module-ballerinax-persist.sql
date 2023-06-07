@@ -56,9 +56,9 @@ import static io.ballerina.stdlib.persist.sql.ModuleUtils.getModule;
  *
  * @since 0.3.0
  */
-public class MySQLProcessor {
+public class SQLProcessor {
 
-    private MySQLProcessor() {
+    private SQLProcessor() {
     }
 
     public static BStream query(Environment env, BObject client, BTypedesc targetType) {

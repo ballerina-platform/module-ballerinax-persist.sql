@@ -140,21 +140,21 @@ public isolated client class MySQLRainierClient {
         self.dbClient = dbClient;
 
         self.persistClients = {
-            [EMPLOYEE] : check new (dbClient, self.metadata.get(EMPLOYEE)),
-            [WORKSPACE] : check new (dbClient, self.metadata.get(WORKSPACE)),
-            [BUILDING] : check new (dbClient, self.metadata.get(BUILDING)),
-            [DEPARTMENT] : check new (dbClient, self.metadata.get(DEPARTMENT)),
-            [ORDER_ITEM] : check new (dbClient, self.metadata.get(ORDER_ITEM))
+            [EMPLOYEE] : check new (dbClient, self.metadata.get(EMPLOYEE), MYSQL_SPECIFICS),
+            [WORKSPACE] : check new (dbClient, self.metadata.get(WORKSPACE), MYSQL_SPECIFICS),
+            [BUILDING] : check new (dbClient, self.metadata.get(BUILDING), MYSQL_SPECIFICS),
+            [DEPARTMENT] : check new (dbClient, self.metadata.get(DEPARTMENT), MYSQL_SPECIFICS),
+            [ORDER_ITEM] : check new (dbClient, self.metadata.get(ORDER_ITEM), MYSQL_SPECIFICS)
         };
     }
 
     isolated resource function get employees(EmployeeTargetType targetType = <>) returns stream<targetType, persist:Error?> = @java:Method {
-        'class: "io.ballerina.stdlib.persist.sql.datastore.MySQLProcessor",
+        'class: "io.ballerina.stdlib.persist.sql.datastore.SQLProcessor",
         name: "query"
     } external;
 
     isolated resource function get employees/[string empNo](EmployeeTargetType targetType = <>) returns targetType|persist:Error = @java:Method {
-        'class: "io.ballerina.stdlib.persist.sql.datastore.MySQLProcessor",
+        'class: "io.ballerina.stdlib.persist.sql.datastore.SQLProcessor",
         name: "queryOne"
     } external;
 
@@ -188,12 +188,12 @@ public isolated client class MySQLRainierClient {
     }
 
     isolated resource function get workspaces(WorkspaceTargetType targetType = <>) returns stream<targetType, persist:Error?> = @java:Method {
-        'class: "io.ballerina.stdlib.persist.sql.datastore.MySQLProcessor",
+        'class: "io.ballerina.stdlib.persist.sql.datastore.SQLProcessor",
         name: "query"
     } external;
 
     isolated resource function get workspaces/[string workspaceId](WorkspaceTargetType targetType = <>) returns targetType|persist:Error = @java:Method {
-        'class: "io.ballerina.stdlib.persist.sql.datastore.MySQLProcessor",
+        'class: "io.ballerina.stdlib.persist.sql.datastore.SQLProcessor",
         name: "queryOne"
     } external;
 
@@ -227,12 +227,12 @@ public isolated client class MySQLRainierClient {
     }
 
     isolated resource function get buildings(BuildingTargetType targetType = <>) returns stream<targetType, persist:Error?> = @java:Method {
-        'class: "io.ballerina.stdlib.persist.sql.datastore.MySQLProcessor",
+        'class: "io.ballerina.stdlib.persist.sql.datastore.SQLProcessor",
         name: "query"
     } external;
 
     isolated resource function get buildings/[string buildingCode](BuildingTargetType targetType = <>) returns targetType|persist:Error = @java:Method {
-        'class: "io.ballerina.stdlib.persist.sql.datastore.MySQLProcessor",
+        'class: "io.ballerina.stdlib.persist.sql.datastore.SQLProcessor",
         name: "queryOne"
     } external;
 
@@ -266,12 +266,12 @@ public isolated client class MySQLRainierClient {
     }
 
     isolated resource function get departments(DepartmentTargetType targetType = <>) returns stream<targetType, persist:Error?> = @java:Method {
-        'class: "io.ballerina.stdlib.persist.sql.datastore.MySQLProcessor",
+        'class: "io.ballerina.stdlib.persist.sql.datastore.SQLProcessor",
         name: "query"
     } external;
 
     isolated resource function get departments/[string deptNo](DepartmentTargetType targetType = <>) returns targetType|persist:Error = @java:Method {
-        'class: "io.ballerina.stdlib.persist.sql.datastore.MySQLProcessor",
+        'class: "io.ballerina.stdlib.persist.sql.datastore.SQLProcessor",
         name: "queryOne"
     } external;
 
@@ -305,12 +305,12 @@ public isolated client class MySQLRainierClient {
     }
 
     isolated resource function get orderitems(OrderItemTargetType targetType = <>) returns stream<targetType, persist:Error?> = @java:Method {
-        'class: "io.ballerina.stdlib.persist.sql.datastore.MySQLProcessor",
+        'class: "io.ballerina.stdlib.persist.sql.datastore.SQLProcessor",
         name: "query"
     } external;
 
     isolated resource function get orderitems/[string orderId]/[string itemId](OrderItemTargetType targetType = <>) returns targetType|persist:Error = @java:Method {
-        'class: "io.ballerina.stdlib.persist.sql.datastore.MySQLProcessor",
+        'class: "io.ballerina.stdlib.persist.sql.datastore.SQLProcessor",
         name: "queryOne"
     } external;
 

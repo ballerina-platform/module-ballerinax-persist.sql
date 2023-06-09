@@ -118,6 +118,98 @@ function initTests() returns error? {
             PRIMARY KEY(orderId, itemId)
         )
     `);
+
+    _ = check mssqlDbClient->execute(`
+        CREATE TABLE AllTypes (
+            id INT NOT NULL,
+            booleanType BIT NOT NULL,
+            intType INT NOT NULL,
+            floatType FLOAT NOT NULL,
+            decimalType DECIMAL(10, 2) NOT NULL,
+            stringType VARCHAR(191) NOT NULL,
+            byteArrayType BINARY(6) NOT NULL,
+            dateType DATE NOT NULL,
+            timeOfDayType TIME NOT NULL,
+            civilType DATETIME NOT NULL,
+            booleanTypeOptional BIT,
+            intTypeOptional INT,
+            floatTypeOptional FLOAT,
+            decimalTypeOptional DECIMAL(10, 2),
+            stringTypeOptional VARCHAR(191),
+            dateTypeOptional DATE,
+            timeOfDayTypeOptional TIME,
+            civilTypeOptional DATETIME,
+            enumType VARCHAR(6) CHECK (enumType IN ('TYPE_1', 'TYPE_2', 'TYPE_3', 'TYPE_4')) NOT NULL,
+            enumTypeOptional VARCHAR(6) CHECK (enumTypeOptional IN ('TYPE_1', 'TYPE_2', 'TYPE_3', 'TYPE_4')),
+            PRIMARY KEY(id)
+        );
+    `);
+
+    _ = check mssqlDbClient->execute(`
+        CREATE TABLE FloatIdRecord (
+            id FLOAT NOT NULL,
+            randomField VARCHAR(191) NOT NULL,
+            PRIMARY KEY(id)
+        );
+    `);
+
+    _ = check mssqlDbClient->execute(`
+        CREATE TABLE StringIdRecord (
+            id VARCHAR(191) NOT NULL,
+            randomField VARCHAR(191) NOT NULL,
+            PRIMARY KEY(id)
+        );
+    `);
+
+    _ = check mssqlDbClient->execute(`
+        CREATE TABLE DecimalIdRecord (
+            id DECIMAL(10, 2) NOT NULL,
+            randomField VARCHAR(191) NOT NULL,
+            PRIMARY KEY(id)
+        );
+    `);
+
+    _ = check mssqlDbClient->execute(`
+        CREATE TABLE BooleanIdRecord (
+            id BIT NOT NULL,
+            randomField VARCHAR(191) NOT NULL,
+            PRIMARY KEY(id)
+        );
+    `);
+
+    _ = check mssqlDbClient->execute(`
+        CREATE TABLE IntIdRecord (
+            id INT NOT NULL,
+            randomField VARCHAR(191) NOT NULL,
+            PRIMARY KEY(id)
+        );
+    `);
+
+    _ = check mssqlDbClient->execute(`
+        CREATE TABLE AllTypesIdRecord (
+            booleanType BIT NOT NULL,
+            intType INT NOT NULL,
+            floatType FLOAT NOT NULL,
+            decimalType DECIMAL(10, 2) NOT NULL,
+            stringType VARCHAR(191) NOT NULL,
+            randomField VARCHAR(191) NOT NULL,
+            PRIMARY KEY(booleanType,intType,floatType,decimalType,stringType)
+        );
+    `);
+
+    _ = check mssqlDbClient->execute(`
+        CREATE TABLE CompositeAssociationRecord (
+            id VARCHAR(191) NOT NULL,
+            randomField VARCHAR(191) NOT NULL,
+            alltypesidrecordBooleanType BIT NOT NULL,
+            alltypesidrecordIntType INT NOT NULL,
+            alltypesidrecordFloatType FLOAT NOT NULL,
+            alltypesidrecordDecimalType DECIMAL(10, 2) NOT NULL,
+            alltypesidrecordStringType VARCHAR(191) NOT NULL,
+            CONSTRAINT FK_COMPOSITEASSOCIATIONRECORD_ALLTYPESIDRECORD FOREIGN KEY(alltypesidrecordBooleanType, alltypesidrecordIntType, alltypesidrecordFloatType, alltypesidrecordDecimalType, alltypesidrecordStringType) REFERENCES AllTypesIdRecord(booleanType, intType, floatType, decimalType, stringType),
+            PRIMARY KEY(id)
+        );
+    `);
 }
 
 AllTypes allTypes1 = {

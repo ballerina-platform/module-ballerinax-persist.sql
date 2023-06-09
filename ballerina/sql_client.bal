@@ -224,7 +224,11 @@ public isolated client class SQLClient {
                 params = sql:queryConcat(params, `,`);
             }
 
-            params = sql:queryConcat(params, `${<sql:Value>'object[key]}`);
+            if 'object[key] is () {
+                params = sql:queryConcat(params, `NULL`);
+            } else {
+                params = sql:queryConcat(params, `${<sql:Value>'object[key]}`);
+            }
             columnCount = columnCount + 1;
         }
         params = sql:queryConcat(params, `)`);
@@ -306,7 +310,7 @@ public isolated client class SQLClient {
             }
 
             if ignoreFieldCheck {
-                query = sql:queryConcat(query, stringToParameterizedQuery(keys[i] + " = " + filter[keys[i]].toString()));
+                query = sql:queryConcat(query, stringToParameterizedQuery(keys[i] + " = '" + filter[keys[i]].toString() + "'"));
             } else {
                 query = sql:queryConcat(query, stringToParameterizedQuery(self.entityName + "." + self.getColumnFromField(keys[i])), ` = ${<sql:Value>filter[keys[i]]}`);
             }
@@ -412,7 +416,7 @@ public isolated client class SQLClient {
     private isolated function getManyRelationWhereFilter(record {} 'object, JoinMetadata joinMetadata) returns map<string>|persist:Error {
         map<string> whereFilter = {};
         foreach int i in 0 ..< joinMetadata.refColumns.length() {
-            whereFilter[joinMetadata.refColumns[i]] = 'object[check self.getFieldFromColumn(joinMetadata.joinColumns[i])].toBalString();
+            whereFilter[joinMetadata.refColumns[i]] = 'object[check self.getFieldFromColumn(joinMetadata.joinColumns[i])].toString();
         }
         return whereFilter;
     }

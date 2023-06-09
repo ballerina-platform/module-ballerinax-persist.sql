@@ -352,4 +352,3 @@ public isolated client class MSSQLRainierClient {
         return result;
     }
 }
-

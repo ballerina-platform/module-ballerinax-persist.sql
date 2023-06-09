@@ -384,7 +384,7 @@ modules = [
 [[package]]
 org = "ballerinax"
 name = "mssql"
-version = "1.8.0"
+version = "1.9.0"
 scope = "testOnly"
 dependencies = [
 	{org = "ballerina", name = "crypto"},

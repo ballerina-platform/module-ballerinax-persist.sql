@@ -14,10 +14,10 @@
 // specific language governing permissions and limitations
 // under the License.
 
+import ballerina/persist;
 import ballerina/jballerina.java;
 import ballerinax/mssql;
 import ballerinax/mssql.driver as _;
-import ballerina/persist;
 
 const EMPLOYEE = "employees";
 const WORKSPACE = "workspaces";
@@ -97,7 +97,7 @@ public isolated client class MSSQLRainierClient {
                 'type: {columnName: "type"},
                 "workspaces[].workspaceId": {relation: {entityName: "workspaces", refField: "workspaceId"}},
                 "workspaces[].workspaceType": {relation: {entityName: "workspaces", refField: "workspaceType"}},
-                "workspaces[].locationBuildingCode": {relation: {entityName: "location", refField: "locationBuildingCode"}}
+                "workspaces[].locationBuildingCode": {relation: {entityName: "workspaces", refField: "locationBuildingCode"}}
             },
             keyFields: ["buildingCode"],
             joinMetadata: {workspaces: {entity: Workspace, fieldName: "workspaces", refTable: "Workspace", refColumns: ["locationBuildingCode"], joinColumns: ["buildingCode"], 'type: MANY_TO_ONE}}
@@ -139,7 +139,6 @@ public isolated client class MSSQLRainierClient {
             return <persist:Error>error(dbClient.message());
         }
         self.dbClient = dbClient;
-
         self.persistClients = {
             [EMPLOYEE] : check new (dbClient, self.metadata.get(EMPLOYEE), MSSQL_SPECIFICS),
             [WORKSPACE] : check new (dbClient, self.metadata.get(WORKSPACE), MSSQL_SPECIFICS),
@@ -147,7 +146,7 @@ public isolated client class MSSQLRainierClient {
             [DEPARTMENT] : check new (dbClient, self.metadata.get(DEPARTMENT), MSSQL_SPECIFICS),
             [ORDER_ITEM] : check new (dbClient, self.metadata.get(ORDER_ITEM), MSSQL_SPECIFICS)
         };
-    };
+    }
 
     isolated resource function get employees(EmployeeTargetType targetType = <>) returns stream<targetType, persist:Error?> = @java:Method {
         'class: "io.ballerina.stdlib.persist.sql.datastore.MSSQLProcessor",

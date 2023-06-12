@@ -14,9 +14,10 @@
 // specific language governing permissions and limitations
 // under the License.
 
+import ballerina/persist;
 import ballerina/jballerina.java;
 import ballerinax/mssql;
-import ballerina/persist;
+import ballerinax/mssql.driver as _;
 
 const ALL_TYPES = "alltypes";
 const STRING_ID_RECORD = "stringidrecords";
@@ -158,14 +159,14 @@ public isolated client class MSSQLTestEntitiesClient {
         }
         self.dbClient = dbClient;
         self.persistClients = {
-            [ALL_TYPES] : check new (self.dbClient, self.metadata.get(ALL_TYPES), MSSQL_SPECIFICS),
-            [STRING_ID_RECORD] : check new (self.dbClient, self.metadata.get(STRING_ID_RECORD), MSSQL_SPECIFICS),
-            [INT_ID_RECORD] : check new (self.dbClient, self.metadata.get(INT_ID_RECORD), MSSQL_SPECIFICS),
-            [FLOAT_ID_RECORD] : check new (self.dbClient, self.metadata.get(FLOAT_ID_RECORD), MSSQL_SPECIFICS),
-            [DECIMAL_ID_RECORD] : check new (self.dbClient, self.metadata.get(DECIMAL_ID_RECORD), MSSQL_SPECIFICS),
-            [BOOLEAN_ID_RECORD] : check new (self.dbClient, self.metadata.get(BOOLEAN_ID_RECORD), MSSQL_SPECIFICS),
-            [COMPOSITE_ASSOCIATION_RECORD] : check new (self.dbClient, self.metadata.get(COMPOSITE_ASSOCIATION_RECORD), MSSQL_SPECIFICS),
-            [ALL_TYPES_ID_RECORD] : check new (self.dbClient, self.metadata.get(ALL_TYPES_ID_RECORD), MSSQL_SPECIFICS)
+            [ALL_TYPES] : check new (dbClient, self.metadata.get(ALL_TYPES), MSSQL_SPECIFICS),
+            [STRING_ID_RECORD] : check new (dbClient, self.metadata.get(STRING_ID_RECORD), MSSQL_SPECIFICS),
+            [INT_ID_RECORD] : check new (dbClient, self.metadata.get(INT_ID_RECORD), MSSQL_SPECIFICS),
+            [FLOAT_ID_RECORD] : check new (dbClient, self.metadata.get(FLOAT_ID_RECORD), MSSQL_SPECIFICS),
+            [DECIMAL_ID_RECORD] : check new (dbClient, self.metadata.get(DECIMAL_ID_RECORD), MSSQL_SPECIFICS),
+            [BOOLEAN_ID_RECORD] : check new (dbClient, self.metadata.get(BOOLEAN_ID_RECORD), MSSQL_SPECIFICS),
+            [COMPOSITE_ASSOCIATION_RECORD] : check new (dbClient, self.metadata.get(COMPOSITE_ASSOCIATION_RECORD), MSSQL_SPECIFICS),
+            [ALL_TYPES_ID_RECORD] : check new (dbClient, self.metadata.get(ALL_TYPES_ID_RECORD), MSSQL_SPECIFICS)
         };
     }
 

@@ -14,9 +14,10 @@
 // specific language governing permissions and limitations
 // under the License.
 
+import ballerina/persist;
 import ballerina/jballerina.java;
 import ballerinax/mysql;
-import ballerina/persist;
+import ballerinax/mysql.driver as _;
 
 const EMPLOYEE = "employees";
 const WORKSPACE = "workspaces";
@@ -96,7 +97,7 @@ public isolated client class MySQLRainierClient {
                 'type: {columnName: "type"},
                 "workspaces[].workspaceId": {relation: {entityName: "workspaces", refField: "workspaceId"}},
                 "workspaces[].workspaceType": {relation: {entityName: "workspaces", refField: "workspaceType"}},
-                "workspaces[].locationBuildingCode": {relation: {entityName: "location", refField: "locationBuildingCode"}}
+                "workspaces[].locationBuildingCode": {relation: {entityName: "workspaces", refField: "locationBuildingCode"}}
             },
             keyFields: ["buildingCode"],
             joinMetadata: {workspaces: {entity: Workspace, fieldName: "workspaces", refTable: "Workspace", refColumns: ["locationBuildingCode"], joinColumns: ["buildingCode"], 'type: MANY_TO_ONE}}
@@ -138,7 +139,6 @@ public isolated client class MySQLRainierClient {
             return <persist:Error>error(dbClient.message());
         }
         self.dbClient = dbClient;
-
         self.persistClients = {
             [EMPLOYEE] : check new (dbClient, self.metadata.get(EMPLOYEE), MYSQL_SPECIFICS),
             [WORKSPACE] : check new (dbClient, self.metadata.get(WORKSPACE), MYSQL_SPECIFICS),

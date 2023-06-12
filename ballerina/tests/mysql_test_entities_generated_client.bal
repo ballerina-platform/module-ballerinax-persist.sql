@@ -14,9 +14,10 @@
 // specific language governing permissions and limitations
 // under the License.
 
+import ballerina/persist;
 import ballerina/jballerina.java;
 import ballerinax/mysql;
-import ballerina/persist;
+import ballerinax/mysql.driver as _;
 
 const ALL_TYPES = "alltypes";
 const STRING_ID_RECORD = "stringidrecords";
@@ -27,7 +28,7 @@ const BOOLEAN_ID_RECORD = "booleanidrecords";
 const COMPOSITE_ASSOCIATION_RECORD = "compositeassociationrecords";
 const ALL_TYPES_ID_RECORD = "alltypesidrecords";
 
-public isolated client class SQLTestEntitiesClient {
+public isolated client class MySQLTestEntitiesClient {
     *persist:AbstractPersistClient;
 
     private final mysql:Client dbClient;
@@ -152,20 +153,20 @@ public isolated client class SQLTestEntitiesClient {
     };
 
     public isolated function init() returns persist:Error? {
-        mysql:Client|error dbClient = new (host = host, user = user, password = password, database = database, port = port);
+        mysql:Client|error dbClient = new (host = mysql.host, user = mysql.user, password = mysql.password, database = mysql.database, port = mysql.port);
         if dbClient is error {
             return <persist:Error>error(dbClient.message());
         }
         self.dbClient = dbClient;
         self.persistClients = {
-            [ALL_TYPES] : check new (self.dbClient, self.metadata.get(ALL_TYPES)),
-            [STRING_ID_RECORD] : check new (self.dbClient, self.metadata.get(STRING_ID_RECORD)),
-            [INT_ID_RECORD] : check new (self.dbClient, self.metadata.get(INT_ID_RECORD)),
-            [FLOAT_ID_RECORD] : check new (self.dbClient, self.metadata.get(FLOAT_ID_RECORD)),
-            [DECIMAL_ID_RECORD] : check new (self.dbClient, self.metadata.get(DECIMAL_ID_RECORD)),
-            [BOOLEAN_ID_RECORD] : check new (self.dbClient, self.metadata.get(BOOLEAN_ID_RECORD)),
-            [COMPOSITE_ASSOCIATION_RECORD] : check new (self.dbClient, self.metadata.get(COMPOSITE_ASSOCIATION_RECORD)),
-            [ALL_TYPES_ID_RECORD] : check new (self.dbClient, self.metadata.get(ALL_TYPES_ID_RECORD))
+            [ALL_TYPES] : check new (dbClient, self.metadata.get(ALL_TYPES), MYSQL_SPECIFICS),
+            [STRING_ID_RECORD] : check new (dbClient, self.metadata.get(STRING_ID_RECORD), MYSQL_SPECIFICS),
+            [INT_ID_RECORD] : check new (dbClient, self.metadata.get(INT_ID_RECORD), MYSQL_SPECIFICS),
+            [FLOAT_ID_RECORD] : check new (dbClient, self.metadata.get(FLOAT_ID_RECORD), MYSQL_SPECIFICS),
+            [DECIMAL_ID_RECORD] : check new (dbClient, self.metadata.get(DECIMAL_ID_RECORD), MYSQL_SPECIFICS),
+            [BOOLEAN_ID_RECORD] : check new (dbClient, self.metadata.get(BOOLEAN_ID_RECORD), MYSQL_SPECIFICS),
+            [COMPOSITE_ASSOCIATION_RECORD] : check new (dbClient, self.metadata.get(COMPOSITE_ASSOCIATION_RECORD), MYSQL_SPECIFICS),
+            [ALL_TYPES_ID_RECORD] : check new (dbClient, self.metadata.get(ALL_TYPES_ID_RECORD), MYSQL_SPECIFICS)
         };
     }
 

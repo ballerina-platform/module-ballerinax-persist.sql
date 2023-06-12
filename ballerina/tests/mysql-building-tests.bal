@@ -18,10 +18,10 @@ import ballerina/test;
 import ballerina/persist;
 
 @test:Config {
-    groups: ["building", "sql"]
+    groups: ["building", "mysql"]
 }
-function sqlBuildingCreateTest() returns error? {
-    SQLRainierClient rainierClient = check new ();
+function mysqlBuildingCreateTest() returns error? {
+    MySQLRainierClient rainierClient = check new ();
 
     string[] buildingCodes = check rainierClient->/buildings.post([building1]);
     test:assertEquals(buildingCodes, [building1.buildingCode]);
@@ -32,10 +32,10 @@ function sqlBuildingCreateTest() returns error? {
 }
 
 @test:Config {
-    groups: ["building", "sql"]
+    groups: ["building", "mysql"]
 }
-function sqlBuildingCreateTest2() returns error? {
-    SQLRainierClient rainierClient = check new ();
+function mysqlBuildingCreateTest2() returns error? {
+    MySQLRainierClient rainierClient = check new ();
 
     string[] buildingCodes = check rainierClient->/buildings.post([building2, building3]);
 
@@ -51,10 +51,10 @@ function sqlBuildingCreateTest2() returns error? {
 }
 
 @test:Config {
-    groups: ["building", "sql"]
+    groups: ["building", "mysql"]
 }
-function sqlBuildingCreateTestNegative() returns error? {
-    SQLRainierClient rainierClient = check new ();
+function mysqlBuildingCreateTestNegative() returns error? {
+    MySQLRainierClient rainierClient = check new ();
 
     string[]|error building = rainierClient->/buildings.post([invalidBuilding]);
     if building is persist:Error {
@@ -66,11 +66,11 @@ function sqlBuildingCreateTestNegative() returns error? {
 }
 
 @test:Config {
-    groups: ["building", "sql"],
-    dependsOn: [sqlBuildingCreateTest]
+    groups: ["building", "mysql"],
+    dependsOn: [mysqlBuildingCreateTest]
 }
-function sqlBuildingReadOneTest() returns error? {
-    SQLRainierClient rainierClient = check new ();
+function mysqlBuildingReadOneTest() returns error? {
+    MySQLRainierClient rainierClient = check new ();
 
     Building buildingRetrieved = check rainierClient->/buildings/[building1.buildingCode].get();
     test:assertEquals(buildingRetrieved, building1);
@@ -78,11 +78,11 @@ function sqlBuildingReadOneTest() returns error? {
 }
 
 @test:Config {
-    groups: ["building", "sql"],
-    dependsOn: [sqlBuildingCreateTest]
+    groups: ["building", "mysql"],
+    dependsOn: [mysqlBuildingCreateTest]
 }
-function sqlBuildingReadOneTestNegative() returns error? {
-    SQLRainierClient rainierClient = check new ();
+function mysqlBuildingReadOneTestNegative() returns error? {
+    MySQLRainierClient rainierClient = check new ();
 
     Building|error buildingRetrieved = rainierClient->/buildings/["invalid-building-code"].get();
     if buildingRetrieved is persist:NotFoundError {
@@ -94,11 +94,11 @@ function sqlBuildingReadOneTestNegative() returns error? {
 }
 
 @test:Config {
-    groups: ["building", "sql"],
-    dependsOn: [sqlBuildingCreateTest, sqlBuildingCreateTest2]
+    groups: ["building", "mysql"],
+    dependsOn: [mysqlBuildingCreateTest, mysqlBuildingCreateTest2]
 }
-function sqlBuildingReadManyTest() returns error? {
-    SQLRainierClient rainierClient = check new ();
+function mysqlBuildingReadManyTest() returns error? {
+    MySQLRainierClient rainierClient = check new ();
 
     stream<Building, error?> buildingStream = rainierClient->/buildings.get();
     Building[] buildings = check from Building building in buildingStream
@@ -109,11 +109,11 @@ function sqlBuildingReadManyTest() returns error? {
 }
 
 @test:Config {
-    groups: ["building", "sql", "dependent"],
-    dependsOn: [sqlBuildingCreateTest, sqlBuildingCreateTest2]
+    groups: ["building", "mysql", "dependent"],
+    dependsOn: [mysqlBuildingCreateTest, mysqlBuildingCreateTest2]
 }
-function sqlBuildingReadManyDependentTest() returns error? {
-    SQLRainierClient rainierClient = check new ();
+function mysqlBuildingReadManyDependentTest() returns error? {
+    MySQLRainierClient rainierClient = check new ();
 
     stream<BuildingInfo2, error?> buildingStream = rainierClient->/buildings.get();
     BuildingInfo2[] buildings = check from BuildingInfo2 building in buildingStream
@@ -128,11 +128,11 @@ function sqlBuildingReadManyDependentTest() returns error? {
 }
 
 @test:Config {
-    groups: ["building", "sql"],
-    dependsOn: [sqlBuildingReadOneTest, sqlBuildingReadManyTest, sqlBuildingReadManyDependentTest]
+    groups: ["building", "mysql"],
+    dependsOn: [mysqlBuildingReadOneTest, mysqlBuildingReadManyTest, mysqlBuildingReadManyDependentTest]
 }
-function sqlBuildingUpdateTest() returns error? {
-    SQLRainierClient rainierClient = check new ();
+function mysqlBuildingUpdateTest() returns error? {
+    MySQLRainierClient rainierClient = check new ();
 
     Building building = check rainierClient->/buildings/[building1.buildingCode].put({
         city: "Galle",
@@ -149,11 +149,11 @@ function sqlBuildingUpdateTest() returns error? {
 }
 
 @test:Config {
-    groups: ["building", "sql"],
-    dependsOn: [sqlBuildingReadOneTest, sqlBuildingReadManyTest, sqlBuildingReadManyDependentTest]
+    groups: ["building", "mysql"],
+    dependsOn: [mysqlBuildingReadOneTest, mysqlBuildingReadManyTest, mysqlBuildingReadManyDependentTest]
 }
-function sqlBuildingUpdateTestNegative1() returns error? {
-    SQLRainierClient rainierClient = check new ();
+function mysqlBuildingUpdateTestNegative1() returns error? {
+    MySQLRainierClient rainierClient = check new ();
 
     Building|error building = rainierClient->/buildings/["invalid-building-code"].put({
         city: "Galle",
@@ -170,11 +170,11 @@ function sqlBuildingUpdateTestNegative1() returns error? {
 }
 
 @test:Config {
-    groups: ["building", "sql"],
-    dependsOn: [sqlBuildingReadOneTest, sqlBuildingReadManyTest, sqlBuildingReadManyDependentTest]
+    groups: ["building", "mysql"],
+    dependsOn: [mysqlBuildingReadOneTest, mysqlBuildingReadManyTest, mysqlBuildingReadManyDependentTest]
 }
-function sqlBuildingUpdateTestNegative2() returns error? {
-    SQLRainierClient rainierClient = check new ();
+function mysqlBuildingUpdateTestNegative2() returns error? {
+    MySQLRainierClient rainierClient = check new ();
 
     Building|error building = rainierClient->/buildings/[building1.buildingCode].put({
         city: "unncessarily-long-city-name-to-force-error-on-update",
@@ -191,11 +191,11 @@ function sqlBuildingUpdateTestNegative2() returns error? {
 }
 
 @test:Config {
-    groups: ["building", "sql"],
-    dependsOn: [sqlBuildingUpdateTest, sqlBuildingUpdateTestNegative2]
+    groups: ["building", "mysql"],
+    dependsOn: [mysqlBuildingUpdateTest, mysqlBuildingUpdateTestNegative2]
 }
-function sqlBuildingDeleteTest() returns error? {
-    SQLRainierClient rainierClient = check new ();
+function mysqlBuildingDeleteTest() returns error? {
+    MySQLRainierClient rainierClient = check new ();
 
     Building building = check rainierClient->/buildings/[building1.buildingCode].delete();
     test:assertEquals(building, updatedBuilding1);
@@ -209,11 +209,11 @@ function sqlBuildingDeleteTest() returns error? {
 }
 
 @test:Config {
-    groups: ["building", "sql"],
-    dependsOn: [sqlBuildingDeleteTest]
+    groups: ["building", "mysql"],
+    dependsOn: [mysqlBuildingDeleteTest]
 }
-function sqlBuildingDeleteTestNegative() returns error? {
-    SQLRainierClient rainierClient = check new ();
+function mysqlBuildingDeleteTestNegative() returns error? {
+    MySQLRainierClient rainierClient = check new ();
 
     Building|error building = rainierClient->/buildings/[building1.buildingCode].delete();
 

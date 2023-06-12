@@ -18,11 +18,11 @@ import ballerina/test;
 import ballerina/persist;
 
 @test:Config {
-    groups: ["employee", "sql"],
-    dependsOn: [sqlWorkspaceDeleteTestNegative, sqlDepartmentDeleteTestNegative]
+    groups: ["employee", "mssql"],
+    dependsOn: [mssqlWorkspaceDeleteTestNegative, mssqlDepartmentDeleteTestNegative]
 }
-function sqlEmployeeCreateTest() returns error? {
-    SQLRainierClient rainierClient = check new ();
+function mssqlEmployeeCreateTest() returns error? {
+    MSSQLRainierClient rainierClient = check new ();
 
     string[] empNos = check rainierClient->/employees.post([employee1]);
     test:assertEquals(empNos, [employee1.empNo]);
@@ -33,11 +33,11 @@ function sqlEmployeeCreateTest() returns error? {
 }
 
 @test:Config {
-    groups: ["employee", "sql"],
-    dependsOn: [sqlWorkspaceDeleteTestNegative, sqlDepartmentDeleteTestNegative]
+    groups: ["employee", "mssql"],
+    dependsOn: [mssqlWorkspaceDeleteTestNegative, mssqlDepartmentDeleteTestNegative]
 }
-function sqlEmployeeCreateTest2() returns error? {
-    SQLRainierClient rainierClient = check new ();
+function mssqlEmployeeCreateTest2() returns error? {
+    MSSQLRainierClient rainierClient = check new ();
 
     string[] empNos = check rainierClient->/employees.post([employee2, employee3]);
 
@@ -52,14 +52,14 @@ function sqlEmployeeCreateTest2() returns error? {
 }
 
 @test:Config {
-    groups: ["employee", "sql"]
+    groups: ["employee", "mssql"]
 }
-function sqlEmployeeCreateTestNegative() returns error? {
-    SQLRainierClient rainierClient = check new ();
+function mssqlEmployeeCreateTestNegative() returns error? {
+    MSSQLRainierClient rainierClient = check new ();
 
     string[]|error employee = rainierClient->/employees.post([invalidEmployee]);
     if employee is persist:Error {
-        test:assertTrue(employee.message().includes("Data truncation: Data too long for column 'empNo' at row 1."));
+        test:assertTrue(employee.message().includes("String or binary data would be truncated in table"));
     } else {
         test:assertFail("Error expected.");
     }
@@ -67,11 +67,11 @@ function sqlEmployeeCreateTestNegative() returns error? {
 }
 
 @test:Config {
-    groups: ["employee", "sql"],
-    dependsOn: [sqlEmployeeCreateTest]
+    groups: ["employee", "mssql"],
+    dependsOn: [mssqlEmployeeCreateTest]
 }
-function sqlEmployeeReadOneTest() returns error? {
-    SQLRainierClient rainierClient = check new ();
+function mssqlEmployeeReadOneTest() returns error? {
+    MSSQLRainierClient rainierClient = check new ();
 
     Employee employeeRetrieved = check rainierClient->/employees/[employee1.empNo].get();
     test:assertEquals(employeeRetrieved, employee1);
@@ -79,11 +79,11 @@ function sqlEmployeeReadOneTest() returns error? {
 }
 
 @test:Config {
-    groups: ["employee", "sql"],
-    dependsOn: [sqlEmployeeCreateTest]
+    groups: ["employee", "mssql"],
+    dependsOn: [mssqlEmployeeCreateTest]
 }
-function sqlEmployeeReadOneTestNegative() returns error? {
-    SQLRainierClient rainierClient = check new ();
+function mssqlEmployeeReadOneTestNegative() returns error? {
+    MSSQLRainierClient rainierClient = check new ();
 
     Employee|error employeeRetrieved = rainierClient->/employees/["invalid-employee-id"].get();
     if employeeRetrieved is persist:NotFoundError {
@@ -95,11 +95,11 @@ function sqlEmployeeReadOneTestNegative() returns error? {
 }
 
 @test:Config {
-    groups: ["employee", "sql"],
-    dependsOn: [sqlEmployeeCreateTest, sqlEmployeeCreateTest2]
+    groups: ["employee", "mssql"],
+    dependsOn: [mssqlEmployeeCreateTest, mssqlEmployeeCreateTest2]
 }
-function sqlEmployeeReadManyTest() returns error? {
-    SQLRainierClient rainierClient = check new ();
+function mssqlEmployeeReadManyTest() returns error? {
+    MSSQLRainierClient rainierClient = check new ();
 
     stream<Employee, persist:Error?> employeeStream = rainierClient->/employees.get();
     Employee[] employees = check from Employee employee in employeeStream
@@ -111,10 +111,10 @@ function sqlEmployeeReadManyTest() returns error? {
 
 @test:Config {
     groups: ["dependent", "employee"],
-    dependsOn: [sqlEmployeeCreateTest, sqlEmployeeCreateTest2]
+    dependsOn: [mssqlEmployeeCreateTest, mssqlEmployeeCreateTest2]
 }
-function sqlEmployeeReadManyDependentTest1() returns error? {
-    SQLRainierClient rainierClient = check new ();
+function mssqlEmployeeReadManyDependentTest1() returns error? {
+    MSSQLRainierClient rainierClient = check new ();
 
     stream<EmployeeName, persist:Error?> employeeStream = rainierClient->/employees.get();
     EmployeeName[] employees = check from EmployeeName employee in employeeStream
@@ -130,10 +130,10 @@ function sqlEmployeeReadManyDependentTest1() returns error? {
 
 @test:Config {
     groups: ["dependent", "employee"],
-    dependsOn: [sqlEmployeeCreateTest, sqlEmployeeCreateTest2]
+    dependsOn: [mssqlEmployeeCreateTest, mssqlEmployeeCreateTest2]
 }
-function sqlEmployeeReadManyDependentTest2() returns error? {
-    SQLRainierClient rainierClient = check new ();
+function mssqlEmployeeReadManyDependentTest2() returns error? {
+    MSSQLRainierClient rainierClient = check new ();
 
     stream<EmployeeInfo2, persist:Error?> employeeStream = rainierClient->/employees.get();
     EmployeeInfo2[] employees = check from EmployeeInfo2 employee in employeeStream
@@ -148,11 +148,11 @@ function sqlEmployeeReadManyDependentTest2() returns error? {
 }
 
 @test:Config {
-    groups: ["employee", "sql"],
-    dependsOn: [sqlEmployeeReadOneTest, sqlEmployeeReadManyTest, sqlEmployeeReadManyDependentTest1, sqlEmployeeReadManyDependentTest2]
+    groups: ["employee", "mssql"],
+    dependsOn: [mssqlEmployeeReadOneTest, mssqlEmployeeReadManyTest, mssqlEmployeeReadManyDependentTest1, mssqlEmployeeReadManyDependentTest2]
 }
-function sqlEmployeeUpdateTest() returns error? {
-    SQLRainierClient rainierClient = check new ();
+function mssqlEmployeeUpdateTest() returns error? {
+    MSSQLRainierClient rainierClient = check new ();
 
     Employee employee = check rainierClient->/employees/[employee1.empNo].put({
         lastName: "Jones",
@@ -168,11 +168,11 @@ function sqlEmployeeUpdateTest() returns error? {
 }
 
 @test:Config {
-    groups: ["employee", "sql"],
-    dependsOn: [sqlEmployeeReadOneTest, sqlEmployeeReadManyTest, sqlEmployeeReadManyDependentTest1, sqlEmployeeReadManyDependentTest2]
+    groups: ["employee", "mssql"],
+    dependsOn: [mssqlEmployeeReadOneTest, mssqlEmployeeReadManyTest, mssqlEmployeeReadManyDependentTest1, mssqlEmployeeReadManyDependentTest2]
 }
-function sqlEmployeeUpdateTestNegative1() returns error? {
-    SQLRainierClient rainierClient = check new ();
+function mssqlEmployeeUpdateTestNegative1() returns error? {
+    MSSQLRainierClient rainierClient = check new ();
 
     Employee|error employee = rainierClient->/employees/["invalid-employee-id"].put({
         lastName: "Jones"
@@ -187,18 +187,18 @@ function sqlEmployeeUpdateTestNegative1() returns error? {
 }
 
 @test:Config {
-    groups: ["employee", "sql"],
-    dependsOn: [sqlEmployeeReadOneTest, sqlEmployeeReadManyTest, sqlEmployeeReadManyDependentTest1, sqlEmployeeReadManyDependentTest2]
+    groups: ["employee", "mssql"],
+    dependsOn: [mssqlEmployeeReadOneTest, mssqlEmployeeReadManyTest, mssqlEmployeeReadManyDependentTest1, mssqlEmployeeReadManyDependentTest2]
 }
-function sqlEmployeeUpdateTestNegative2() returns error? {
-    SQLRainierClient rainierClient = check new ();
+function mssqlEmployeeUpdateTestNegative2() returns error? {
+    MSSQLRainierClient rainierClient = check new ();
 
     Employee|error employee = rainierClient->/employees/[employee1.empNo].put({
         firstName: "unncessarily-long-employee-name-to-force-error-on-update"
     });
 
     if employee is persist:Error {
-        test:assertTrue(employee.message().includes("Data truncation: Data too long for column 'firstName' at row 1."));
+        test:assertTrue(employee.message().includes("String or binary data would be truncated in table"));
     } else {
         test:assertFail("NotFoundError expected.");
     }
@@ -206,31 +206,26 @@ function sqlEmployeeUpdateTestNegative2() returns error? {
 }
 
 @test:Config {
-    groups: ["employee", "sql"],
-    dependsOn: [sqlEmployeeReadOneTest, sqlEmployeeReadManyTest, sqlEmployeeReadManyDependentTest1, sqlEmployeeReadManyDependentTest2]
+    groups: ["employee", "mssql"],
+    dependsOn: [mssqlEmployeeReadOneTest, mssqlEmployeeReadManyTest, mssqlEmployeeReadManyDependentTest1, mssqlEmployeeReadManyDependentTest2]
 }
-function sqlEmployeeUpdateTestNegative3() returns error? {
-    SQLRainierClient rainierClient = check new ();
+function mssqlEmployeeUpdateTestNegative3() returns error? {
+    MSSQLRainierClient rainierClient = check new ();
 
     Employee|error employee = rainierClient->/employees/[employee1.empNo].put({
         workspaceWorkspaceId: "invalid-workspaceWorkspaceId"
     });
 
-    if employee is persist:ConstraintViolationError {
-        test:assertTrue(employee.message().includes("Cannot add or update a child row: a foreign key constraint fails (`test`.`Employee`, " +
-            "CONSTRAINT `Employee_ibfk_2` FOREIGN KEY (`workspaceWorkspaceId`) REFERENCES `Workspace` (`workspaceId`))."));
-    } else {
-        test:assertFail("persist:persist:ConstraintViolationError expected.");
-    }
+    test:assertTrue(employee is persist:ConstraintViolationError);
     check rainierClient.close();
 }
 
 @test:Config {
-    groups: ["employee", "sql"],
-    dependsOn: [sqlEmployeeUpdateTest, sqlEmployeeUpdateTestNegative2, sqlEmployeeUpdateTestNegative3]
+    groups: ["employee", "mssql"],
+    dependsOn: [mssqlEmployeeUpdateTest, mssqlEmployeeUpdateTestNegative2, mssqlEmployeeUpdateTestNegative3]
 }
-function sqlEmployeeDeleteTest() returns error? {
-    SQLRainierClient rainierClient = check new ();
+function mssqlEmployeeDeleteTest() returns error? {
+    MSSQLRainierClient rainierClient = check new ();
 
     Employee employee = check rainierClient->/employees/[employee1.empNo].delete();
     test:assertEquals(employee, updatedEmployee1);
@@ -244,11 +239,11 @@ function sqlEmployeeDeleteTest() returns error? {
 }
 
 @test:Config {
-    groups: ["employee", "sql"],
-    dependsOn: [sqlEmployeeDeleteTest]
+    groups: ["employee", "mssql"],
+    dependsOn: [mssqlEmployeeDeleteTest]
 }
-function sqlEmployeeDeleteTestNegative() returns error? {
-    SQLRainierClient rainierClient = check new ();
+function mssqlEmployeeDeleteTestNegative() returns error? {
+    MSSQLRainierClient rainierClient = check new ();
 
     Employee|error employee = rainierClient->/employees/[employee1.empNo].delete();
 

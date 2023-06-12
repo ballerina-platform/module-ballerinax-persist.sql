@@ -94,3 +94,12 @@ public enum JoinType {
     ONE_TO_MANY,
     MANY_TO_ONE
 }
+
+public type DataSourceSpecifics record {|
+    string quoteOpen;
+    string quoteClose;
+    string constraintViolationErrorMessage;
+    string duplicateEntryErrorMessage;
+    string duplicateKeyStartIndicator;
+    string duplicateKeyEndIndicator;
+|};

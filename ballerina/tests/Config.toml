@@ -1,9 +1,17 @@
+[mysql]
 user="root"
 password="Test123#"
 host="localhost"
 port=3305
 database="test"
 
-[connectionOptions]
+[mysql.connectionOptions]
 connectTimeout = 50.0
 socketTimeout = 30.0
+
+[mssql]
+user="sa"
+password="Test123#"
+host="localhost"
+port=1433
+database="test"

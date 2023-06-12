@@ -35,7 +35,7 @@ public isolated client class SQLClient {
     # + dbClient - The `sql:Client`, which is used to execute SQL queries
     # + metadata - Metadata of the entity
     # + return - A `persist:Error` if the client creation fails
-    public isolated function init(sql:Client dbClient, SQLMetadata & readonly metadata, DataSourceSpecifics & readonly dataSourceSpecifics) returns persist:Error? {
+    public isolated function init(sql:Client dbClient, SQLMetadata & readonly metadata, DataSourceSpecifics & readonly dataSourceSpecifics = MYSQL_SPECIFICS) returns persist:Error? {
         self.entityName = metadata.entityName;
         self.tableName = metadata.tableName;
         self.fieldMetadata = metadata.fieldMetadata;

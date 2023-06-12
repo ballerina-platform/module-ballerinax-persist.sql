@@ -170,12 +170,12 @@ public isolated client class MSSQLTestEntitiesClient {
     }
 
     isolated resource function get alltypes(AllTypesTargetType targetType = <>) returns stream<targetType, persist:Error?> = @java:Method {
-        'class: "io.ballerina.stdlib.persist.sql.datastore.SQLProcessor",
+        'class: "io.ballerina.stdlib.persist.sql.datastore.MSSQLProcessor",
         name: "query"
     } external;
 
     isolated resource function get alltypes/[int id](AllTypesTargetType targetType = <>) returns targetType|persist:Error = @java:Method {
-        'class: "io.ballerina.stdlib.persist.sql.datastore.SQLProcessor",
+        'class: "io.ballerina.stdlib.persist.sql.datastore.MSSQLProcessor",
         name: "queryOne"
     } external;
 
@@ -209,12 +209,12 @@ public isolated client class MSSQLTestEntitiesClient {
     }
 
     isolated resource function get stringidrecords(StringIdRecordTargetType targetType = <>) returns stream<targetType, persist:Error?> = @java:Method {
-        'class: "io.ballerina.stdlib.persist.sql.datastore.SQLProcessor",
+        'class: "io.ballerina.stdlib.persist.sql.datastore.MSSQLProcessor",
         name: "query"
     } external;
 
     isolated resource function get stringidrecords/[string id](StringIdRecordTargetType targetType = <>) returns targetType|persist:Error = @java:Method {
-        'class: "io.ballerina.stdlib.persist.sql.datastore.SQLProcessor",
+        'class: "io.ballerina.stdlib.persist.sql.datastore.MSSQLProcessor",
         name: "queryOne"
     } external;
 
@@ -248,12 +248,12 @@ public isolated client class MSSQLTestEntitiesClient {
     }
 
     isolated resource function get intidrecords(IntIdRecordTargetType targetType = <>) returns stream<targetType, persist:Error?> = @java:Method {
-        'class: "io.ballerina.stdlib.persist.sql.datastore.SQLProcessor",
+        'class: "io.ballerina.stdlib.persist.sql.datastore.MSSQLProcessor",
         name: "query"
     } external;
 
     isolated resource function get intidrecords/[int id](IntIdRecordTargetType targetType = <>) returns targetType|persist:Error = @java:Method {
-        'class: "io.ballerina.stdlib.persist.sql.datastore.SQLProcessor",
+        'class: "io.ballerina.stdlib.persist.sql.datastore.MSSQLProcessor",
         name: "queryOne"
     } external;
 
@@ -287,12 +287,12 @@ public isolated client class MSSQLTestEntitiesClient {
     }
 
     isolated resource function get floatidrecords(FloatIdRecordTargetType targetType = <>) returns stream<targetType, persist:Error?> = @java:Method {
-        'class: "io.ballerina.stdlib.persist.sql.datastore.SQLProcessor",
+        'class: "io.ballerina.stdlib.persist.sql.datastore.MSSQLProcessor",
         name: "query"
     } external;
 
     isolated resource function get floatidrecords/[float id](FloatIdRecordTargetType targetType = <>) returns targetType|persist:Error = @java:Method {
-        'class: "io.ballerina.stdlib.persist.sql.datastore.SQLProcessor",
+        'class: "io.ballerina.stdlib.persist.sql.datastore.MSSQLProcessor",
         name: "queryOne"
     } external;
 
@@ -326,12 +326,12 @@ public isolated client class MSSQLTestEntitiesClient {
     }
 
     isolated resource function get decimalidrecords(DecimalIdRecordTargetType targetType = <>) returns stream<targetType, persist:Error?> = @java:Method {
-        'class: "io.ballerina.stdlib.persist.sql.datastore.SQLProcessor",
+        'class: "io.ballerina.stdlib.persist.sql.datastore.MSSQLProcessor",
         name: "query"
     } external;
 
     isolated resource function get decimalidrecords/[decimal id](DecimalIdRecordTargetType targetType = <>) returns targetType|persist:Error = @java:Method {
-        'class: "io.ballerina.stdlib.persist.sql.datastore.SQLProcessor",
+        'class: "io.ballerina.stdlib.persist.sql.datastore.MSSQLProcessor",
         name: "queryOne"
     } external;
 
@@ -365,12 +365,12 @@ public isolated client class MSSQLTestEntitiesClient {
     }
 
     isolated resource function get booleanidrecords(BooleanIdRecordTargetType targetType = <>) returns stream<targetType, persist:Error?> = @java:Method {
-        'class: "io.ballerina.stdlib.persist.sql.datastore.SQLProcessor",
+        'class: "io.ballerina.stdlib.persist.sql.datastore.MSSQLProcessor",
         name: "query"
     } external;
 
     isolated resource function get booleanidrecords/[boolean id](BooleanIdRecordTargetType targetType = <>) returns targetType|persist:Error = @java:Method {
-        'class: "io.ballerina.stdlib.persist.sql.datastore.SQLProcessor",
+        'class: "io.ballerina.stdlib.persist.sql.datastore.MSSQLProcessor",
         name: "queryOne"
     } external;
 
@@ -404,12 +404,12 @@ public isolated client class MSSQLTestEntitiesClient {
     }
 
     isolated resource function get compositeassociationrecords(CompositeAssociationRecordTargetType targetType = <>) returns stream<targetType, persist:Error?> = @java:Method {
-        'class: "io.ballerina.stdlib.persist.sql.datastore.SQLProcessor",
+        'class: "io.ballerina.stdlib.persist.sql.datastore.MSSQLProcessor",
         name: "query"
     } external;
 
     isolated resource function get compositeassociationrecords/[string id](CompositeAssociationRecordTargetType targetType = <>) returns targetType|persist:Error = @java:Method {
-        'class: "io.ballerina.stdlib.persist.sql.datastore.SQLProcessor",
+        'class: "io.ballerina.stdlib.persist.sql.datastore.MSSQLProcessor",
         name: "queryOne"
     } external;
 
@@ -443,12 +443,12 @@ public isolated client class MSSQLTestEntitiesClient {
     }
 
     isolated resource function get alltypesidrecords(AllTypesIdRecordTargetType targetType = <>) returns stream<targetType, persist:Error?> = @java:Method {
-        'class: "io.ballerina.stdlib.persist.sql.datastore.SQLProcessor",
+        'class: "io.ballerina.stdlib.persist.sql.datastore.MSSQLProcessor",
         name: "query"
     } external;
 
     isolated resource function get alltypesidrecords/[boolean booleanType]/[int intType]/[float floatType]/[decimal decimalType]/[string stringType](AllTypesIdRecordTargetType targetType = <>) returns targetType|persist:Error = @java:Method {
-        'class: "io.ballerina.stdlib.persist.sql.datastore.SQLProcessor",
+        'class: "io.ballerina.stdlib.persist.sql.datastore.MSSQLProcessor",
         name: "queryOne"
     } external;
 

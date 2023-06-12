@@ -52,16 +52,13 @@ import static io.ballerina.stdlib.persist.sql.Constants.PERSIST_SQL_STREAM;
 import static io.ballerina.stdlib.persist.sql.ModuleUtils.getModule;
 
 /**
- * This class provides the MySQL query processing implementations for persistence.
+ * This class provides the SQL query processing implementations for persistence.
  *
  * @since 0.3.0
  */
-public class SQLProcessor {
+class SQLProcessor {
 
-    private SQLProcessor() {
-    }
-
-    public static BStream query(Environment env, BObject client, BTypedesc targetType) {
+    static BStream query(Environment env, BObject client, BTypedesc targetType) {
         BString entity = getEntity(env);
         BObject persistClient = getPersistClient(client, entity);
         BArray keyFields = (BArray) persistClient.get(KEY_FIELDS);
@@ -110,7 +107,7 @@ public class SQLProcessor {
         return null;
     }
 
-    public static Object queryOne(Environment env, BObject client, BArray path, BTypedesc targetType) {
+    static Object queryOne(Environment env, BObject client, BArray path, BTypedesc targetType) {
 
         BString entity = getEntity(env);
         BObject persistClient = getPersistClient(client, entity);

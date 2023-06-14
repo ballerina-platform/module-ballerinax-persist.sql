@@ -120,28 +120,28 @@ function initTests() returns error? {
     `);
 
     _ = check mssqlDbClient->execute(`
-        CREATE TABLE AllTypes (
-            id INT NOT NULL,
-            booleanType BIT NOT NULL,
-            intType INT NOT NULL,
-            floatType FLOAT NOT NULL,
-            decimalType DECIMAL(10, 2) NOT NULL,
-            stringType VARCHAR(191) NOT NULL,
-            byteArrayType BINARY(6) NOT NULL,
-            dateType DATE NOT NULL,
-            timeOfDayType TIME NOT NULL,
-            civilType DATETIME NOT NULL,
-            booleanTypeOptional BIT,
-            intTypeOptional INT,
-            floatTypeOptional FLOAT,
-            decimalTypeOptional DECIMAL(10, 2),
-            stringTypeOptional VARCHAR(191),
-            dateTypeOptional DATE,
-            timeOfDayTypeOptional TIME,
-            civilTypeOptional DATETIME,
-            enumType VARCHAR(6) CHECK (enumType IN ('TYPE_1', 'TYPE_2', 'TYPE_3', 'TYPE_4')) NOT NULL,
-            enumTypeOptional VARCHAR(6) CHECK (enumTypeOptional IN ('TYPE_1', 'TYPE_2', 'TYPE_3', 'TYPE_4')),
-            PRIMARY KEY(id)
+        CREATE TABLE [AllTypes] (
+        	[id] INT NOT NULL,
+        	[booleanType] BIT NOT NULL,
+        	[intType] INT NOT NULL,
+        	[floatType] FLOAT NOT NULL,
+        	[decimalType] DECIMAL(38,30) NOT NULL,
+        	[stringType] VARCHAR(191) NOT NULL,
+        	[byteArrayType] VARBINARY(MAX) NOT NULL,
+        	[dateType] DATE NOT NULL,
+        	[timeOfDayType] TIME NOT NULL,
+        	[civilType] DATETIME2 NOT NULL,
+        	[booleanTypeOptional] BIT,
+        	[intTypeOptional] INT,
+        	[floatTypeOptional] FLOAT,
+        	[decimalTypeOptional] DECIMAL(38,30),
+        	[stringTypeOptional] VARCHAR(191),
+        	[dateTypeOptional] DATE,
+        	[timeOfDayTypeOptional] TIME,
+        	[civilTypeOptional] DATETIME2,
+        	[enumType] VARCHAR(6) CHECK ([enumType] IN ('TYPE_1', 'TYPE_2', 'TYPE_3', 'TYPE_4')) NOT NULL,
+        	[enumTypeOptional] VARCHAR(6) CHECK ([enumTypeOptional] IN ('TYPE_1', 'TYPE_2', 'TYPE_3', 'TYPE_4')),
+        	PRIMARY KEY([id])
         );
     `);
 

@@ -216,19 +216,19 @@ task startMSSQLTestDockerContainer(type: Exec) {
         def standardOutput = new ByteArrayOutputStream()
         commandLine 'sh', '-c',
                 "docker run --rm -d --name ballerina-persist-mssql -e ACCEPT_EULA=1 -e SA_PASSWORD=Test123# -p 1433:1433 -d ballerina-persist-mssql"
-//        def healthCheck = 1;
-//        def counter = 0;
-//        doLast {
-//            checkExecResult(execResult, 'Error', standardOutput)
-//            while (healthCheck != 0 && counter < 12) {
-//                sleep(5 * 1000)
-//                healthCheck = checkMSSQLTestDockerContainerStatus("ballerina-persist-mssql")
-//                counter = counter + 1;
-//            }
-//            if (healthCheck != 0) {
-//                throw new GradleException("Docker container 'ballerina-persist-mssql' health test exceeded timeout!")
-//            }
-//        }
+        def healthCheck = 1;
+        def counter = 0;
+        doLast {
+            checkExecResult(execResult, 'Error', standardOutput)
+            while (healthCheck != 0 && counter < 12) {
+                sleep(5 * 1000)
+                healthCheck = checkMSSQLTestDockerContainerStatus("ballerina-persist-mssql")
+                counter = counter + 1;
+            }
+            if (healthCheck != 0) {
+                throw new GradleException("Docker container 'ballerina-persist-mssql' health test exceeded timeout!")
+            }
+        }
     }
 }
 
@@ -255,8 +255,8 @@ startMSSQLTestDockerContainer.dependsOn createMSSQLTestDockerImage
 
 build.dependsOn "generatePomFileForMavenPublication"
 build.dependsOn ":${packageName}-native:build"
-//build.finalizedBy stopMySQLTestDockerContainer
-//build.finalizedBy stopMSSQLTestDockerContainer
+build.finalizedBy stopMySQLTestDockerContainer
+build.finalizedBy stopMSSQLTestDockerContainer
 
 test.dependsOn ":${packageName}-native:build"
 test.dependsOn startMySQLTestDockerContainer

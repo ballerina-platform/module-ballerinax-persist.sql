@@ -18,6 +18,9 @@
 
 package io.ballerina.stdlib.persist.sql;
 
+import io.ballerina.runtime.api.utils.StringUtils;
+import io.ballerina.runtime.api.values.BString;
+
 /**
  * Constants for Persist SQL module.
  *
@@ -27,6 +30,12 @@ public final class Constants {
     private Constants() {
     }
 
+    public static final BString DB_CLIENT = StringUtils.fromString("dbClient");
     public static final String PERSIST_SQL_STREAM = "PersistSQLStream";
-    
+    public static final String PERSIST_NATIVE_SQL_STREAM = "PersistNativeSQLStream";
+    public static final String SQL_QUERY_METHOD = "query";
+    public static final String SQL_EXECUTE_METHOD = "execute";
+    public static final String PERSIST_EXECUTION_RESULT = "ExecutionResult";
+    public static final String PERSIST_ERROR = "Error";
+
 }

@@ -774,3 +774,135 @@ OrderItem orderItem2Updated = {
     quantity: 20,
     notes: "more than more"
 };
+
+Department departmentNative1 = {
+    deptNo: "department-native-1",
+    deptName: "Finance"
+};
+
+Department departmentNative2 = {
+    deptNo: "department-native-2",
+    deptName: "HR"
+};
+
+Department departmentNative3 = {
+    deptNo: "department-native-3",
+    deptName: "Marketing"
+};
+
+Building buildingNative1 = {
+    buildingCode: "building-native-1",
+    city: "Colombo",
+    state: "Western",
+    country: "Sri Lanka",
+    postalCode: "10370",
+    'type: "office"
+};
+
+Building buildingNative2 = {
+    buildingCode: "building-native-2",
+    city: "Kandy",
+    state: "Central",
+    country: "Sri Lanka",
+    postalCode: "20000",
+    'type: "coworking space"
+};
+
+Building buildingNative3 = {
+    buildingCode: "building-native-3",
+    city: "San Francisco",
+    state: "California",
+    country: "USA",
+    postalCode: "80000",
+    'type: "office"
+};
+
+Workspace workspaceNative1 = {
+    workspaceId: "workspace-native-1",
+    workspaceType: "hot seat",
+    locationBuildingCode: "building-native-2"
+};
+
+Workspace workspaceNative2 = {
+    workspaceId: "workspace-native-2",
+    workspaceType: "dedicated",
+    locationBuildingCode: "building-native-2"
+};
+
+Workspace workspaceNative3 = {
+    workspaceId: "workspace-native-3",
+    workspaceType: "hot seat",
+    locationBuildingCode: "building-native-3"
+};
+
+Employee employeeNative1 = {
+    empNo: "employee-native-1",
+    firstName: "John",
+    lastName: "Doe",
+    birthDate: {year: 1994, month: 10, day: 30},
+    gender: MALE,
+    hireDate: {year: 2020, month: 10, day: 30},
+    departmentDeptNo: "department-native-1",
+    workspaceWorkspaceId: "workspace-native-1"
+};
+
+Employee employeeNative2 = {
+    empNo: "employee-native-2",
+    firstName: "Jane",
+    lastName: "Doe",
+    birthDate: {year: 1996, month: 8, day: 12},
+    gender: FEMALE,
+    hireDate: {year: 2021, month: 10, day: 30},
+    departmentDeptNo: "department-native-2",
+    workspaceWorkspaceId: "workspace-native-2"
+};
+
+Employee employeeNative3 = {
+    empNo: "employee-native-3",
+    firstName: "Sam",
+    lastName: "Smith",
+    birthDate: {year: 1991, month: 8, day: 12},
+    gender: MALE,
+    hireDate: {year: 2019, month: 10, day: 30},
+    departmentDeptNo: "department-native-3",
+    workspaceWorkspaceId: "workspace-native-3"
+};
+
+EmployeeInfo employeeInfoNative1 = {
+    firstName: "John",
+    lastName: "Doe",
+    department: {
+        deptName: "Finance"
+    },
+    workspace: {
+        workspaceId: "workspace-native-1",
+        workspaceType: "hot seat",
+        locationBuildingCode: "building-native-2"
+    }
+};
+
+EmployeeInfo employeeInfoNative2 = {
+    firstName: "Jane",
+    lastName: "Doe",
+    department: {
+        deptName: "HR"
+    },
+    workspace: {
+        workspaceId: "workspace-native-2",
+        workspaceType: "dedicated",
+        locationBuildingCode: "building-native-2"
+    }
+};
+
+EmployeeInfo employeeInfoNative3 = {
+    firstName: "Sam",
+    lastName: "Smith",
+    department: {
+        deptName: "Marketing"
+    },
+    workspace: {
+        workspaceId: "workspace-native-3",
+        workspaceType: "hot seat",
+        locationBuildingCode: "building-native-3"
+    }
+};

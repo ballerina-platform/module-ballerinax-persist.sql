@@ -80,8 +80,7 @@ function mssqlNativeExecuteTestNegative1() returns error? {
     MSSQLRainierClient rainierClient = check new ();
     ExecutionResult|persist:Error executionResult = rainierClient->executeNativeSQL(`
         INSERT INTO Department (deptNo, deptName)
-        VALUES 
-            (${departmentNative1.deptNo}, ${departmentNative1.deptName})
+        VALUES (${departmentNative1.deptNo}, ${departmentNative1.deptName})
     `);
 
     if executionResult is persist:Error {
@@ -99,8 +98,7 @@ function mssqlNativeExecuteTestNegative2() returns error? {
     MSSQLRainierClient rainierClient = check new ();
     ExecutionResult|persist:Error executionResult = rainierClient->executeNativeSQL(`
         INSERT INTO Departments (deptNo, deptName)
-        VALUES 
-            (${departmentNative1.deptNo}, ${departmentNative1.deptName})
+        VALUES (${departmentNative1.deptNo}, ${departmentNative1.deptName})
     `);
 
     if executionResult is persist:Error {

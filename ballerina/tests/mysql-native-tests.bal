@@ -16,7 +16,6 @@
 
 import ballerina/test;
 import ballerina/persist;
-import ballerina/io;
 
 @test:BeforeGroups {value: ["native-mysql"]}
 function mysqlTruncateTables() returns error? {
@@ -81,12 +80,10 @@ function mysqlNativeExecuteTestNegative1() returns error? {
     MySQLRainierClient rainierClient = check new ();
     ExecutionResult|persist:Error executionResult = rainierClient->executeNativeSQL(`
         INSERT INTO Department (deptNo, deptName)
-        VALUES 
-            (${departmentNative1.deptNo}, ${departmentNative1.deptName})
+        VALUES (${departmentNative1.deptNo}, ${departmentNative1.deptName})
     `);
 
     if executionResult is persist:Error {
-        io:println(executionResult.message());
         test:assertTrue(executionResult.message().includes("Duplicate entry 'department-native-1' for key 'Department.PRIMARY"));
     } else {
         test:assertFail("persist:Error expected.");
@@ -101,8 +98,7 @@ function mysqlNativeExecuteTestNegative2() returns error? {
     MySQLRainierClient rainierClient = check new ();
     ExecutionResult|persist:Error executionResult = rainierClient->executeNativeSQL(`
         INSERT INTO Departments (deptNo, deptName)
-        VALUES 
-            (${departmentNative1.deptNo}, ${departmentNative1.deptName})
+        VALUES (${departmentNative1.deptNo}, ${departmentNative1.deptName})
     `);
 
     if executionResult is persist:Error {

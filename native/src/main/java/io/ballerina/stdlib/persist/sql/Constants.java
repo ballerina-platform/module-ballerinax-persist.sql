@@ -37,5 +37,4 @@ public final class Constants {
     public static final String SQL_EXECUTE_METHOD = "execute";
     public static final String PERSIST_EXECUTION_RESULT = "ExecutionResult";
     public static final String PERSIST_ERROR = "Error";
-
 }

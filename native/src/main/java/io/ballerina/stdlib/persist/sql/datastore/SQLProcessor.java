@@ -87,7 +87,9 @@ public class SQLProcessor {
 
         Future balFuture = env.markAsync();
         env.getRuntime().invokeMethodAsyncSequentially(
-                persistClient, Constants.RUN_READ_QUERY_METHOD, null, null, new Callback() {
+                persistClient, Constants.RUN_READ_QUERY_METHOD,
+                env.getStrandName().isPresent() ? env.getStrandName().get() : null,
+                env.getStrandMetadata(), new Callback() {
                     @Override
                     public void notifySuccess(Object o) {
                         BStream sqlStream = (BStream) o;
@@ -166,28 +168,24 @@ public class SQLProcessor {
         StreamType streamType = TypeCreator.createStreamType(recordType, PredefinedTypes.TYPE_NULL);
 
         Map<String, Object> trxContextProperties = getTransactionContextProperties();
+        String strandName = env.getStrandName().isPresent() ? env.getStrandName().get() : null;
 
         Future balFuture = env.markAsync();
         env.getRuntime().invokeMethodAsyncSequentially(
                 // Call `sqlClient.query(paramSQLString, targetType)` which returns `stream<targetType, sql:Error?>`
 
-                dbClient, SQL_QUERY_METHOD, null, null, new Callback() {
+                dbClient, SQL_QUERY_METHOD, strandName, env.getStrandMetadata(), new Callback() {
                     @Override
                     public void notifySuccess(Object o) {
-                        if (o instanceof BStream) { // returned type is `stream<record {}, sql:Error?>`
-                            BStream sqlStream = (BStream) o;
-                            BObject persistNativeStream = createPersistNativeSQLStream(sqlStream, null);
-                            RecordType streamConstraint =
-                                    (RecordType) TypeUtils.getReferredType(targetType.getDescribingType());
-                            balFuture.complete(
-                                    ValueCreator.createStreamValue(TypeCreator.createStreamType(streamConstraint,
-                                            PredefinedTypes.TYPE_NULL), persistNativeStream)
-                            );
-                        } else { // Unreachable code
-                            BError persistError = getBasicPersistError("Error while executing native SQL query.");
-                            BStream errorStream = getErrorStream(recordType, persistError);
-                            balFuture.complete(errorStream);
-                        }
+                        // returned type is `stream<record {}, sql:Error?>`
+                        BStream sqlStream = (BStream) o;
+                        BObject persistNativeStream = createPersistNativeSQLStream(sqlStream, null);
+                        RecordType streamConstraint =
+                                (RecordType) TypeUtils.getReferredType(targetType.getDescribingType());
+                        balFuture.complete(
+                                ValueCreator.createStreamValue(TypeCreator.createStreamType(streamConstraint,
+                                        PredefinedTypes.TYPE_NULL), persistNativeStream)
+                        );
                     }
 
                     @Override
@@ -208,13 +206,15 @@ public class SQLProcessor {
         BObject dbClient = (BObject) client.get(DB_CLIENT);
         RecordType persistExecutionResultType = TypeCreator.createRecordType(
                 io.ballerina.stdlib.persist.sql.Constants.PERSIST_EXECUTION_RESULT, getModule(), 0, true, 0);
+
         Map<String, Object> trxContextProperties = getTransactionContextProperties();
+        String strandName = env.getStrandName().isPresent() ? env.getStrandName().get() : null;
 
         Future balFuture = env.markAsync();
         env.getRuntime().invokeMethodAsyncSequentially(
                 // Call `sqlClient.execute(paramSQLString)` which returns `sql:ExecutionResult|sql:Error`
 
-                dbClient, SQL_EXECUTE_METHOD, null, null, new Callback() {
+                dbClient, SQL_EXECUTE_METHOD, strandName, env.getStrandMetadata(), new Callback() {
                     @Override
                     public void notifySuccess(Object o) {
                         if (o instanceof BMap) { // returned type is `sql:ExecutionResult`
@@ -225,9 +225,6 @@ public class SQLProcessor {
                             balFuture.complete(persistExecutionResult);
                         } else if (o instanceof BError) { // returned type is `sql:Error`
                             BError persistError = wrapSQLError((BError) o);
-                            balFuture.complete(persistError);
-                        } else { // Unreachable code
-                            BError persistError = getBasicPersistError("Error while executing native SQL query.");
                             balFuture.complete(persistError);
                         }
                     }

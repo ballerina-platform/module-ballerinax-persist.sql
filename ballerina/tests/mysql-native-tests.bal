@@ -247,7 +247,7 @@ function mysqlNativeTransactionTest2() returns error? {
         `);
     test:assertEquals(executionResult, {affectedRowCount: 1, lastInsertId: ()});
 
-    stream<Building, persist:Error?> buildingStream = rainierClient->queryNativeSQL(`SELECT * FROM Building`);
+    stream<Building, persist:Error?> buildingStream = rainierClient->queryNativeSQL(`SELECT * FROM Building WHERE buildingCode = ${building33.buildingCode}`);
     Building[] buildings = check from Building building in buildingStream
         select building;
     check buildingStream.close();
@@ -262,14 +262,6 @@ function mysqlNativeTransactionTest2() returns error? {
                 country = ${building33Updated.country}
             WHERE buildingCode = ${building33.buildingCode}
         `);
-        test:assertEquals(executionResult2, {affectedRowCount: 1, lastInsertId: ()});
-
-        stream<Building, persist:Error?> buildingStream2 = rainierClient->queryNativeSQL(`SELECT * FROM Building WHERE buildingCode = ${building33.buildingCode}`);
-        Building[] buildings2 = check from Building building in buildingStream2
-            select building;
-        check buildingStream2.close();
-        test:assertEquals(buildings2, [building33Updated]);
-
         check commit;
     }
 

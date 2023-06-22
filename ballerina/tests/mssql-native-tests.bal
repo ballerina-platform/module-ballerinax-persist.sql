@@ -116,22 +116,25 @@ function mssqlNativeQueryTest() returns error? {
     stream<Department, persist:Error?> departmentStream = rainierClient->queryNativeSQL(`SELECT * FROM Department`);
     Department[] departments = check from Department department in departmentStream
         select department;
-
+    check departmentStream.close();
     test:assertEquals(departments, [departmentNative1, departmentNative2, departmentNative3]);
 
     stream<Building, persist:Error?> buildingStream = rainierClient->queryNativeSQL(`SELECT * FROM Building`);
     Building[] buildings = check from Building building in buildingStream
         select building;
+    check buildingStream.close();
     test:assertEquals(buildings, [buildingNative1, buildingNative2, buildingNative3]);
 
     stream<Workspace, persist:Error?> workspaceStream = rainierClient->queryNativeSQL(`SELECT * FROM Workspace`);
     Workspace[] workspaces = check from Workspace workspace in workspaceStream
         select workspace;
+    check workspaceStream.close();
     test:assertEquals(workspaces, [workspaceNative1, workspaceNative2, workspaceNative3]);
 
     stream<Employee, persist:Error?> employeeStream = rainierClient->queryNativeSQL(`SELECT * FROM Employee`);
     Employee[] employees = check from Employee employee in employeeStream
         select employee;
+    check employeeStream.close();
     test:assertEquals(employees, [employeeNative1, employeeNative2, employeeNative3]);
 
     check rainierClient.close();
@@ -146,6 +149,7 @@ function mssqlNativeQueryTestNegative() returns error? {
     stream<Department, persist:Error?> departmentStream = rainierClient->queryNativeSQL(`SELECT * FROM Departments`);
     Department[]|persist:Error departments = from Department department in departmentStream
         select department;
+    check departmentStream.close();
 
     if departments is persist:Error {
         test:assertTrue(departments.message().includes("Invalid object name 'Departments'"));
@@ -172,13 +176,100 @@ function mssqlNativeQueryComplexTest() returns error? {
             workspace.locationBuildingCode AS 'workspace.locationBuildingCode'
         FROM Employee
         INNER JOIN 
-            Department department ON Employee.departmentDeptNo = Department.deptNo
+            Department department ON Employee.departmentDeptNo = department.deptNo
         INNER JOIN
-            Workspace workspace ON Employee.workspaceWorkspaceId = Workspace.workspaceId
+            Workspace workspace ON Employee.workspaceWorkspaceId = workspace.workspaceId
     `);
     EmployeeInfo[] employees = check from EmployeeInfo employee in employeeInfoStream
         select employee;
+    check employeeInfoStream.close();
     test:assertEquals(employees, [employeeInfoNative1, employeeInfoNative2, employeeInfoNative3]);
+
+    check rainierClient.close();
+}
+
+@test:Config {
+    groups: ["transactions", "mssql", "native"],
+    dependsOn: [mssqlNativeExecuteTestNegative1, mssqlNativeQueryTest, mssqlNativeQueryTestNegative, mssqlNativeQueryComplexTest]
+}
+function mssqlNativeTransactionTest() returns error? {
+    MSSQLRainierClient rainierClient = check new ();
+    _ = check rainierClient->executeNativeSQL(`DELETE FROM Employee`);
+    _ = check rainierClient->executeNativeSQL(`DELETE FROM Workspace`);
+    _ = check rainierClient->executeNativeSQL(`DELETE FROM Building`);
+    _ = check rainierClient->executeNativeSQL(`DELETE FROM Department`);
+
+    transaction {
+        ExecutionResult executionResult = check rainierClient->executeNativeSQL(`
+        INSERT INTO Building (buildingCode, city, state, country, postalCode, type)
+        VALUES 
+            (${building31.buildingCode}, ${building31.city}, ${building31.state}, ${building31.country}, ${building31.postalCode}, ${building31.'type}),
+            (${building32.buildingCode}, ${building32.city}, ${building32.state}, ${building32.country}, ${building32.postalCode}, ${building32.'type})
+        `);
+        test:assertEquals(executionResult, {affectedRowCount: 2, lastInsertId: ()});
+
+        stream<Building, persist:Error?> buildingStream = rainierClient->queryNativeSQL(`SELECT * FROM Building`);
+        Building[] buildings = check from Building building in buildingStream
+            select building;
+        check buildingStream.close();
+        test:assertEquals(buildings, [building31, building32]);
+
+        executionResult = check rainierClient->executeNativeSQL(`
+        INSERT INTO Building (buildingCode, city, state, country, postalCode, type)
+        VALUES 
+            (${building31.buildingCode}, ${building31.city}, ${building31.state}, ${building31.country}, ${building31.postalCode}, ${building31.'type})
+        `);
+        check commit;
+    } on fail error e {
+        test:assertTrue(e is persist:Error, "persist:Error expected");
+    }
+
+    stream<Building, persist:Error?> buildingStream = rainierClient->queryNativeSQL(`SELECT * FROM Building`);
+    Building[] buildings = check from Building building in buildingStream
+        select building;
+    check buildingStream.close();
+    test:assertEquals(buildings, []);
+
+    check rainierClient.close();
+}
+
+@test:Config {
+    groups: ["transactions", "mssql", "native"],
+    dependsOn: [mssqlNativeExecuteTestNegative1, mssqlNativeQueryTest, mssqlNativeQueryTestNegative, mssqlNativeQueryComplexTest]
+}
+function mssqlNativeTransactionTest2() returns error? {
+    MSSQLRainierClient rainierClient = check new ();
+
+    ExecutionResult executionResult = check rainierClient->executeNativeSQL(`
+        INSERT INTO Building (buildingCode, city, state, country, postalCode, type)
+        VALUES 
+            (${building33.buildingCode}, ${building33.city}, ${building33.state}, ${building33.country}, ${building33.postalCode}, ${building33.'type})
+        `);
+    test:assertEquals(executionResult, {affectedRowCount: 1, lastInsertId: ()});
+
+    stream<Building, persist:Error?> buildingStream = rainierClient->queryNativeSQL(`SELECT * FROM Building WHERE buildingCode = ${building33.buildingCode}`);
+    Building[] buildings = check from Building building in buildingStream
+        select building;
+    check buildingStream.close();
+    test:assertEquals(buildings, [building33]);
+
+    transaction {
+        ExecutionResult executionResult2 = check rainierClient->executeNativeSQL(`
+            UPDATE Building
+            SET
+                city = ${building33Updated.city},
+                state = ${building33Updated.state},
+                country = ${building33Updated.country}
+            WHERE buildingCode = ${building33.buildingCode}
+        `);
+        check commit;
+    }
+
+    stream<Building, persist:Error?> buildingStream3 = rainierClient->queryNativeSQL(`SELECT * FROM Building WHERE buildingCode = ${building33.buildingCode}`);
+    Building[] buildings3 = check from Building building in buildingStream3
+        select building;
+    check buildingStream3.close();
+    test:assertEquals(buildings3, [building33Updated]);
 
     check rainierClient.close();
 }

@@ -60,7 +60,7 @@ function initTests() returns error? {
     _ = check mysqlDbClient->execute(`SET FOREIGN_KEY_CHECKS = 1`);
     check mysqlDbClient.close();
 
-    // MSSQL
+    //MSSQL
     mssql:Client mssqlDbClient = check new (host = mssql.host, user = mssql.user, password = mssql.password, port = mssql.port);
     _ = check mssqlDbClient->execute(`DROP DATABASE IF EXISTS test;`);
     _ = check mssqlDbClient->execute(`CREATE DATABASE test`);

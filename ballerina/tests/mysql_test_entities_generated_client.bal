@@ -491,7 +491,6 @@ public isolated client class MySQLTestEntitiesClient {
         'class: "io.ballerina.stdlib.persist.sql.datastore.SQLProcessor"
     } external;
 
-
     public isolated function close() returns persist:Error? {
         error? result = self.dbClient.close();
         if result is error {

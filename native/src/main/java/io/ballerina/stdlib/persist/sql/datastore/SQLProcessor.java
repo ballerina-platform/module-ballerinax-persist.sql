@@ -87,8 +87,7 @@ public class SQLProcessor {
 
         Future balFuture = env.markAsync();
         env.getRuntime().invokeMethodAsyncSequentially(
-                persistClient, Constants.RUN_READ_QUERY_METHOD,
-                null, null, new Callback() {
+                persistClient, Constants.RUN_READ_QUERY_METHOD, null, null, new Callback() {
                     @Override
                     public void notifySuccess(Object o) {
                         BStream sqlStream = (BStream) o;
@@ -140,8 +139,7 @@ public class SQLProcessor {
 
         Future balFuture = env.markAsync();
         env.getRuntime().invokeMethodAsyncSequentially(
-                getPersistClient(client, entity), Constants.RUN_READ_BY_KEY_QUERY_METHOD,
-                null, null, new Callback() {
+                getPersistClient(client, entity), Constants.RUN_READ_BY_KEY_QUERY_METHOD, null, null, new Callback() {
                     @Override
                     public void notifySuccess(Object o) {
                         balFuture.complete(o);

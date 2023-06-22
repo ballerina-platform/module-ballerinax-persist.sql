@@ -17,22 +17,17 @@
 import ballerina/test;
 import ballerina/persist;
 
-@test:BeforeGroups {value: ["native-mssql"]}
-function mssqlTruncateTables() returns error? {
+@test:Config {
+    groups: ["native", "mssql"],
+    dependsOn: [mssqlEmployeeRelationsTest, mssqlWorkspaceRelationsTest, mssqlBuildingRelationsTest, mssqlDepartmentRelationsTest]
+}
+function mssqlNativeExecuteTest() returns error? {
     MSSQLRainierClient rainierClient = check new ();
     _ = check rainierClient->executeNativeSQL(`DELETE FROM Employee`);
     _ = check rainierClient->executeNativeSQL(`DELETE FROM Workspace`);
     _ = check rainierClient->executeNativeSQL(`DELETE FROM Building`);
     _ = check rainierClient->executeNativeSQL(`DELETE FROM Department`);
-    check rainierClient.close();
-}
 
-@test:Config {
-    groups: ["native-mssql", "execute"],
-    dependsOn: [mssqlEmployeeRelationsTest, mssqlWorkspaceRelationsTest, mssqlBuildingRelationsTest, mssqlDepartmentRelationsTest]
-}
-function mssqlNativeExecuteTest() returns error? {
-    MSSQLRainierClient rainierClient = check new ();
     ExecutionResult executionResult = check rainierClient->executeNativeSQL(`
         INSERT INTO Department (deptNo, deptName)
         VALUES 
@@ -73,7 +68,7 @@ function mssqlNativeExecuteTest() returns error? {
 }
 
 @test:Config {
-    groups: ["native-mssql", "execute"],
+    groups: ["native", "mssql"],
     dependsOn: [mssqlNativeExecuteTest]
 }
 function mssqlNativeExecuteTestNegative1() returns error? {
@@ -88,10 +83,12 @@ function mssqlNativeExecuteTestNegative1() returns error? {
     } else {
         test:assertFail("persist:Error expected.");
     }
+
+    check rainierClient.close();
 }
 
 @test:Config {
-    groups: ["native-mssql", "execute"],
+    groups: ["native", "mssql"],
     dependsOn: [mssqlNativeExecuteTest]
 }
 function mssqlNativeExecuteTestNegative2() returns error? {
@@ -106,10 +103,12 @@ function mssqlNativeExecuteTestNegative2() returns error? {
     } else {
         test:assertFail("persist:Error expected.");
     }
+
+    check rainierClient.close();
 }
 
 @test:Config {
-    groups: ["native", "query", "mssql"],
+    groups: ["native", "mssql"],
     dependsOn: [mssqlNativeExecuteTest]
 }
 function mssqlNativeQueryTest() returns error? {
@@ -139,7 +138,7 @@ function mssqlNativeQueryTest() returns error? {
 }
 
 @test:Config {
-    groups: ["native", "query", "mssql"],
+    groups: ["native", "mssql"],
     dependsOn: [mssqlNativeExecuteTest]
 }
 function mssqlNativeQueryTestNegative() returns error? {
@@ -153,10 +152,12 @@ function mssqlNativeQueryTestNegative() returns error? {
     } else {
         test:assertFail("persist:Error expected.");
     }
+
+    check rainierClient.close();
 }
 
 @test:Config {
-    groups: ["native", "query", "mssql"],
+    groups: ["native", "mssql"],
     dependsOn: [mssqlNativeExecuteTest]
 }
 function mssqlNativeQueryComplexTest() returns error? {

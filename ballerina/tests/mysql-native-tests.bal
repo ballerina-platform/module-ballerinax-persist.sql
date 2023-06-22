@@ -17,22 +17,17 @@
 import ballerina/test;
 import ballerina/persist;
 
-@test:BeforeGroups {value: ["native-mysql"]}
-function mysqlTruncateTables() returns error? {
+@test:Config {
+    groups: ["native", "mysql"],
+    dependsOn: [mysqlEmployeeRelationsTest, mysqlWorkspaceRelationsTest, mysqlBuildingRelationsTest, mysqlDepartmentRelationsTest]
+}
+function mysqlNativeExecuteTest() returns error? {
     MySQLRainierClient rainierClient = check new ();
     _ = check rainierClient->executeNativeSQL(`DELETE FROM Employee`);
     _ = check rainierClient->executeNativeSQL(`DELETE FROM Workspace`);
     _ = check rainierClient->executeNativeSQL(`DELETE FROM Building`);
     _ = check rainierClient->executeNativeSQL(`DELETE FROM Department`);
-    check rainierClient.close();
-}
 
-@test:Config {
-    groups: ["native-mysql", "execute"],
-    dependsOn: [mysqlEmployeeRelationsTest, mysqlWorkspaceRelationsTest, mysqlBuildingRelationsTest, mysqlDepartmentRelationsTest]
-}
-function mysqlNativeExecuteTest() returns error? {
-    MySQLRainierClient rainierClient = check new ();
     ExecutionResult executionResult = check rainierClient->executeNativeSQL(`
         INSERT INTO Department (deptNo, deptName)
         VALUES 
@@ -73,7 +68,7 @@ function mysqlNativeExecuteTest() returns error? {
 }
 
 @test:Config {
-    groups: ["native-mysql", "execute"],
+    groups: ["native", "mysql"],
     dependsOn: [mysqlNativeExecuteTest]
 }
 function mysqlNativeExecuteTestNegative1() returns error? {
@@ -88,10 +83,12 @@ function mysqlNativeExecuteTestNegative1() returns error? {
     } else {
         test:assertFail("persist:Error expected.");
     }
+
+    check rainierClient.close();
 }
 
 @test:Config {
-    groups: ["native-mysql", "execute"],
+    groups: ["native", "mysql"],
     dependsOn: [mysqlNativeExecuteTest]
 }
 function mysqlNativeExecuteTestNegative2() returns error? {
@@ -106,10 +103,12 @@ function mysqlNativeExecuteTestNegative2() returns error? {
     } else {
         test:assertFail("persist:Error expected.");
     }
+
+    check rainierClient.close();
 }
 
 @test:Config {
-    groups: ["native", "query", "mysql"],
+    groups: ["native", "mysql"],
     dependsOn: [mysqlNativeExecuteTest]
 }
 function mysqlNativeQueryTest() returns error? {
@@ -139,7 +138,7 @@ function mysqlNativeQueryTest() returns error? {
 }
 
 @test:Config {
-    groups: ["native", "query", "mysql"],
+    groups: ["native", "mysql"],
     dependsOn: [mysqlNativeExecuteTest]
 }
 function mysqlNativeQueryTestNegative() returns error? {
@@ -153,10 +152,12 @@ function mysqlNativeQueryTestNegative() returns error? {
     } else {
         test:assertFail("persist:Error expected.");
     }
+
+    check rainierClient.close();
 }
 
 @test:Config {
-    groups: ["native", "query", "mysql"],
+    groups: ["native", "mysql"],
     dependsOn: [mysqlNativeExecuteTest]
 }
 function mysqlNativeQueryComplexTest() returns error? {

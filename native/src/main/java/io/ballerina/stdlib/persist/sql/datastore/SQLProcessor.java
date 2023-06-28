@@ -100,7 +100,7 @@ class SQLProcessor {
                     }
 
                     @Override
-                    public void notifyFailure(BError bError) { // can only be hit on a panic
+                    public void notifyFailure(BError bError) {
                         BError persistError = wrapError(bError);
                         balFuture.complete(Utils.createPersistSQLStreamValue(null, targetType, fields, includes,
                                 typeDescriptions, persistClient, persistError));

@@ -16,6 +16,6 @@
 
 FROM mysql:8.0.21
 
-COPY sql-scripts/init.sql /docker-entrypoint-initdb.d/
+COPY init.sql /docker-entrypoint-initdb.d/
 
 ENV MYSQL_ROOT_PASSWORD Test123#

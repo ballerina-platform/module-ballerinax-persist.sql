@@ -18,11 +18,11 @@ import ballerina/test;
 import ballerina/persist;
 
 @test:Config {
-    groups: ["associations", "sql"],
-    dependsOn: [sqlEmployeeDeleteTestNegative]
+    groups: ["associations", "mysql"],
+    dependsOn: [mysqlEmployeeDeleteTestNegative]
 }
-function sqlEmployeeRelationsTest() returns error? {
-    SQLRainierClient rainierClient = check new ();
+function mysqlEmployeeRelationsTest() returns error? {
+    MySQLRainierClient rainierClient = check new ();
 
     Employee employee21 = {
         empNo: "employee-21",
@@ -85,11 +85,11 @@ function sqlEmployeeRelationsTest() returns error? {
 }
 
 @test:Config {
-    groups: ["associations", "sql"],
-    dependsOn: [sqlEmployeeDeleteTestNegative]
+    groups: ["associations", "mysql"],
+    dependsOn: [mysqlEmployeeDeleteTestNegative]
 }
 function departmentRelationsTest() returns error? {
-    SQLRainierClient rainierClient = check new ();
+    MySQLRainierClient rainierClient = check new ();
 
     Employee employee11 = {
         empNo: "employee-11",
@@ -165,11 +165,11 @@ function departmentRelationsTest() returns error? {
 }
 
 @test:Config {
-    groups: ["associations", "sql"],
-    dependsOn: [sqlEmployeeRelationsTest]
+    groups: ["associations", "mysql"],
+    dependsOn: [mysqlEmployeeRelationsTest]
 }
 function workspaceRelationsTest() returns error? {
-    SQLRainierClient rainierClient = check new ();
+    MySQLRainierClient rainierClient = check new ();
 
     Employee employee22 = {
         empNo: "employee-22",
@@ -241,11 +241,11 @@ function workspaceRelationsTest() returns error? {
 }
 
 @test:Config {
-    groups: ["associations", "sql"],
-    dependsOn: [sqlEmployeeRelationsTest]
+    groups: ["associations", "mysql"],
+    dependsOn: [mysqlEmployeeRelationsTest]
 }
 function buildingRelationsTest() returns error? {
-    SQLRainierClient rainierClient = check new ();
+    MySQLRainierClient rainierClient = check new ();
 
     stream<BuildingInfo, error?> buildingStream = rainierClient->/buildings.get();
     BuildingInfo[] buildings = check from BuildingInfo building in buildingStream

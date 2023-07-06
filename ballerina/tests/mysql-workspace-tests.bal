@@ -18,11 +18,11 @@ import ballerina/test;
 import ballerina/persist;
 
 @test:Config {
-    groups: ["workspace", "sql"],
-    dependsOn: [sqlBuildingDeleteTestNegative]
+    groups: ["workspace", "mysql"],
+    dependsOn: [mysqlBuildingDeleteTestNegative]
 }
-function sqlWorkspaceCreateTest() returns error? {
-    SQLRainierClient rainierClient = check new ();
+function mysqlWorkspaceCreateTest() returns error? {
+    MySQLRainierClient rainierClient = check new ();
 
     string[] workspaceIds = check rainierClient->/workspaces.post([workspace1]);
     test:assertEquals(workspaceIds, [workspace1.workspaceId]);
@@ -32,10 +32,10 @@ function sqlWorkspaceCreateTest() returns error? {
 }
 
 @test:Config {
-    groups: ["workspace", "sql"]
+    groups: ["workspace", "mysql"]
 }
-function sqlWorkspaceCreateTest2() returns error? {
-    SQLRainierClient rainierClient = check new ();
+function mysqlWorkspaceCreateTest2() returns error? {
+    MySQLRainierClient rainierClient = check new ();
 
     string[] workspaceIds = check rainierClient->/workspaces.post([workspace2, workspace3]);
 
@@ -50,10 +50,10 @@ function sqlWorkspaceCreateTest2() returns error? {
 }
 
 @test:Config {
-    groups: ["workspace", "sql"]
+    groups: ["workspace", "mysql"]
 }
-function sqlWorkspaceCreateTestNegative() returns error? {
-    SQLRainierClient rainierClient = check new ();
+function mysqlWorkspaceCreateTestNegative() returns error? {
+    MySQLRainierClient rainierClient = check new ();
 
     string[]|error workspace = rainierClient->/workspaces.post([invalidWorkspace]);
     if workspace is persist:Error {
@@ -65,11 +65,11 @@ function sqlWorkspaceCreateTestNegative() returns error? {
 }
 
 @test:Config {
-    groups: ["workspace", "sql"],
-    dependsOn: [sqlWorkspaceCreateTest]
+    groups: ["workspace", "mysql"],
+    dependsOn: [mysqlWorkspaceCreateTest]
 }
-function sqlWorkspaceReadOneTest() returns error? {
-    SQLRainierClient rainierClient = check new ();
+function mysqlWorkspaceReadOneTest() returns error? {
+    MySQLRainierClient rainierClient = check new ();
 
     Workspace workspaceRetrieved = check rainierClient->/workspaces/[workspace1.workspaceId].get();
     test:assertEquals(workspaceRetrieved, workspace1);
@@ -77,11 +77,11 @@ function sqlWorkspaceReadOneTest() returns error? {
 }
 
 @test:Config {
-    groups: ["workspace", "sql"],
-    dependsOn: [sqlWorkspaceCreateTest]
+    groups: ["workspace", "mysql"],
+    dependsOn: [mysqlWorkspaceCreateTest]
 }
-function sqlWorkspaceReadOneDependentTest() returns error? {
-    SQLRainierClient rainierClient = check new ();
+function mysqlWorkspaceReadOneDependentTest() returns error? {
+    MySQLRainierClient rainierClient = check new ();
 
     WorkspaceInfo2 workspaceRetrieved = check rainierClient->/workspaces/[workspace1.workspaceId].get();
     test:assertEquals(workspaceRetrieved,
@@ -94,15 +94,15 @@ function sqlWorkspaceReadOneDependentTest() returns error? {
 }
 
 @test:Config {
-    groups: ["workspace", "sql"],
-    dependsOn: [sqlWorkspaceCreateTest]
+    groups: ["workspace", "mysql"],
+    dependsOn: [mysqlWorkspaceCreateTest]
 }
-function sqlWorkspaceReadOneTestNegative() returns error? {
-    SQLRainierClient rainierClient = check new ();
+function mysqlWorkspaceReadOneTestNegative() returns error? {
+    MySQLRainierClient rainierClient = check new ();
 
     Workspace|error workspaceRetrieved = rainierClient->/workspaces/["invalid-workspace-id"].get();
     if workspaceRetrieved is persist:NotFoundError {
-        test:assertEquals(workspaceRetrieved.message(), "A record does not exist for 'Workspace' for key \"invalid-workspace-id\".");
+        test:assertEquals(workspaceRetrieved.message(), "A record with the key 'invalid-workspace-id' does not exist for the entity 'Workspace'.");
     } else {
         test:assertFail("NotFoundError expected.");
     }
@@ -110,11 +110,11 @@ function sqlWorkspaceReadOneTestNegative() returns error? {
 }
 
 @test:Config {
-    groups: ["workspace", "sql"],
-    dependsOn: [sqlWorkspaceCreateTest, sqlWorkspaceCreateTest2]
+    groups: ["workspace", "mysql"],
+    dependsOn: [mysqlWorkspaceCreateTest, mysqlWorkspaceCreateTest2]
 }
-function sqlWorkspaceReadManyTest() returns error? {
-    SQLRainierClient rainierClient = check new ();
+function mysqlWorkspaceReadManyTest() returns error? {
+    MySQLRainierClient rainierClient = check new ();
 
     stream<Workspace, error?> workspaceStream = rainierClient->/workspaces.get();
     Workspace[] workspaces = check from Workspace workspace in workspaceStream
@@ -125,11 +125,11 @@ function sqlWorkspaceReadManyTest() returns error? {
 }
 
 @test:Config {
-    groups: ["workspace", "sql", "dependent"],
-    dependsOn: [sqlWorkspaceCreateTest, sqlWorkspaceCreateTest2]
+    groups: ["workspace", "mysql", "dependent"],
+    dependsOn: [mysqlWorkspaceCreateTest, mysqlWorkspaceCreateTest2]
 }
-function sqlWorkspaceReadManyDependentTest() returns error? {
-    SQLRainierClient rainierClient = check new ();
+function mysqlWorkspaceReadManyDependentTest() returns error? {
+    MySQLRainierClient rainierClient = check new ();
 
     stream<WorkspaceInfo2, error?> workspaceStream = rainierClient->/workspaces.get();
     WorkspaceInfo2[] workspaces = check from WorkspaceInfo2 workspace in workspaceStream
@@ -144,11 +144,11 @@ function sqlWorkspaceReadManyDependentTest() returns error? {
 }
 
 @test:Config {
-    groups: ["workspace", "sql"],
-    dependsOn: [sqlWorkspaceReadOneTest, sqlWorkspaceReadManyTest, sqlWorkspaceReadManyDependentTest]
+    groups: ["workspace", "mysql"],
+    dependsOn: [mysqlWorkspaceReadOneTest, mysqlWorkspaceReadManyTest, mysqlWorkspaceReadManyDependentTest]
 }
-function sqlWorkspaceUpdateTest() returns error? {
-    SQLRainierClient rainierClient = check new ();
+function mysqlWorkspaceUpdateTest() returns error? {
+    MySQLRainierClient rainierClient = check new ();
 
     Workspace workspace = check rainierClient->/workspaces/[workspace1.workspaceId].put({
         workspaceType: "large"
@@ -162,18 +162,18 @@ function sqlWorkspaceUpdateTest() returns error? {
 }
 
 @test:Config {
-    groups: ["workspace", "sql"],
-    dependsOn: [sqlWorkspaceReadOneTest, sqlWorkspaceReadManyTest, sqlWorkspaceReadManyDependentTest]
+    groups: ["workspace", "mysql"],
+    dependsOn: [mysqlWorkspaceReadOneTest, mysqlWorkspaceReadManyTest, mysqlWorkspaceReadManyDependentTest]
 }
-function sqlWorkspaceUpdateTestNegative1() returns error? {
-    SQLRainierClient rainierClient = check new ();
+function mysqlWorkspaceUpdateTestNegative1() returns error? {
+    MySQLRainierClient rainierClient = check new ();
 
     Workspace|error workspace = rainierClient->/workspaces/["invalid-workspace-id"].put({
         workspaceType: "large"
     });
 
     if workspace is persist:NotFoundError {
-        test:assertEquals(workspace.message(), "A record does not exist for 'Workspace' for key \"invalid-workspace-id\".");
+        test:assertEquals(workspace.message(), "A record with the key 'invalid-workspace-id' does not exist for the entity 'Workspace'.");
     } else {
         test:assertFail("NotFoundError expected.");
     }
@@ -181,11 +181,11 @@ function sqlWorkspaceUpdateTestNegative1() returns error? {
 }
 
 @test:Config {
-    groups: ["workspace", "sql"],
-    dependsOn: [sqlWorkspaceReadOneTest, sqlWorkspaceReadManyTest, sqlWorkspaceReadManyDependentTest]
+    groups: ["workspace", "mysql"],
+    dependsOn: [mysqlWorkspaceReadOneTest, mysqlWorkspaceReadManyTest, mysqlWorkspaceReadManyDependentTest]
 }
-function sqlWorkspaceUpdateTestNegative2() returns error? {
-    SQLRainierClient rainierClient = check new ();
+function mysqlWorkspaceUpdateTestNegative2() returns error? {
+    MySQLRainierClient rainierClient = check new ();
 
     Workspace|error workspace = rainierClient->/workspaces/[workspace1.workspaceId].put({
         workspaceType: "unncessarily-long-workspace-type-to-force-error-on-update"
@@ -200,11 +200,11 @@ function sqlWorkspaceUpdateTestNegative2() returns error? {
 }
 
 @test:Config {
-    groups: ["workspace", "sql"],
-    dependsOn: [sqlWorkspaceUpdateTest, sqlWorkspaceUpdateTestNegative2]
+    groups: ["workspace", "mysql"],
+    dependsOn: [mysqlWorkspaceUpdateTest, mysqlWorkspaceUpdateTestNegative2]
 }
-function sqlWorkspaceDeleteTest() returns error? {
-    SQLRainierClient rainierClient = check new ();
+function mysqlWorkspaceDeleteTest() returns error? {
+    MySQLRainierClient rainierClient = check new ();
 
     Workspace workspace = check rainierClient->/workspaces/[workspace1.workspaceId].delete();
     test:assertEquals(workspace, updatedWorkspace1);
@@ -218,16 +218,16 @@ function sqlWorkspaceDeleteTest() returns error? {
 }
 
 @test:Config {
-    groups: ["workspace", "sql"],
-    dependsOn: [sqlWorkspaceDeleteTest]
+    groups: ["workspace", "mysql"],
+    dependsOn: [mysqlWorkspaceDeleteTest]
 }
-function sqlWorkspaceDeleteTestNegative() returns error? {
-    SQLRainierClient rainierClient = check new ();
+function mysqlWorkspaceDeleteTestNegative() returns error? {
+    MySQLRainierClient rainierClient = check new ();
 
     Workspace|error workspace = rainierClient->/workspaces/[workspace1.workspaceId].delete();
 
     if workspace is persist:NotFoundError {
-        test:assertEquals(workspace.message(), string `A record does not exist for 'Workspace' for key "${workspace1.workspaceId}".`);
+        test:assertEquals(workspace.message(), string `A record with the key '${workspace1.workspaceId}' does not exist for the entity 'Workspace'.`);
     } else {
         test:assertFail("NotFoundError expected.");
     }

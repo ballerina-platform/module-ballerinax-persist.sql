@@ -18,10 +18,10 @@ import ballerina/test;
 import ballerina/persist;
 
 @test:Config {
-    groups: ["department", "sql"]
+    groups: ["department", "mssql"]
 }
-function sqlDepartmentCreateTest() returns error? {
-    SQLRainierClient rainierClient = check new ();
+function mssqlDepartmentCreateTest() returns error? {
+    MSSQLRainierClient rainierClient = check new ();
 
     string[] deptNos = check rainierClient->/departments.post([department1]);
     test:assertEquals(deptNos, [department1.deptNo]);
@@ -32,10 +32,10 @@ function sqlDepartmentCreateTest() returns error? {
 }
 
 @test:Config {
-    groups: ["department", "sql"]
+    groups: ["department", "mssql"]
 }
-function sqlDepartmentCreateTest2() returns error? {
-    SQLRainierClient rainierClient = check new ();
+function mssqlDepartmentCreateTest2() returns error? {
+    MSSQLRainierClient rainierClient = check new ();
 
     string[] deptNos = check rainierClient->/departments.post([department2, department3]);
 
@@ -50,14 +50,14 @@ function sqlDepartmentCreateTest2() returns error? {
 }
 
 @test:Config {
-    groups: ["department", "sql"]
+    groups: ["department", "mssql"]
 }
-function sqlDepartmentCreateTestNegative() returns error? {
-    SQLRainierClient rainierClient = check new ();
+function mssqlDepartmentCreateTestNegative() returns error? {
+    MSSQLRainierClient rainierClient = check new ();
 
     string[]|error department = rainierClient->/departments.post([invalidDepartment]);
     if department is persist:Error {
-        test:assertTrue(department.message().includes("Data truncation: Data too long for column 'deptNo' at row 1."));
+        test:assertTrue(department.message().includes("String or binary data would be truncated in table"));
     } else {
         test:assertFail("Error expected.");
     }
@@ -65,11 +65,11 @@ function sqlDepartmentCreateTestNegative() returns error? {
 }
 
 @test:Config {
-    groups: ["department", "sql"],
-    dependsOn: [sqlDepartmentCreateTest]
+    groups: ["department", "mssql"],
+    dependsOn: [mssqlDepartmentCreateTest]
 }
-function sqlDepartmentReadOneTest() returns error? {
-    SQLRainierClient rainierClient = check new ();
+function mssqlDepartmentReadOneTest() returns error? {
+    MSSQLRainierClient rainierClient = check new ();
 
     Department departmentRetrieved = check rainierClient->/departments/[department1.deptNo].get();
     test:assertEquals(departmentRetrieved, department1);
@@ -77,15 +77,15 @@ function sqlDepartmentReadOneTest() returns error? {
 }
 
 @test:Config {
-    groups: ["department", "sql"],
-    dependsOn: [sqlDepartmentCreateTest]
+    groups: ["department", "mssql"],
+    dependsOn: [mssqlDepartmentCreateTest]
 }
-function sqlDepartmentReadOneTestNegative() returns error? {
-    SQLRainierClient rainierClient = check new ();
+function mssqlDepartmentReadOneTestNegative() returns error? {
+    MSSQLRainierClient rainierClient = check new ();
 
     Department|error departmentRetrieved = rainierClient->/departments/["invalid-department-id"].get();
     if departmentRetrieved is persist:NotFoundError {
-        test:assertEquals(departmentRetrieved.message(), "A record does not exist for 'Department' for key \"invalid-department-id\".");
+        test:assertEquals(departmentRetrieved.message(), "A record with the key 'invalid-department-id' does not exist for the entity 'Department'.");
     } else {
         test:assertFail("NotFoundError expected.");
     }
@@ -93,11 +93,11 @@ function sqlDepartmentReadOneTestNegative() returns error? {
 }
 
 @test:Config {
-    groups: ["department", "sql"],
-    dependsOn: [sqlDepartmentCreateTest, sqlDepartmentCreateTest2]
+    groups: ["department", "mssql"],
+    dependsOn: [mssqlDepartmentCreateTest, mssqlDepartmentCreateTest2]
 }
-function sqlDepartmentReadManyTest() returns error? {
-    SQLRainierClient rainierClient = check new ();
+function mssqlDepartmentReadManyTest() returns error? {
+    MSSQLRainierClient rainierClient = check new ();
     stream<Department, error?> departmentStream = rainierClient->/departments.get();
     Department[] departments = check from Department department in departmentStream
         select department;
@@ -107,11 +107,11 @@ function sqlDepartmentReadManyTest() returns error? {
 }
 
 @test:Config {
-    groups: ["department", "sql", "dependent"],
-    dependsOn: [sqlDepartmentCreateTest, sqlDepartmentCreateTest2]
+    groups: ["department", "mssql", "dependent"],
+    dependsOn: [mssqlDepartmentCreateTest, mssqlDepartmentCreateTest2]
 }
-function sqlDepartmentReadManyTestDependent() returns error? {
-    SQLRainierClient rainierClient = check new ();
+function mssqlDepartmentReadManyTestDependent() returns error? {
+    MSSQLRainierClient rainierClient = check new ();
 
     stream<DepartmentInfo2, persist:Error?> departmentStream = rainierClient->/departments.get();
     DepartmentInfo2[] departments = check from DepartmentInfo2 department in departmentStream
@@ -126,11 +126,11 @@ function sqlDepartmentReadManyTestDependent() returns error? {
 }
 
 @test:Config {
-    groups: ["department", "sql"],
-    dependsOn: [sqlDepartmentReadOneTest, sqlDepartmentReadManyTest, sqlDepartmentReadManyTestDependent]
+    groups: ["department", "mssql"],
+    dependsOn: [mssqlDepartmentReadOneTest, mssqlDepartmentReadManyTest, mssqlDepartmentReadManyTestDependent]
 }
-function sqlDepartmentUpdateTest() returns error? {
-    SQLRainierClient rainierClient = check new ();
+function mssqlDepartmentUpdateTest() returns error? {
+    MSSQLRainierClient rainierClient = check new ();
 
     Department department = check rainierClient->/departments/[department1.deptNo].put({
         deptName: "Finance & Legalities"
@@ -144,18 +144,18 @@ function sqlDepartmentUpdateTest() returns error? {
 }
 
 @test:Config {
-    groups: ["department", "sql"],
-    dependsOn: [sqlDepartmentReadOneTest, sqlDepartmentReadManyTest, sqlDepartmentReadManyTestDependent]
+    groups: ["department", "mssql"],
+    dependsOn: [mssqlDepartmentReadOneTest, mssqlDepartmentReadManyTest, mssqlDepartmentReadManyTestDependent]
 }
-function sqlDepartmentUpdateTestNegative1() returns error? {
-    SQLRainierClient rainierClient = check new ();
+function mssqlDepartmentUpdateTestNegative1() returns error? {
+    MSSQLRainierClient rainierClient = check new ();
 
     Department|error department = rainierClient->/departments/["invalid-department-id"].put({
         deptName: "Human Resources"
     });
 
     if department is persist:NotFoundError {
-        test:assertEquals(department.message(), "A record does not exist for 'Department' for key \"invalid-department-id\".");
+        test:assertEquals(department.message(), "A record with the key 'invalid-department-id' does not exist for the entity 'Department'.");
     } else {
         test:assertFail("NotFoundError expected.");
     }
@@ -163,18 +163,18 @@ function sqlDepartmentUpdateTestNegative1() returns error? {
 }
 
 @test:Config {
-    groups: ["department", "sql"],
-    dependsOn: [sqlDepartmentReadOneTest, sqlDepartmentReadManyTest, sqlDepartmentReadManyTestDependent]
+    groups: ["department", "mssql"],
+    dependsOn: [mssqlDepartmentReadOneTest, mssqlDepartmentReadManyTest, mssqlDepartmentReadManyTestDependent]
 }
-function sqlDepartmentUpdateTestNegative2() returns error? {
-    SQLRainierClient rainierClient = check new ();
+function mssqlDepartmentUpdateTestNegative2() returns error? {
+    MSSQLRainierClient rainierClient = check new ();
 
     Department|error department = rainierClient->/departments/[department1.deptNo].put({
         deptName: "unncessarily-long-department-name-to-force-error-on-update"
     });
 
     if department is persist:Error {
-        test:assertTrue(department.message().includes("Data truncation: Data too long for column 'deptName' at row 1."));
+        test:assertTrue(department.message().includes("String or binary data would be truncated in table"));
     } else {
         test:assertFail("NotFoundError expected.");
     }
@@ -182,11 +182,11 @@ function sqlDepartmentUpdateTestNegative2() returns error? {
 }
 
 @test:Config {
-    groups: ["department", "sql"],
-    dependsOn: [sqlDepartmentUpdateTest, sqlDepartmentUpdateTestNegative2]
+    groups: ["department", "mssql"],
+    dependsOn: [mssqlDepartmentUpdateTest, mssqlDepartmentUpdateTestNegative2]
 }
-function sqlDepartmentDeleteTest() returns error? {
-    SQLRainierClient rainierClient = check new ();
+function mssqlDepartmentDeleteTest() returns error? {
+    MSSQLRainierClient rainierClient = check new ();
 
     Department department = check rainierClient->/departments/[department1.deptNo].delete();
     test:assertEquals(department, updatedDepartment1);
@@ -200,16 +200,16 @@ function sqlDepartmentDeleteTest() returns error? {
 }
 
 @test:Config {
-    groups: ["department", "sql"],
-    dependsOn: [sqlDepartmentDeleteTest]
+    groups: ["department", "mssql"],
+    dependsOn: [mssqlDepartmentDeleteTest]
 }
-function sqlDepartmentDeleteTestNegative() returns error? {
-    SQLRainierClient rainierClient = check new ();
+function mssqlDepartmentDeleteTestNegative() returns error? {
+    MSSQLRainierClient rainierClient = check new ();
 
     Department|error department = rainierClient->/departments/[department1.deptNo].delete();
 
     if department is persist:NotFoundError {
-        test:assertEquals(department.message(), string `A record does not exist for 'Department' for key "${department1.deptNo}".`);
+        test:assertEquals(department.message(), string `A record with the key '${department1.deptNo}' does not exist for the entity 'Department'.`);
     } else {
         test:assertFail("NotFoundError expected.");
     }

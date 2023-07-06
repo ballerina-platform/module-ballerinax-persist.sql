@@ -18,10 +18,10 @@ import ballerina/test;
 import ballerina/persist;
 
 @test:Config {
-    groups: ["all-types", "sql"]
+    groups: ["all-types", "mssql"]
 }
-function sqlAllTypesCreateTest() returns error? {
-    SQLTestEntitiesClient testEntitiesClient = check new ();
+function mssqlAllTypesCreateTest() returns error? {
+    MSSQLTestEntitiesClient testEntitiesClient = check new ();
 
     int[] ids = check testEntitiesClient->/alltypes.post([allTypes1, allTypes2]);
     test:assertEquals(ids, [allTypes1.id, allTypes2.id]);
@@ -36,10 +36,10 @@ function sqlAllTypesCreateTest() returns error? {
 }
 
 @test:Config {
-    groups: ["all-types", "sql"]
+    groups: ["all-types", "mssql"]
 }
-function sqlAllTypesCreateOptionalTest() returns error? {
-    SQLTestEntitiesClient testEntitiesClient = check new ();
+function mssqlAllTypesCreateOptionalTest() returns error? {
+    MSSQLTestEntitiesClient testEntitiesClient = check new ();
 
     int[] ids = check testEntitiesClient->/alltypes.post([allTypes3]);
     test:assertEquals(ids, [allTypes3.id]);
@@ -51,11 +51,11 @@ function sqlAllTypesCreateOptionalTest() returns error? {
 }
 
 @test:Config {
-    groups: ["all-types", "sql"],
-    dependsOn: [sqlAllTypesCreateTest, sqlAllTypesCreateOptionalTest]
+    groups: ["all-types", "mssql"],
+    dependsOn: [mssqlAllTypesCreateTest, mssqlAllTypesCreateOptionalTest]
 }
-function sqlAllTypesReadTest() returns error? {
-    SQLTestEntitiesClient testEntitiesClient = check new ();
+function mssqlAllTypesReadTest() returns error? {
+    MSSQLTestEntitiesClient testEntitiesClient = check new ();
 
     stream<AllTypes, error?> allTypesStream = testEntitiesClient->/alltypes.get();
     AllTypes[] allTypes = check from AllTypes allTypesRecord in allTypesStream
@@ -66,11 +66,11 @@ function sqlAllTypesReadTest() returns error? {
 }
 
 @test:Config {
-    groups: ["all-types", "sql", "dependent"],
-    dependsOn: [sqlAllTypesCreateTest, sqlAllTypesCreateOptionalTest]
+    groups: ["all-types", "mssql", "dependent"],
+    dependsOn: [mssqlAllTypesCreateTest, mssqlAllTypesCreateOptionalTest]
 }
-function sqlAllTypesReadDependentTest() returns error? {
-    SQLTestEntitiesClient testEntitiesClient = check new ();
+function mssqlAllTypesReadDependentTest() returns error? {
+    MSSQLTestEntitiesClient testEntitiesClient = check new ();
 
     stream<AllTypesDependent, error?> allTypesStream = testEntitiesClient->/alltypes.get();
     AllTypesDependent[] allTypes = check from AllTypesDependent allTypesRecord in allTypesStream
@@ -139,11 +139,11 @@ function sqlAllTypesReadDependentTest() returns error? {
 }
 
 @test:Config {
-    groups: ["all-types", "sql"],
-    dependsOn: [sqlAllTypesCreateTest, sqlAllTypesCreateOptionalTest]
+    groups: ["all-types", "mssql"],
+    dependsOn: [mssqlAllTypesCreateTest, mssqlAllTypesCreateOptionalTest]
 }
-function sqlAllTypesReadOneTest() returns error? {
-    SQLTestEntitiesClient testEntitiesClient = check new ();
+function mssqlAllTypesReadOneTest() returns error? {
+    MSSQLTestEntitiesClient testEntitiesClient = check new ();
 
     AllTypes allTypesRetrieved = check testEntitiesClient->/alltypes/[allTypes1.id].get();
     test:assertEquals(allTypesRetrieved, allTypes1Expected);
@@ -158,14 +158,14 @@ function sqlAllTypesReadOneTest() returns error? {
 }
 
 @test:Config {
-    groups: ["all-types", "sql"]
+    groups: ["all-types", "mssql"]
 }
-function sqlAllTypesReadOneTestNegative() returns error? {
-    SQLTestEntitiesClient testEntitiesClient = check new ();
+function mssqlAllTypesReadOneTestNegative() returns error? {
+    MSSQLTestEntitiesClient testEntitiesClient = check new ();
 
     AllTypes|persist:Error allTypesRetrieved = testEntitiesClient->/alltypes/[4].get();
     if allTypesRetrieved is persist:NotFoundError {
-        test:assertEquals(allTypesRetrieved.message(), "A record does not exist for 'AllTypes' for key 4.");
+        test:assertEquals(allTypesRetrieved.message(), "A record with the key '4' does not exist for the entity 'AllTypes'.");
     }
     else {
         test:assertFail("persist:NotFoundError expected.");
@@ -175,11 +175,11 @@ function sqlAllTypesReadOneTestNegative() returns error? {
 }
 
 @test:Config {
-    groups: ["all-types", "sql"],
-    dependsOn: [sqlAllTypesReadOneTest, sqlAllTypesReadTest, sqlAllTypesReadDependentTest]
+    groups: ["all-types", "mssql"],
+    dependsOn: [mssqlAllTypesReadOneTest, mssqlAllTypesReadTest, mssqlAllTypesReadDependentTest]
 }
-function sqlAllTypesUpdateTest() returns error? {
-    SQLTestEntitiesClient testEntitiesClient = check new ();
+function mssqlAllTypesUpdateTest() returns error? {
+    MSSQLTestEntitiesClient testEntitiesClient = check new ();
 
     AllTypes allTypes = check testEntitiesClient->/alltypes/[allTypes1.id].put({
         booleanType: allTypes3.booleanType,
@@ -210,11 +210,11 @@ function sqlAllTypesUpdateTest() returns error? {
 }
 
 @test:Config {
-    groups: ["all-types", "sql"],
-    dependsOn: [sqlAllTypesUpdateTest]
+    groups: ["all-types", "mssql"],
+    dependsOn: [mssqlAllTypesUpdateTest]
 }
-function sqlAllTypesDeleteTest() returns error? {
-    SQLTestEntitiesClient testEntitiesClient = check new ();
+function mssqlAllTypesDeleteTest() returns error? {
+    MSSQLTestEntitiesClient testEntitiesClient = check new ();
 
     AllTypes allTypes = check testEntitiesClient->/alltypes/[allTypes2.id].delete();
     test:assertEquals(allTypes, allTypes2Expected);

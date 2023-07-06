@@ -17,47 +17,11 @@
 import ballerina/test;
 import ballerina/persist;
 
-Building building31 = {
-    buildingCode: "building-31",
-    city: "Colombo",
-    state: "Western Province",
-    country: "Sri Lanka",
-    postalCode: "10370",
-    'type: "rented"
-};
-
-BuildingInsert building32 = {
-    buildingCode: "building-32",
-    city: "Manhattan",
-    state: "New York",
-    country: "USA",
-    postalCode: "10570",
-    'type: "owned"
-};
-
-BuildingInsert building33 = {
-    buildingCode: "building-33",
-    city: "Manhattan",
-    state: "New York",
-    country: "USA",
-    postalCode: "10570",
-    'type: "owned"
-};
-
-Building building33Updated = {
-    buildingCode: "building-33",
-    city: "ColomboUpdated",
-    state: "Western ProvinceUpdated",
-    country: "Sri LankaUpdated",
-    postalCode: "10570",
-    'type: "owned"
-};
-
 @test:Config {
-    groups: ["transactions", "sql"]
+    groups: ["transactions", "mssql"]
 }
-function sqlTransactionTest() returns error? {
-    SQLRainierClient rainierClient = check new ();
+function mssqlTransactionTest() returns error? {
+    MSSQLRainierClient rainierClient = check new ();
 
     transaction {
         string[] buildingCodes = check rainierClient->/buildings.post([building31, building32]);
@@ -79,10 +43,10 @@ function sqlTransactionTest() returns error? {
 }
 
 @test:Config {
-    groups: ["transactions", "sql"]
+    groups: ["transactions", "mssql"]
 }
-function sqlTransactionTest2() returns error? {
-    SQLRainierClient rainierClient = check new ();
+function mssqlTransactionTest2() returns error? {
+    MSSQLRainierClient rainierClient = check new ();
 
     _ = check rainierClient->/buildings.post([building33]);
     Building buildingRetrieved = check rainierClient->/buildings/[building33.buildingCode].get();

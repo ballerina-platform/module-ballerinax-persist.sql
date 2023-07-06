@@ -25,22 +25,16 @@ import io.ballerina.runtime.api.values.BStream;
 import io.ballerina.runtime.api.values.BTypedesc;
 
 /**
- * This class provides the MySQL query processing implementations for persistence.
+ * This class provides the MSSQL query processing implementations for persistence.
  *
  * @since 1.0.1
  */
-public class MySQLProcessor {
+public class MSSQLProcessor {
 
-    private MySQLProcessor() {
+    private MSSQLProcessor() {
     }
 
     public static BStream query(Environment env, BObject client, BTypedesc targetType) {
-//        PrintStream asd = System.out;
-//        BArray stringsArray = whereClause.getArrayValue(io.ballerina.stdlib.persist.sql.Constants.STRINGS);
-//        stringsArray.add(0, StringUtils.fromString("WHERE "));
-//        BArray insertions = whereClause.getArrayValue(Constants.INSERTIONS);
-//        asd.println(stringsArray);
-//        asd.println(insertions);
         return SQLProcessor.query(env, client, targetType);
     }
 

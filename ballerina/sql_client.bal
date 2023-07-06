@@ -28,13 +28,14 @@ public isolated client class SQLClient {
     private final map<FieldMetadata> & readonly fieldMetadata;
     private final string[] & readonly keyFields;
     private final map<JoinMetadata> & readonly joinMetadata;
+    private final DataSourceSpecifics & readonly dataSourceSpecifics;
 
     # Initializes the `SQLClient`.
     #
     # + dbClient - The `sql:Client`, which is used to execute SQL queries
     # + metadata - Metadata of the entity
     # + return - A `persist:Error` if the client creation fails
-    public isolated function init(sql:Client dbClient, SQLMetadata & readonly metadata) returns persist:Error? {
+    public isolated function init(sql:Client dbClient, SQLMetadata & readonly metadata, DataSourceSpecifics & readonly dataSourceSpecifics = MYSQL_SPECIFICS) returns persist:Error? {
         self.entityName = metadata.entityName;
         self.tableName = metadata.tableName;
         self.fieldMetadata = metadata.fieldMetadata;
@@ -45,6 +46,7 @@ public isolated client class SQLClient {
         } else {
             self.joinMetadata = {};
         }
+        self.dataSourceSpecifics = dataSourceSpecifics;
     }
 
     # Performs a batch SQL `INSERT` operation to insert entity instances into a table.
@@ -57,9 +59,9 @@ public isolated client class SQLClient {
         sql:ExecutionResult[]|sql:Error result = self.dbClient->batchExecute(insertQueries);
 
         if result is sql:Error {
-            if result.message().indexOf("Duplicate entry ") != () {
-                string duplicateKey = check getKeyFromAlreadyExistsErrorMessage(result.message());
-                return <persist:AlreadyExistsError>error(string `A ${self.entityName} entity with the key '${duplicateKey}' already exists.`);
+            if result.message().indexOf(self.dataSourceSpecifics.duplicateEntryErrorMessage) != () {
+                string duplicateKey = check getKeyFromAlreadyExistsErrorMessage(result.message(), self.dataSourceSpecifics.duplicateKeyStartIndicator, self.dataSourceSpecifics.duplicateKeyEndIndicator);
+                return persist:getAlreadyExistsError(self.entityName, duplicateKey);
             }
 
             return <persist:Error>error(result.message());
@@ -89,7 +91,7 @@ public isolated client class SQLClient {
         record {}|error result = self.dbClient->queryRow(query, rowTypeWithIdFields);
 
         if result is sql:NoRowsError {
-            return <persist:NotFoundError>error(string `A record does not exist for '${self.entityName}' for key ${key.toBalString()}.`);
+            return persist:getNotFoundError(self.entityName, key);
         }
 
         if result is record {} {
@@ -136,7 +138,7 @@ public isolated client class SQLClient {
 
         sql:ExecutionResult|sql:Error? e = self.dbClient->execute(query);
         if e is sql:Error {
-            if e.message().indexOf("a foreign key constraint fails ") is int {
+            if e.message().indexOf(self.dataSourceSpecifics.constraintViolationErrorMessage) is int {
                 return <persist:ConstraintViolationError>error(e.message());
             }
             else {
@@ -222,7 +224,11 @@ public isolated client class SQLClient {
                 params = sql:queryConcat(params, `,`);
             }
 
-            params = sql:queryConcat(params, `${<sql:Value>'object[key]}`);
+            if 'object[key] is () {
+                params = sql:queryConcat(params, `NULL`);
+            } else {
+                params = sql:queryConcat(params, `${<sql:Value>'object[key]}`);
+            }
             columnCount = columnCount + 1;
         }
         params = sql:queryConcat(params, `)`);
@@ -239,7 +245,7 @@ public isolated client class SQLClient {
                 params = sql:queryConcat(params, `, `);
             }
 
-            params = sql:queryConcat(params, stringToParameterizedQuery((<SimpleFieldMetadata>fieldMetadata).columnName));
+            params = sql:queryConcat(params, stringToParameterizedQuery(self.escape((<SimpleFieldMetadata>fieldMetadata).columnName)));
             columnCount = columnCount + 1;
         }
         return params;
@@ -254,10 +260,10 @@ public isolated client class SQLClient {
 
             if fieldMetadata is SimpleFieldMetadata {
                 //  column is in the current entity's table
-                columnNames.push(self.entityName + "." + fieldMetadata.columnName + " AS `" + key + "`");
+                columnNames.push(self.escape(self.entityName) + "." + self.escape(fieldMetadata.columnName) + " AS " + self.escape(key));
             } else {
                 // column is in another entity's table
-                columnNames.push(fieldName + "." + fieldMetadata.relation.refField + " AS `" + fieldName + "." + fieldMetadata.relation.refField + "`");
+                columnNames.push(self.escape(fieldName) + "." + self.escape(fieldMetadata.relation.refField) + " AS " + self.escape(fieldName + "." + fieldMetadata.relation.refField));
             }
 
         }
@@ -277,7 +283,7 @@ public isolated client class SQLClient {
             }
 
             string columnName = fieldMetadata.relation.refField;
-            columnNames.push(columnName);
+            columnNames.push(self.escape(columnName));
         }
         return arrayToParameterizedQuery(columnNames);
     }
@@ -304,9 +310,9 @@ public isolated client class SQLClient {
             }
 
             if ignoreFieldCheck {
-                query = sql:queryConcat(query, stringToParameterizedQuery(keys[i] + " = " + filter[keys[i]].toString()));
+                query = sql:queryConcat(query, stringToParameterizedQuery(self.escape(keys[i]) + " = '" + filter[keys[i]].toString() + "'"));
             } else {
-                query = sql:queryConcat(query, stringToParameterizedQuery(self.entityName + "." + self.getColumnFromField(keys[i])), ` = ${<sql:Value>filter[keys[i]]}`);
+                query = sql:queryConcat(query, stringToParameterizedQuery(self.escape(self.entityName) + "." + self.escape(self.getColumnFromField(keys[i]))), ` = ${<sql:Value>filter[keys[i]]}`);
             }
         }
         return query;
@@ -316,7 +322,7 @@ public isolated client class SQLClient {
         sql:ParameterizedQuery query = ` `;
         int count = 0;
         foreach string key in 'object.keys() {
-            sql:ParameterizedQuery columnName = stringToParameterizedQuery(self.getColumnFromField(key));
+            sql:ParameterizedQuery columnName = stringToParameterizedQuery(self.escape(self.getColumnFromField(key)));
             if count > 0 {
                 query = sql:queryConcat(query, `, `);
             }
@@ -332,7 +338,7 @@ public isolated client class SQLClient {
             if i > 0 {
                 query = sql:queryConcat(query, ` AND `);
             }
-            sql:ParameterizedQuery filterQuery = stringToParameterizedQuery(joinKey + "." + refFields[i] + " = " + self.entityName + "." + joinColumns[i]);
+            sql:ParameterizedQuery filterQuery = stringToParameterizedQuery(self.escape(joinKey) + "." + self.escape(refFields[i]) + " = " + self.entityName + "." + joinColumns[i]);
             query = sql:queryConcat(query, filterQuery);
         }
         return query;
@@ -343,7 +349,7 @@ public isolated client class SQLClient {
         return fieldMetadata.columnName;
     }
 
-    private isolated function getFieldFromColumn(string columnName) returns string|persist:NotFoundError {
+    private isolated function getFieldFromColumn(string columnName) returns string|persist:Error {
         foreach string key in self.fieldMetadata.keys() {
             FieldMetadata fieldMetadata = self.fieldMetadata.get(key);
             if fieldMetadata is EntityFieldMetadata {
@@ -355,7 +361,7 @@ public isolated client class SQLClient {
             }
         }
 
-        return <persist:NotFoundError>error(string `A field corresponding to column '${columnName}' does not exist in entity '${self.entityName}'.`);
+        return error persist:Error(string `A field corresponding to column '${columnName}' does not exist in entity '${self.entityName}'.`);
     }
 
     private isolated function getFieldFromKey(string key) returns string {
@@ -368,12 +374,12 @@ public isolated client class SQLClient {
 
     private isolated function getInsertQueries(record {}[] insertRecords) returns sql:ParameterizedQuery[] {
         return from record {} insertRecord in insertRecords
-            select sql:queryConcat(`INSERT INTO `, stringToParameterizedQuery(self.tableName), ` (`, self.getInsertColumnNames(), ` ) `, `VALUES `, self.getInsertQueryParams(insertRecord));
+            select sql:queryConcat(`INSERT INTO `, stringToParameterizedQuery(self.escape(self.tableName)), ` (`, self.getInsertColumnNames(), ` ) `, `VALUES `, self.getInsertQueryParams(insertRecord));
     }
 
     private isolated function getSelectQuery(string[] fields) returns sql:ParameterizedQuery {
         return sql:queryConcat(
-            `SELECT `, self.getSelectColumnNames(fields), ` FROM `, stringToParameterizedQuery(self.tableName), ` AS `, stringToParameterizedQuery(self.entityName)
+            `SELECT `, self.getSelectColumnNames(fields), ` FROM `, stringToParameterizedQuery(self.escape(self.tableName)), ` AS `, stringToParameterizedQuery(self.escape(self.entityName))
         );
     }
 
@@ -382,11 +388,11 @@ public isolated client class SQLClient {
     }
 
     private isolated function getUpdateQuery(record {} updateRecord) returns sql:ParameterizedQuery|persist:Error {
-        return sql:queryConcat(`UPDATE `, stringToParameterizedQuery(self.tableName), stringToParameterizedQuery(" " + self.entityName), ` SET `, check self.getSetClauses(updateRecord));
+        return sql:queryConcat(`UPDATE `, stringToParameterizedQuery(self.escape(self.tableName)), ` SET `, check self.getSetClauses(updateRecord));
     }
 
     private isolated function getDeleteQuery() returns sql:ParameterizedQuery {
-        return sql:queryConcat(`DELETE FROM `, stringToParameterizedQuery(self.tableName), stringToParameterizedQuery(" " + self.entityName));
+        return sql:queryConcat(`DELETE FROM `, stringToParameterizedQuery(self.escape(self.tableName)));
     }
 
     private isolated function getJoinFields(string[] include) returns string[] {
@@ -410,14 +416,14 @@ public isolated client class SQLClient {
     private isolated function getManyRelationWhereFilter(record {} 'object, JoinMetadata joinMetadata) returns map<string>|persist:Error {
         map<string> whereFilter = {};
         foreach int i in 0 ..< joinMetadata.refColumns.length() {
-            whereFilter[joinMetadata.refColumns[i]] = 'object[check self.getFieldFromColumn(joinMetadata.joinColumns[i])].toBalString();
+            whereFilter[joinMetadata.refColumns[i]] = 'object[check self.getFieldFromColumn(joinMetadata.joinColumns[i])].toString();
         }
         return whereFilter;
     }
 
     private isolated function getJoinQuery(string joinKey) returns sql:ParameterizedQuery|persist:Error {
         JoinMetadata joinMetadata = self.joinMetadata.get(joinKey);
-        return sql:queryConcat(` LEFT JOIN `, stringToParameterizedQuery(joinMetadata.refTable + " " + joinKey),
+        return sql:queryConcat(` LEFT JOIN `, stringToParameterizedQuery(self.escape(joinMetadata.refTable) + " " + self.escape(joinKey)),
                                 ` ON `, check self.getJoinFilters(joinKey, joinMetadata.refColumns, <string[]>joinMetadata.joinColumns));
     }
 
@@ -443,5 +449,9 @@ public isolated client class SQLClient {
         return from string key in self.fieldMetadata.keys()
             where (fields.indexOf(key) != () || self.keyFields.indexOf(key) != ()) && !key.includes("[]")
             select key;
+    }
+
+    private isolated function escape(string value) returns string {
+        return self.dataSourceSpecifics.quoteOpen + value + self.dataSourceSpecifics.quoteClose;
     }
 }

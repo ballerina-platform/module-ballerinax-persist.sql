@@ -17,34 +17,199 @@
 import ballerina/test;
 import ballerinax/mysql;
 import ballerinax/mysql.driver as _;
+import ballerinax/mssql;
+import ballerinax/mssql.driver as _;
 import ballerina/time;
 
-configurable int port = ?;
-configurable string host = ?;
-configurable string user = ?;
-configurable string database = ?;
-configurable string password = ?;
-configurable mysql:Options connectionOptions = {};
+configurable record {|
+    int port;
+    string host;
+    string user;
+    string database;
+    string password;
+    mysql:Options connectionOptions = {};
+|} mysql = ?;
+
+configurable record {|
+    int port;
+    string host;
+    string user;
+    string database;
+    string password;
+    mssql:Options connectionOptions = {};
+|} mssql = ?;
 
 @test:BeforeSuite
-function truncate() returns error? {
-    mysql:Client dbClient = check new (host = host, user = user, password = password, database = database, port = port);
-    _ = check dbClient->execute(`SET FOREIGN_KEY_CHECKS = 0`);
-    _ = check dbClient->execute(`TRUNCATE Employee`);
-    _ = check dbClient->execute(`TRUNCATE Workspace`);
-    _ = check dbClient->execute(`TRUNCATE Building`);
-    _ = check dbClient->execute(`TRUNCATE Department`);
-    _ = check dbClient->execute(`TRUNCATE OrderItem`);
-    _ = check dbClient->execute(`TRUNCATE AllTypes`);
-    _ = check dbClient->execute(`TRUNCATE FloatIdRecord`);
-    _ = check dbClient->execute(`TRUNCATE StringIdRecord`);
-    _ = check dbClient->execute(`TRUNCATE DecimalIdRecord`);
-    _ = check dbClient->execute(`TRUNCATE BooleanIdRecord`);
-    _ = check dbClient->execute(`TRUNCATE IntIdRecord`);
-    _ = check dbClient->execute(`TRUNCATE AllTypesIdRecord`);
-    _ = check dbClient->execute(`TRUNCATE CompositeAssociationRecord`);
-    _ = check dbClient->execute(`SET FOREIGN_KEY_CHECKS = 1`);
-    check dbClient.close();
+function initTests() returns error? {
+    // MySQL
+    mysql:Client mysqlDbClient = check new (host = mysql.host, user = mysql.user, password = mysql.password, database = mysql.database, port = mysql.port);
+    _ = check mysqlDbClient->execute(`SET FOREIGN_KEY_CHECKS = 0`);
+    _ = check mysqlDbClient->execute(`TRUNCATE Employee`);
+    _ = check mysqlDbClient->execute(`TRUNCATE Workspace`);
+    _ = check mysqlDbClient->execute(`TRUNCATE Building`);
+    _ = check mysqlDbClient->execute(`TRUNCATE Department`);
+    _ = check mysqlDbClient->execute(`TRUNCATE OrderItem`);
+    _ = check mysqlDbClient->execute(`TRUNCATE AllTypes`);
+    _ = check mysqlDbClient->execute(`TRUNCATE FloatIdRecord`);
+    _ = check mysqlDbClient->execute(`TRUNCATE StringIdRecord`);
+    _ = check mysqlDbClient->execute(`TRUNCATE DecimalIdRecord`);
+    _ = check mysqlDbClient->execute(`TRUNCATE BooleanIdRecord`);
+    _ = check mysqlDbClient->execute(`TRUNCATE IntIdRecord`);
+    _ = check mysqlDbClient->execute(`TRUNCATE AllTypesIdRecord`);
+    _ = check mysqlDbClient->execute(`TRUNCATE CompositeAssociationRecord`);
+    _ = check mysqlDbClient->execute(`SET FOREIGN_KEY_CHECKS = 1`);
+    check mysqlDbClient.close();
+
+    // MSSQL
+    mssql:Client mssqlDbClient = check new (host = mssql.host, user = mssql.user, password = mssql.password, port = mssql.port);
+    _ = check mssqlDbClient->execute(`DROP DATABASE IF EXISTS test;`);
+    _ = check mssqlDbClient->execute(`CREATE DATABASE test`);
+    check mssqlDbClient.close();
+
+    mssqlDbClient = check new (host = mssql.host, user = mssql.user, password = mssql.password, database = mssql.database, port = mssql.port);
+    _ = check mssqlDbClient->execute(`
+        CREATE TABLE Building (
+            buildingCode VARCHAR(36) PRIMARY KEY,
+            city VARCHAR(50),
+            state VARCHAR(50),
+            country VARCHAR(50),
+            postalCode VARCHAR(50),
+            type VARCHAR(50)
+        )
+    `);
+
+    _ = check mssqlDbClient->execute(`
+        CREATE TABLE Workspace (
+            workspaceId VARCHAR(36) PRIMARY KEY,
+            workspaceType VARCHAR(10),
+            locationBuildingCode VARCHAR(36),
+            FOREIGN KEY (locationBuildingCode) REFERENCES Building(buildingCode)
+        )
+    `);
+
+    _ = check mssqlDbClient->execute(`
+        CREATE TABLE Department (
+            deptNo VARCHAR(36) PRIMARY KEY,
+            deptName VARCHAR(30)
+        )
+    `);
+
+    _ = check mssqlDbClient->execute(`
+        CREATE TABLE Employee (
+            empNo VARCHAR(36) PRIMARY KEY,
+            firstName VARCHAR(30),
+            lastName VARCHAR(30),
+            birthDate DATE,
+            gender VARCHAR(6) CHECK (gender IN ('MALE', 'FEMALE')) NOT NULL,
+            hireDate DATE,
+            departmentDeptNo VARCHAR(36),
+            workspaceWorkspaceId VARCHAR(36),
+            FOREIGN KEY (departmentDeptNo) REFERENCES Department(deptNo),
+            FOREIGN KEY (workspaceWorkspaceId) REFERENCES Workspace(workspaceId)
+        )
+    `);
+
+    _ = check mssqlDbClient->execute(`
+        CREATE TABLE OrderItem (
+            orderId VARCHAR(36),
+            itemId VARCHAR(30),
+            quantity INTEGER,
+            notes VARCHAR(255),
+            PRIMARY KEY(orderId, itemId)
+        )
+    `);
+
+    _ = check mssqlDbClient->execute(`
+        CREATE TABLE [AllTypes] (
+        	[id] INT NOT NULL,
+        	[booleanType] BIT NOT NULL,
+        	[intType] INT NOT NULL,
+        	[floatType] FLOAT NOT NULL,
+        	[decimalType] DECIMAL(38,30) NOT NULL,
+        	[stringType] VARCHAR(191) NOT NULL,
+        	[byteArrayType] VARBINARY(MAX) NOT NULL,
+        	[dateType] DATE NOT NULL,
+        	[timeOfDayType] TIME NOT NULL,
+        	[civilType] DATETIME2 NOT NULL,
+        	[booleanTypeOptional] BIT,
+        	[intTypeOptional] INT,
+        	[floatTypeOptional] FLOAT,
+        	[decimalTypeOptional] DECIMAL(38,30),
+        	[stringTypeOptional] VARCHAR(191),
+        	[dateTypeOptional] DATE,
+        	[timeOfDayTypeOptional] TIME,
+        	[civilTypeOptional] DATETIME2,
+        	[enumType] VARCHAR(6) CHECK ([enumType] IN ('TYPE_1', 'TYPE_2', 'TYPE_3', 'TYPE_4')) NOT NULL,
+        	[enumTypeOptional] VARCHAR(6) CHECK ([enumTypeOptional] IN ('TYPE_1', 'TYPE_2', 'TYPE_3', 'TYPE_4')),
+        	PRIMARY KEY([id])
+        );
+    `);
+
+    _ = check mssqlDbClient->execute(`
+        CREATE TABLE FloatIdRecord (
+            id FLOAT NOT NULL,
+            randomField VARCHAR(191) NOT NULL,
+            PRIMARY KEY(id)
+        );
+    `);
+
+    _ = check mssqlDbClient->execute(`
+        CREATE TABLE StringIdRecord (
+            id VARCHAR(191) NOT NULL,
+            randomField VARCHAR(191) NOT NULL,
+            PRIMARY KEY(id)
+        );
+    `);
+
+    _ = check mssqlDbClient->execute(`
+        CREATE TABLE DecimalIdRecord (
+            id DECIMAL(10, 2) NOT NULL,
+            randomField VARCHAR(191) NOT NULL,
+            PRIMARY KEY(id)
+        );
+    `);
+
+    _ = check mssqlDbClient->execute(`
+        CREATE TABLE BooleanIdRecord (
+            id BIT NOT NULL,
+            randomField VARCHAR(191) NOT NULL,
+            PRIMARY KEY(id)
+        );
+    `);
+
+    _ = check mssqlDbClient->execute(`
+        CREATE TABLE IntIdRecord (
+            id INT NOT NULL,
+            randomField VARCHAR(191) NOT NULL,
+            PRIMARY KEY(id)
+        );
+    `);
+
+    _ = check mssqlDbClient->execute(`
+        CREATE TABLE AllTypesIdRecord (
+            booleanType BIT NOT NULL,
+            intType INT NOT NULL,
+            floatType FLOAT NOT NULL,
+            decimalType DECIMAL(10, 2) NOT NULL,
+            stringType VARCHAR(191) NOT NULL,
+            randomField VARCHAR(191) NOT NULL,
+            PRIMARY KEY(booleanType,intType,floatType,decimalType,stringType)
+        );
+    `);
+
+    _ = check mssqlDbClient->execute(`
+        CREATE TABLE CompositeAssociationRecord (
+            id VARCHAR(191) NOT NULL,
+            randomField VARCHAR(191) NOT NULL,
+            alltypesidrecordBooleanType BIT NOT NULL,
+            alltypesidrecordIntType INT NOT NULL,
+            alltypesidrecordFloatType FLOAT NOT NULL,
+            alltypesidrecordDecimalType DECIMAL(10, 2) NOT NULL,
+            alltypesidrecordStringType VARCHAR(191) NOT NULL,
+            CONSTRAINT FK_COMPOSITEASSOCIATIONRECORD_ALLTYPESIDRECORD FOREIGN KEY(alltypesidrecordBooleanType, alltypesidrecordIntType, alltypesidrecordFloatType, alltypesidrecordDecimalType, alltypesidrecordStringType) REFERENCES AllTypesIdRecord(booleanType, intType, floatType, decimalType, stringType),
+            PRIMARY KEY(id)
+        );
+    `);
 }
 
 AllTypes allTypes1 = {
@@ -258,7 +423,7 @@ OrderItemExtended orderItemExtended1 = {
     paid: false,
     ammountPaid: 10.5f,
     ammountPaidDecimal: 10.5,
-    arivalTimeCivil: {"utcOffset":{"hours":5,"minutes":30},"timeAbbrev":"Asia/Colombo","dayOfWeek":1,"year":2021,"month":4,"day":12,"hour":23,"minute":20,"second":50.52},
+    arivalTimeCivil: {"utcOffset": {"hours": 5, "minutes": 30}, "timeAbbrev": "Asia/Colombo", "dayOfWeek": 1, "year": 2021, "month": 4, "day": 12, "hour": 23, "minute": 20, "second": 50.52},
     arivalTimeUtc: [1684493685, 0.998012000],
     arivalTimeDate: {year: 2021, month: 4, day: 12},
     arivalTimeTimeOfDay: {hour: 17, minute: 50, second: 50.52},
@@ -272,7 +437,7 @@ OrderItemExtended orderItemExtendedRetrieved = {
     paid: false,
     ammountPaid: 10.5f,
     ammountPaidDecimal: 10.5,
-    arivalTimeCivil: {"timeAbbrev":"Z","dayOfWeek":1 ,"year":2021,"month":4,"day":12,"hour":17,"minute":50,"second":50.52},
+    arivalTimeCivil: {"timeAbbrev": "Z", "dayOfWeek": 1, "year": 2021, "month": 4, "day": 12, "hour": 17, "minute": 50, "second": 50.52},
     arivalTimeUtc: [1684493685, 0.998012000],
     arivalTimeDate: {year: 2021, month: 4, day: 12},
     arivalTimeTimeOfDay: {hour: 17, minute: 50, second: 50.52},
@@ -286,7 +451,7 @@ OrderItemExtended orderItemExtended2 = {
     paid: false,
     ammountPaid: 10.5f,
     ammountPaidDecimal: 10.5,
-    arivalTimeCivil: {"utcOffset":{"hours":5,"minutes":30},"timeAbbrev":"Asia/Colombo","dayOfWeek":1 ,"year":2024,"month":4,"day":12,"hour":17,"minute":50,"second":50.52},
+    arivalTimeCivil: {"utcOffset": {"hours": 5, "minutes": 30}, "timeAbbrev": "Asia/Colombo", "dayOfWeek": 1, "year": 2024, "month": 4, "day": 12, "hour": 17, "minute": 50, "second": 50.52},
     arivalTimeUtc: [1684493685, 0.998012000],
     arivalTimeDate: {year: 2021, month: 4, day: 12},
     arivalTimeTimeOfDay: {hour: 17, minute: 50, second: 50.52},
@@ -309,7 +474,7 @@ OrderItemExtended orderItemExtended2Retrieved = {
     paid: false,
     ammountPaid: 10.5f,
     ammountPaidDecimal: 10.5,
-    arivalTimeCivil: {"timeAbbrev":"Z","dayOfWeek":5 ,"year":2024,"month":4,"day":12,"hour":12,"minute":20,"second":50.52},
+    arivalTimeCivil: {"timeAbbrev": "Z", "dayOfWeek": 5, "year": 2024, "month": 4, "day": 12, "hour": 12, "minute": 20, "second": 50.52},
     arivalTimeUtc: [1684493685, 0.998012000],
     arivalTimeDate: {year: 2021, month: 4, day: 12},
     arivalTimeTimeOfDay: {hour: 17, minute: 50, second: 50.52},
@@ -323,7 +488,7 @@ OrderItemExtended orderItemExtended3 = {
     paid: true,
     ammountPaid: 20.5f,
     ammountPaidDecimal: 20.5,
-    arivalTimeCivil: {"utcOffset":{"hours":5,"minutes":30},"timeAbbrev":"Asia/Colombo","dayOfWeek":1,"year":2021,"month":4,"day":12,"hour":23,"minute":20,"second":50.52},
+    arivalTimeCivil: {"utcOffset": {"hours": 5, "minutes": 30}, "timeAbbrev": "Asia/Colombo", "dayOfWeek": 1, "year": 2021, "month": 4, "day": 12, "hour": 23, "minute": 20, "second": 50.52},
     arivalTimeUtc: [1684493685, 0.998012000],
     arivalTimeDate: {year: 2021, month: 4, day: 12},
     arivalTimeTimeOfDay: {hour: 17, minute: 50, second: 50.52},
@@ -337,7 +502,7 @@ OrderItemExtended orderItemExtended3Retrieved = {
     paid: true,
     ammountPaid: 10.5f,
     ammountPaidDecimal: 10.5,
-    arivalTimeCivil: {"timeAbbrev":"Z","dayOfWeek":1 ,"year":2021,"month":4,"day":12,"hour":17,"minute":50,"second":50.52},
+    arivalTimeCivil: {"timeAbbrev": "Z", "dayOfWeek": 1, "year": 2021, "month": 4, "day": 12, "hour": 17, "minute": 50, "second": 50.52},
     arivalTimeUtc: [1684493685, 0.998012000],
     arivalTimeDate: {year: 2021, month: 4, day: 12},
     arivalTimeTimeOfDay: {hour: 17, minute: 50, second: 50.52},
@@ -588,3 +753,24 @@ public type BuildingInfo2 record {|
     string postalCode;
     string 'type;
 |};
+
+OrderItem orderItem1 = {
+    orderId: "order-1",
+    itemId: "item-1",
+    quantity: 5,
+    notes: "none"
+};
+
+OrderItem orderItem2 = {
+    orderId: "order-2",
+    itemId: "item-2",
+    quantity: 10,
+    notes: "more"
+};
+
+OrderItem orderItem2Updated = {
+    orderId: "order-2",
+    itemId: "item-2",
+    quantity: 20,
+    notes: "more than more"
+};

@@ -17,10 +17,10 @@
 import ballerina/test;
 
 @test:Config {
-    groups: ["id-fields", "sql"]
+    groups: ["id-fields", "mssql"]
 }
-function sqlIntIdFieldTest() returns error? {
-    SQLTestEntitiesClient testEntitiesClient = check new ();
+function mssqlIntIdFieldTest() returns error? {
+    MSSQLTestEntitiesClient testEntitiesClient = check new ();
     IntIdRecord intIdRecord1 = {
         id: 1,
         randomField: "test1"
@@ -77,10 +77,10 @@ function sqlIntIdFieldTest() returns error? {
 }
 
 @test:Config {
-    groups: ["id-fields", "sql"]
+    groups: ["id-fields", "mssql"]
 }
-function sqlStringIdFieldTest() returns error? {
-    SQLTestEntitiesClient testEntitiesClient = check new ();
+function mssqlStringIdFieldTest() returns error? {
+    MSSQLTestEntitiesClient testEntitiesClient = check new ();
     StringIdRecord stringIdRecord1 = {
         id: "id-1",
         randomField: "test1"
@@ -137,10 +137,10 @@ function sqlStringIdFieldTest() returns error? {
 }
 
 @test:Config {
-    groups: ["id-fields", "sql"]
+    groups: ["id-fields", "mssql"]
 }
-function sqlFloatIdFieldTest() returns error? {
-    SQLTestEntitiesClient testEntitiesClient = check new ();
+function mssqlFloatIdFieldTest() returns error? {
+    MSSQLTestEntitiesClient testEntitiesClient = check new ();
     FloatIdRecord floatIdRecord1 = {
         id: 1.0,
         randomField: "test1"
@@ -195,10 +195,10 @@ function sqlFloatIdFieldTest() returns error? {
 }
 
 @test:Config {
-    groups: ["id-fields", "sql"]
+    groups: ["id-fields", "mssql"]
 }
-function sqlDecimalIdFieldTest() returns error? {
-    SQLTestEntitiesClient testEntitiesClient = check new ();
+function mssqlDecimalIdFieldTest() returns error? {
+    MSSQLTestEntitiesClient testEntitiesClient = check new ();
     DecimalIdRecord decimalIdRecord1 = {
         id: 1.1d,
         randomField: "test1"
@@ -255,10 +255,10 @@ function sqlDecimalIdFieldTest() returns error? {
 }
 
 @test:Config {
-    groups: ["id-fields", "sql"]
+    groups: ["id-fields", "mssql"]
 }
-function sqlBooleanIdFieldTest() returns error? {
-    SQLTestEntitiesClient testEntitiesClient = check new ();
+function mssqlBooleanIdFieldTest() returns error? {
+    MSSQLTestEntitiesClient testEntitiesClient = check new ();
     BooleanIdRecord booleanIdRecord1 = {
         id: true,
         randomField: "test1"
@@ -311,10 +311,10 @@ function sqlBooleanIdFieldTest() returns error? {
 }
 
 @test:Config {
-    groups: ["id-fields", "sql"]
+    groups: ["id-fields", "mssql"]
 }
-function sqlAllTypesIdFieldTest() returns error? {
-    SQLTestEntitiesClient testEntitiesClient = check new ();
+function mssqlAllTypesIdFieldTest() returns error? {
+    MSSQLTestEntitiesClient testEntitiesClient = check new ();
     AllTypesIdRecord allTypesIdRecord1 = {
         intType: 1,
         stringType: "id-1",
@@ -382,11 +382,11 @@ function sqlAllTypesIdFieldTest() returns error? {
 }
 
 @test:Config {
-    groups: ["id-fields", "sql", "associations"],
-    dependsOn: [sqlAllTypesIdFieldTest]
+    groups: ["id-fields", "mssql", "associations"],
+    dependsOn: [mssqlAllTypesIdFieldTest]
 }
-function sqlCompositeAssociationsTest() returns error? {
-    SQLTestEntitiesClient testEntitiesClient = check new ();
+function mssqlCompositeAssociationsTest() returns error? {
+    MSSQLTestEntitiesClient testEntitiesClient = check new ();
 
     CompositeAssociationRecord compositeAssociationRecord1 = {
         id: "id-1",

@@ -17,32 +17,11 @@
 import ballerina/test;
 import ballerina/persist;
 
-OrderItem orderItem1 = {
-    orderId: "order-1",
-    itemId: "item-1",
-    quantity: 5,
-    notes: "none"
-};
-
-OrderItem orderItem2 = {
-    orderId: "order-2",
-    itemId: "item-2",
-    quantity: 10,
-    notes: "more"
-};
-
-OrderItem orderItem2Updated = {
-    orderId: "order-2",
-    itemId: "item-2",
-    quantity: 20,
-    notes: "more than more"
-};
-
 @test:Config {
-    groups: ["composite-key"]
+    groups: ["composite-key", "mssql"]
 }
-function compositeKeyCreateTest() returns error? {
-    SQLRainierClient rainierClient = check new ();
+function mssqlCompositeKeyCreateTest() returns error? {
+    MSSQLRainierClient rainierClient = check new ();
 
     [string, string][] ids = check rainierClient->/orderitems.post([orderItem1, orderItem2]);
     test:assertEquals(ids, [[orderItem1.orderId, orderItem1.itemId], [orderItem2.orderId, orderItem2.itemId]]);
@@ -57,15 +36,15 @@ function compositeKeyCreateTest() returns error? {
 }
 
 @test:Config {
-    groups: ["composite-key"],
-    dependsOn: [compositeKeyCreateTest]
+    groups: ["composite-key", "mssql"],
+    dependsOn: [mssqlCompositeKeyCreateTest]
 }
-function compositeKeyCreateTestNegative() returns error? {
-    SQLRainierClient rainierClient = check new ();
+function mssqlCompositeKeyCreateTestNegative() returns error? {
+    MSSQLRainierClient rainierClient = check new ();
 
     [string, string][]|error ids = rainierClient->/orderitems.post([orderItem1]);
     if ids is persist:AlreadyExistsError {
-        test:assertEquals(ids.message(), "A OrderItem entity with the key 'order-1-item-1' already exists.");
+        test:assertEquals(ids.message(), "A record with the key 'order-1, item-1' already exists for the entity 'OrderItem'.");
     } else {
         test:assertFail("persist:AlreadyExistsError expected");
     }
@@ -74,11 +53,11 @@ function compositeKeyCreateTestNegative() returns error? {
 }
 
 @test:Config {
-    groups: ["composite-key"],
-    dependsOn: [compositeKeyCreateTest]
+    groups: ["composite-key", "mssql"],
+    dependsOn: [mssqlCompositeKeyCreateTest]
 }
-function compositeKeyReadManyTest() returns error? {
-    SQLRainierClient rainierClient = check new ();
+function mssqlCompositeKeyReadManyTest() returns error? {
+    MSSQLRainierClient rainierClient = check new ();
 
     stream<OrderItem, error?> orderItemStream = rainierClient->/orderitems.get();
     OrderItem[] orderitem = check from OrderItem orderItem in orderItemStream
@@ -89,11 +68,11 @@ function compositeKeyReadManyTest() returns error? {
 }
 
 @test:Config {
-    groups: ["composite-key"],
-    dependsOn: [compositeKeyCreateTest]
+    groups: ["composite-key", "mssql"],
+    dependsOn: [mssqlCompositeKeyCreateTest]
 }
-function compositeKeyReadOneTest() returns error? {
-    SQLRainierClient rainierClient = check new ();
+function mssqlCompositeKeyReadOneTest() returns error? {
+    MSSQLRainierClient rainierClient = check new ();
     OrderItem orderItem = check rainierClient->/orderitems/[orderItem1.orderId]/[orderItem1.itemId].get();
     test:assertEquals(orderItem, orderItem1);
     check rainierClient.close();
@@ -101,25 +80,25 @@ function compositeKeyReadOneTest() returns error? {
 
 @test:Config {
     groups: ["composite-key2"],
-    dependsOn: [compositeKeyCreateTest]
+    dependsOn: [mssqlCompositeKeyCreateTest]
 }
-function compositeKeyReadOneTest2() returns error? {
-    SQLRainierClient rainierClient = check new ();
+function mssqlCompositeKeyReadOneTest2() returns error? {
+    MSSQLRainierClient rainierClient = check new ();
     OrderItem orderItem = check rainierClient->/orderitems/[orderItem1.orderId]/[orderItem1.itemId].get();
     test:assertEquals(orderItem, orderItem1);
     check rainierClient.close();
 }
 
 @test:Config {
-    groups: ["composite-key"],
-    dependsOn: [compositeKeyCreateTest]
+    groups: ["composite-key", "mssql"],
+    dependsOn: [mssqlCompositeKeyCreateTest]
 }
-function compositeKeyReadOneTestNegative1() returns error? {
-    SQLRainierClient rainierClient = check new ();
+function mssqlCompositeKeyReadOneTestNegative1() returns error? {
+    MSSQLRainierClient rainierClient = check new ();
     OrderItem|error orderItem = rainierClient->/orderitems/["invalid-order-id"]/[orderItem1.itemId].get();
 
     if orderItem is persist:NotFoundError {
-        test:assertEquals(orderItem.message(), "A record does not exist for 'OrderItem' for key {\"orderId\":\"invalid-order-id\",\"itemId\":\"item-1\"}.");
+        test:assertEquals(orderItem.message(), "A record with the key '{\"orderId\":\"invalid-order-id\",\"itemId\":\"item-1\"}' does not exist for the entity 'OrderItem'.");
     } else {
         test:assertFail("Error expected.");
     }
@@ -128,15 +107,15 @@ function compositeKeyReadOneTestNegative1() returns error? {
 }
 
 @test:Config {
-    groups: ["composite-key"],
-    dependsOn: [compositeKeyCreateTest]
+    groups: ["composite-key", "mssql"],
+    dependsOn: [mssqlCompositeKeyCreateTest]
 }
-function compositeKeyReadOneTestNegative2() returns error? {
-    SQLRainierClient rainierClient = check new ();
+function mssqlCompositeKeyReadOneTestNegative2() returns error? {
+    MSSQLRainierClient rainierClient = check new ();
     OrderItem|error orderItem = rainierClient->/orderitems/[orderItem1.orderId]/["invalid-item-id"].get();
 
     if orderItem is persist:NotFoundError {
-        test:assertEquals(orderItem.message(), "A record does not exist for 'OrderItem' for key {\"orderId\":\"order-1\",\"itemId\":\"invalid-item-id\"}.");
+        test:assertEquals(orderItem.message(), "A record with the key '{\"orderId\":\"order-1\",\"itemId\":\"invalid-item-id\"}' does not exist for the entity 'OrderItem'.");
     } else {
         test:assertFail("Error expected.");
     }
@@ -145,11 +124,11 @@ function compositeKeyReadOneTestNegative2() returns error? {
 }
 
 @test:Config {
-    groups: ["composite-key"],
-    dependsOn: [compositeKeyCreateTest, compositeKeyReadOneTest, compositeKeyReadManyTest, compositeKeyReadOneTest2]
+    groups: ["composite-key", "mssql"],
+    dependsOn: [mssqlCompositeKeyCreateTest, mssqlCompositeKeyReadOneTest, mssqlCompositeKeyReadManyTest, mssqlCompositeKeyReadOneTest2]
 }
-function compositeKeyUpdateTest() returns error? {
-    SQLRainierClient rainierClient = check new ();
+function mssqlCompositeKeyUpdateTest() returns error? {
+    MSSQLRainierClient rainierClient = check new ();
 
     OrderItem orderItem = check rainierClient->/orderitems/[orderItem2.orderId]/[orderItem2.itemId].put({
         quantity: orderItem2Updated.quantity,
@@ -164,18 +143,18 @@ function compositeKeyUpdateTest() returns error? {
 }
 
 @test:Config {
-    groups: ["composite-key"],
-    dependsOn: [compositeKeyCreateTest, compositeKeyReadOneTest, compositeKeyReadManyTest, compositeKeyReadOneTest2]
+    groups: ["composite-key", "mssql"],
+    dependsOn: [mssqlCompositeKeyCreateTest, mssqlCompositeKeyReadOneTest, mssqlCompositeKeyReadManyTest, mssqlCompositeKeyReadOneTest2]
 }
-function compositeKeyUpdateTestNegative() returns error? {
-    SQLRainierClient rainierClient = check new ();
+function mssqlCompositeKeyUpdateTestNegative() returns error? {
+    MSSQLRainierClient rainierClient = check new ();
 
     OrderItem|error orderItem = rainierClient->/orderitems/[orderItem1.orderId]/[orderItem2.itemId].put({
         quantity: 239,
         notes: "updated notes"
     });
     if orderItem is persist:NotFoundError {
-        test:assertEquals(orderItem.message(), "A record does not exist for 'OrderItem' for key {\"orderId\":\"order-1\",\"itemId\":\"item-2\"}.");
+        test:assertEquals(orderItem.message(), "A record with the key '{\"orderId\":\"order-1\",\"itemId\":\"item-2\"}' does not exist for the entity 'OrderItem'.");
     } else {
         test:assertFail("Error expected.");
     }
@@ -184,11 +163,11 @@ function compositeKeyUpdateTestNegative() returns error? {
 }
 
 @test:Config {
-    groups: ["composite-key"],
-    dependsOn: [compositeKeyUpdateTest]
+    groups: ["composite-key", "mssql"],
+    dependsOn: [mssqlCompositeKeyUpdateTest]
 }
-function compositeKeyDeleteTest() returns error? {
-    SQLRainierClient rainierClient = check new ();
+function mssqlCompositeKeyDeleteTest() returns error? {
+    MSSQLRainierClient rainierClient = check new ();
 
     OrderItem orderItem = check rainierClient->/orderitems/[orderItem2.orderId]/[orderItem2.itemId].delete();
     test:assertEquals(orderItem, orderItem2Updated);
@@ -200,15 +179,15 @@ function compositeKeyDeleteTest() returns error? {
 }
 
 @test:Config {
-    groups: ["composite-key"],
-    dependsOn: [compositeKeyUpdateTest]
+    groups: ["composite-key", "mssql"],
+    dependsOn: [mssqlCompositeKeyUpdateTest]
 }
-function compositeKeyDeleteTestNegative() returns error? {
-    SQLRainierClient rainierClient = check new ();
+function mssqlCompositeKeyDeleteTestNegative() returns error? {
+    MSSQLRainierClient rainierClient = check new ();
 
     OrderItem|error orderItem = rainierClient->/orderitems/["invalid-order-id"]/[orderItem2.itemId].delete();
     if orderItem is persist:NotFoundError {
-        test:assertEquals(orderItem.message(), "A record does not exist for 'OrderItem' for key {\"orderId\":\"invalid-order-id\",\"itemId\":\"item-2\"}.");
+        test:assertEquals(orderItem.message(), "A record with the key '{\"orderId\":\"invalid-order-id\",\"itemId\":\"item-2\"}' does not exist for the entity 'OrderItem'.");
     } else {
         test:assertFail("Error expected.");
     }

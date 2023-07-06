@@ -23,15 +23,15 @@ isolated function stringToParameterizedQuery(string queryStr) returns sql:Parame
     return query;
 }
 
-isolated function getKeyFromAlreadyExistsErrorMessage(string errorMessage) returns string|persist:Error {
-    int? startIndex = errorMessage.indexOf(".Duplicate entry '");
-    int? endIndex = errorMessage.indexOf("' for key");
+isolated function getKeyFromAlreadyExistsErrorMessage(string errorMessage, string startIndicator, string endIndicator) returns string|persist:Error {
+    int? startIndex = errorMessage.indexOf(startIndicator);
+    int? endIndex = errorMessage.indexOf(endIndicator);
 
     if startIndex is () || endIndex is () {
         return <persist:Error>error("Unable to determine key from DuplicateKey error message.");
     }
 
-    string key = errorMessage.substring(startIndex + 18, endIndex);
+    string key = errorMessage.substring(startIndex + startIndicator.length(), endIndex);
     return key;
 }
 

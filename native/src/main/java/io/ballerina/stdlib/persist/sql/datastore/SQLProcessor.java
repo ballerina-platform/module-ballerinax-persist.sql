@@ -55,7 +55,6 @@ import static io.ballerina.stdlib.persist.sql.Constants.SQL_EXECUTE_METHOD;
 import static io.ballerina.stdlib.persist.sql.Constants.SQL_QUERY_METHOD;
 import static io.ballerina.stdlib.persist.sql.ModuleUtils.getModule;
 import static io.ballerina.stdlib.persist.sql.Utils.createPersistNativeSQLStream;
-import static io.ballerina.stdlib.persist.sql.Utils.getBasicPersistError;
 import static io.ballerina.stdlib.persist.sql.Utils.getErrorStream;
 import static io.ballerina.stdlib.persist.sql.Utils.wrapError;
 import static io.ballerina.stdlib.persist.sql.Utils.wrapSQLError;

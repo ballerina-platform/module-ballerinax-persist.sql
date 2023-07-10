@@ -85,3 +85,48 @@ public class PersistSQLStream {
         }
     }
 }
+
+public class PersistNativeSQLStream {
+
+    private stream<record {}, sql:Error?>? anydataStream;
+    private persist:Error? err;
+
+    public isolated function init(stream<record {}, sql:Error?>? anydataStream, persist:Error? err = ()) {
+        self.anydataStream = anydataStream;
+        self.err = err;
+    }
+
+    public isolated function next() returns record {|record {} value;|}|persist:Error? {
+        if self.err is persist:Error {
+            return <persist:Error>self.err;
+        }
+        else if self.anydataStream is stream<record {}, sql:Error?> {
+            var anydataStream = <stream<record {}, sql:Error?>>self.anydataStream;
+            var streamValue = anydataStream.next();
+            if streamValue is () {
+                return streamValue;
+            } else if (streamValue is sql:Error) {
+                return <persist:Error>error(streamValue.message());
+            } else {
+                record {}|error value = streamValue.value;
+                if value is error {
+                    return <persist:Error>error(value.message());
+                }
+
+                record {|record {} value;|} nextRecord = {value: value};
+                return nextRecord;
+            }
+        } else {
+            return ();
+        }
+    }
+
+    public isolated function close() returns persist:Error? {
+        if self.anydataStream is stream<anydata, sql:Error?> {
+            error? e = (<stream<anydata, sql:Error?>>self.anydataStream).close();
+            if e is error {
+                return <persist:Error>error(e.message());
+            }
+        }
+    }
+}

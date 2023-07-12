@@ -251,13 +251,13 @@ task stopMSSQLTestDockerContainer() {
 
 updateTomlFiles.dependsOn copyStdlibs
 startMySQLTestDockerContainer.dependsOn createMySQLTestDockerImage
-// startMSSQLTestDockerContainer.dependsOn createMSSQLTestDockerImage
+startMSSQLTestDockerContainer.dependsOn createMSSQLTestDockerImage
 
 build.dependsOn "generatePomFileForMavenPublication"
 build.dependsOn ":${packageName}-native:build"
 build.finalizedBy stopMySQLTestDockerContainer
-// build.finalizedBy stopMSSQLTestDockerContainer
+build.finalizedBy stopMSSQLTestDockerContainer
 
 test.dependsOn ":${packageName}-native:build"
 test.dependsOn startMySQLTestDockerContainer
-// test.dependsOn startMSSQLTestDockerContainer
+test.dependsOn startMSSQLTestDockerContainer

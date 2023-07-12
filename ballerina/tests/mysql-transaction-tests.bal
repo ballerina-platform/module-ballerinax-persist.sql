@@ -17,42 +17,6 @@
 import ballerina/test;
 import ballerina/persist;
 
-Building building31 = {
-    buildingCode: "building-31",
-    city: "Colombo",
-    state: "Western Province",
-    country: "Sri Lanka",
-    postalCode: "10370",
-    'type: "rented"
-};
-
-BuildingInsert building32 = {
-    buildingCode: "building-32",
-    city: "Manhattan",
-    state: "New York",
-    country: "USA",
-    postalCode: "10570",
-    'type: "owned"
-};
-
-BuildingInsert building33 = {
-    buildingCode: "building-33",
-    city: "Manhattan",
-    state: "New York",
-    country: "USA",
-    postalCode: "10570",
-    'type: "owned"
-};
-
-Building building33Updated = {
-    buildingCode: "building-33",
-    city: "ColomboUpdated",
-    state: "Western ProvinceUpdated",
-    country: "Sri LankaUpdated",
-    postalCode: "10570",
-    'type: "owned"
-};
-
 @test:Config {
     groups: ["transactions", "mysql"]
 }

@@ -165,7 +165,7 @@ function mssqlDepartmentRelationsTest() returns error? {
 }
 
 @test:Config {
-    groups: ["associations", "mssql", "x"],
+    groups: ["associations", "mssql"],
     dependsOn: [mssqlEmployeeRelationsTest]
 }
 function mssqlWorkspaceRelationsTest() returns error? {

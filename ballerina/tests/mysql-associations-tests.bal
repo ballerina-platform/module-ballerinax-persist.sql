@@ -88,7 +88,7 @@ function mysqlEmployeeRelationsTest() returns error? {
     groups: ["associations", "mysql"],
     dependsOn: [mysqlEmployeeDeleteTestNegative]
 }
-function departmentRelationsTest() returns error? {
+function mysqlDepartmentRelationsTest() returns error? {
     MySQLRainierClient rainierClient = check new ();
 
     Employee employee11 = {
@@ -168,7 +168,7 @@ function departmentRelationsTest() returns error? {
     groups: ["associations", "mysql"],
     dependsOn: [mysqlEmployeeRelationsTest]
 }
-function workspaceRelationsTest() returns error? {
+function mysqlWorkspaceRelationsTest() returns error? {
     MySQLRainierClient rainierClient = check new ();
 
     Employee employee22 = {
@@ -244,7 +244,7 @@ function workspaceRelationsTest() returns error? {
     groups: ["associations", "mysql"],
     dependsOn: [mysqlEmployeeRelationsTest]
 }
-function buildingRelationsTest() returns error? {
+function mysqlBuildingRelationsTest() returns error? {
     MySQLRainierClient rainierClient = check new ();
 
     stream<BuildingInfo, error?> buildingStream = rainierClient->/buildings.get();

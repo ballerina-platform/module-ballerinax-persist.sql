@@ -93,17 +93,15 @@ class SQLProcessor {
                             balFuture.complete(Utils.createPersistSQLStreamValue(sqlStream, targetType, fields,
                                     includes, typeDescriptions, persistClient, null));
                         } else { // persist:Error
-                            BError persistError = (BError) o;
                             balFuture.complete(Utils.createPersistSQLStreamValue(null, targetType, fields, includes,
-                                    typeDescriptions, persistClient, persistError));
+                                    typeDescriptions, persistClient, (BError) o));
                         }
                     }
 
                     @Override
                     public void notifyFailure(BError bError) {
-                        BError persistError = wrapError(bError);
                         balFuture.complete(Utils.createPersistSQLStreamValue(null, targetType, fields, includes,
-                                typeDescriptions, persistClient, persistError));
+                                typeDescriptions, persistClient, wrapError(bError)));
                     }
                 }, trxContextProperties, streamTypeWithIdFields,
                 targetTypeWithIdFields, true, fields, true, includes, true
@@ -153,8 +151,7 @@ class SQLProcessor {
 
                     @Override
                     public void notifyFailure(BError bError) {
-                        BError persistError = wrapError(bError);
-                        balFuture.complete(persistError);
+                        balFuture.complete(wrapError(bError));
                     }
                 },  trxContextProperties, unionType,
                 targetType, true, targetTypeWithIdFields, true, key, true, fields, true, includes, true,

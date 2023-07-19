@@ -28,7 +28,6 @@ import io.ballerina.runtime.api.types.ErrorType;
 import io.ballerina.runtime.api.types.RecordType;
 import io.ballerina.runtime.api.types.StreamType;
 import io.ballerina.runtime.api.types.Type;
-import io.ballerina.runtime.api.utils.TypeUtils;
 import io.ballerina.runtime.api.values.BArray;
 import io.ballerina.runtime.api.values.BError;
 import io.ballerina.runtime.api.values.BMap;
@@ -38,26 +37,19 @@ import io.ballerina.runtime.api.values.BString;
 import io.ballerina.runtime.api.values.BTypedesc;
 import io.ballerina.stdlib.persist.Constants;
 import io.ballerina.stdlib.persist.ModuleUtils;
+import io.ballerina.stdlib.persist.sql.Utils;
 
 import java.util.Map;
 
 import static io.ballerina.stdlib.persist.Constants.ERROR;
 import static io.ballerina.stdlib.persist.Constants.KEY_FIELDS;
+import static io.ballerina.stdlib.persist.ErrorGenerator.wrapError;
 import static io.ballerina.stdlib.persist.Utils.getEntity;
 import static io.ballerina.stdlib.persist.Utils.getKey;
 import static io.ballerina.stdlib.persist.Utils.getMetadata;
 import static io.ballerina.stdlib.persist.Utils.getPersistClient;
 import static io.ballerina.stdlib.persist.Utils.getRecordTypeWithKeyFields;
 import static io.ballerina.stdlib.persist.Utils.getTransactionContextProperties;
-import static io.ballerina.stdlib.persist.sql.Constants.DB_CLIENT;
-import static io.ballerina.stdlib.persist.sql.Constants.PERSIST_SQL_STREAM;
-import static io.ballerina.stdlib.persist.sql.Constants.SQL_EXECUTE_METHOD;
-import static io.ballerina.stdlib.persist.sql.Constants.SQL_QUERY_METHOD;
-import static io.ballerina.stdlib.persist.sql.ModuleUtils.getModule;
-import static io.ballerina.stdlib.persist.sql.Utils.createPersistNativeSQLStream;
-import static io.ballerina.stdlib.persist.sql.Utils.getErrorStream;
-import static io.ballerina.stdlib.persist.sql.Utils.wrapError;
-import static io.ballerina.stdlib.persist.sql.Utils.wrapSQLError;
 
 /**
  * This class provides the SQL query processing implementations for persistence.
@@ -67,6 +59,8 @@ import static io.ballerina.stdlib.persist.sql.Utils.wrapSQLError;
 public class SQLProcessor {
 
     static BStream query(Environment env, BObject client, BTypedesc targetType) {
+        // This method will return `stream<targetType, persist:Error?>`
+
         BString entity = getEntity(env);
         BObject persistClient = getPersistClient(client, entity);
         BArray keyFields = (BArray) persistClient.get(KEY_FIELDS);
@@ -78,6 +72,7 @@ public class SQLProcessor {
                 PredefinedTypes.TYPE_NULL);
 
         Map<String, Object> trxContextProperties = getTransactionContextProperties();
+        String strandName = env.getStrandName().isPresent() ? env.getStrandName().get() : null;
 
         BArray[] metadata = getMetadata(recordType);
         BArray fields = metadata[0];
@@ -86,28 +81,28 @@ public class SQLProcessor {
 
         Future balFuture = env.markAsync();
         env.getRuntime().invokeMethodAsyncSequentially(
-                persistClient, Constants.RUN_READ_QUERY_METHOD,
-                env.getStrandName().isPresent() ? env.getStrandName().get() : null,
-                env.getStrandMetadata(), new Callback() {
+                // Call `SQLClient.runReadQuery(
+                //      typedesc<record {}> rowType, string[] fields = [], string[] include = []
+                // )`
+                // which returns `stream<record {}, sql:Error?>|persist:Error`
+
+                persistClient, Constants.RUN_READ_QUERY_METHOD, strandName, env.getStrandMetadata(), new Callback() {
                     @Override
                     public void notifySuccess(Object o) {
-                        BStream sqlStream = (BStream) o;
-                        BObject persistStream = ValueCreator.createObjectValue(
-                                getModule(), PERSIST_SQL_STREAM, sqlStream, targetType,
-                                fields, includes, typeDescriptions, persistClient, null
-                        );
-
-                        RecordType streamConstraint =
-                                (RecordType) TypeUtils.getReferredType(targetType.getDescribingType());
-                        balFuture.complete(
-                                ValueCreator.createStreamValue(TypeCreator.createStreamType(streamConstraint,
-                                        PredefinedTypes.TYPE_NULL), persistStream)
-                        );
+                        if (o instanceof BStream) { // stream<record {}, sql:Error?>
+                            BStream sqlStream = (BStream) o;
+                            balFuture.complete(Utils.createPersistSQLStreamValue(sqlStream, targetType, fields,
+                                    includes, typeDescriptions, persistClient, null));
+                        } else { // persist:Error
+                            balFuture.complete(Utils.createPersistSQLStreamValue(null, targetType, fields, includes,
+                                    typeDescriptions, persistClient, (BError) o));
+                        }
                     }
 
                     @Override
                     public void notifyFailure(BError bError) {
-                        balFuture.complete(bError);
+                        balFuture.complete(Utils.createPersistSQLStreamValue(null, targetType, fields, includes,
+                                typeDescriptions, persistClient, wrapError(bError)));
                     }
                 }, trxContextProperties, streamTypeWithIdFields,
                 targetTypeWithIdFields, true, fields, true, includes, true
@@ -117,6 +112,7 @@ public class SQLProcessor {
     }
 
     static Object queryOne(Environment env, BObject client, BArray path, BTypedesc targetType) {
+        // This method will return `targetType|persist:Error`
 
         BString entity = getEntity(env);
         BObject persistClient = getPersistClient(client, entity);
@@ -125,6 +121,7 @@ public class SQLProcessor {
         RecordType recordType = (RecordType) targetType.getDescribingType();
 
         Map<String, Object> trxContextProperties = getTransactionContextProperties();
+        String strandName = env.getStrandName().isPresent() ? env.getStrandName().get() : null;
 
         RecordType recordTypeWithIdFields = getRecordTypeWithKeyFields(keyFields, recordType);
         BTypedesc targetTypeWithIdFields = ValueCreator.createTypedescValue(recordTypeWithIdFields);
@@ -140,7 +137,12 @@ public class SQLProcessor {
 
         Future balFuture = env.markAsync();
         env.getRuntime().invokeMethodAsyncSequentially(
-                getPersistClient(client, entity), Constants.RUN_READ_BY_KEY_QUERY_METHOD, null, null, new Callback() {
+                // Call `SQLClient.runReadByKeyQuery(
+                //      typedesc<record {}> rowType, typedesc<record {}> rowTypeWithIdFields, anydata key,
+                //      string[] fields = [], string[] include = [], typedesc<record {}>[] typeDescriptions = []
+                // )`
+                // which returns `record {}|persist:Error`getPersistClient(client, entity), Constants.RUN_READ_BY_KEY_QUERY_METHOD, strandName,
+                env.getStrandMetadata(), new Callback() {
                     @Override
                     public void notifySuccess(Object o) {
                         balFuture.complete(o);
@@ -148,7 +150,7 @@ public class SQLProcessor {
 
                     @Override
                     public void notifyFailure(BError bError) {
-                        balFuture.complete(bError);
+                        balFuture.complete(wrapError(bError));
                     }
                 },  trxContextProperties, unionType,
                 targetType, true, targetTypeWithIdFields, true, key, true, fields, true, includes, true,

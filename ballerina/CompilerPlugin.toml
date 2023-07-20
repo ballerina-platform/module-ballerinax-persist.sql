@@ -1,0 +1,6 @@
+[plugin]
+id = "persist.sql-compiler-plugin"
+class = "io.ballerina.stdlib.persist.sql.compiler.PersistSqlCompilerPlugin"
+
+[[dependency]]
+path = "../compiler-plugin/build/libs/persist.sql-compiler-plugin-1.1.0-SNAPSHOT.jar"

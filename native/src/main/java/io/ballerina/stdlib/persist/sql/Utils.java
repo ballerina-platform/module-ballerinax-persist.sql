@@ -29,6 +29,7 @@ import io.ballerina.runtime.api.values.BObject;
 import io.ballerina.runtime.api.values.BStream;
 import io.ballerina.runtime.api.values.BTypedesc;
 
+import static io.ballerina.stdlib.persist.ErrorGenerator.getBasicPersistError;
 import static io.ballerina.stdlib.persist.sql.Constants.PERSIST_SQL_STREAM;
 import static io.ballerina.stdlib.persist.sql.ModuleUtils.getModule;
 
@@ -60,4 +61,15 @@ public class Utils {
                 persistClient, persistError);
         return createPersistSQLStreamValue(targetType, persistSQLStream);
     }
+
+    public static BError wrapSQLError(BError sqlError) {
+        return getBasicPersistError(sqlError.getErrorMessage().toString());
+    }
+
+    public static BObject createPersistNativeSQLStream(BStream sqlStream, BError error) {
+        return ValueCreator.createObjectValue(getModule(),
+                io.ballerina.stdlib.persist.sql.Constants.PERSIST_NATIVE_SQL_STREAM, sqlStream, error);
+    }
+
+
 }

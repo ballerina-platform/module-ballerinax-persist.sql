@@ -28,6 +28,7 @@ import io.ballerina.runtime.api.types.ErrorType;
 import io.ballerina.runtime.api.types.RecordType;
 import io.ballerina.runtime.api.types.StreamType;
 import io.ballerina.runtime.api.types.Type;
+import io.ballerina.runtime.api.utils.TypeUtils;
 import io.ballerina.runtime.api.values.BArray;
 import io.ballerina.runtime.api.values.BError;
 import io.ballerina.runtime.api.values.BMap;
@@ -50,6 +51,12 @@ import static io.ballerina.stdlib.persist.Utils.getMetadata;
 import static io.ballerina.stdlib.persist.Utils.getPersistClient;
 import static io.ballerina.stdlib.persist.Utils.getRecordTypeWithKeyFields;
 import static io.ballerina.stdlib.persist.Utils.getTransactionContextProperties;
+import static io.ballerina.stdlib.persist.sql.Constants.DB_CLIENT;
+import static io.ballerina.stdlib.persist.sql.Constants.SQL_EXECUTE_METHOD;
+import static io.ballerina.stdlib.persist.sql.Constants.SQL_QUERY_METHOD;
+import static io.ballerina.stdlib.persist.sql.ModuleUtils.getModule;
+import static io.ballerina.stdlib.persist.sql.Utils.createPersistNativeSQLStream;
+import static io.ballerina.stdlib.persist.sql.Utils.wrapSQLError;
 
 /**
  * This class provides the SQL query processing implementations for persistence.
@@ -141,7 +148,9 @@ public class SQLProcessor {
                 //      typedesc<record {}> rowType, typedesc<record {}> rowTypeWithIdFields, anydata key,
                 //      string[] fields = [], string[] include = [], typedesc<record {}>[] typeDescriptions = []
                 // )`
-                // which returns `record {}|persist:Error`getPersistClient(client, entity), Constants.RUN_READ_BY_KEY_QUERY_METHOD, strandName,
+                // which returns `record {}|persist:Error`
+
+                getPersistClient(client, entity), Constants.RUN_READ_BY_KEY_QUERY_METHOD, strandName,
                 env.getStrandMetadata(), new Callback() {
                     @Override
                     public void notifySuccess(Object o) {
@@ -191,8 +200,7 @@ public class SQLProcessor {
 
                     @Override
                     public void notifyFailure(BError bError) { // can only be hit on a panic
-                        BError persistError = wrapError(bError);
-                        BStream errorStream = getErrorStream(recordType, persistError);
+                        BObject errorStream = Utils.createPersistNativeSQLStream(null, bError);
                         balFuture.complete(errorStream);
                     }
                 }, trxContextProperties, streamType, paramSQLString, true, targetType, true

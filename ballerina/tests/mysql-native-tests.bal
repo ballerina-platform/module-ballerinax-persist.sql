@@ -254,7 +254,7 @@ function mysqlNativeTransactionTest2() returns error? {
     test:assertEquals(buildings, [building33]);
 
     transaction {
-        ExecutionResult executionResult2 = check rainierClient->executeNativeSQL(`
+        _ = check rainierClient->executeNativeSQL(`
             UPDATE Building
             SET
                 city = ${building33Updated.city},

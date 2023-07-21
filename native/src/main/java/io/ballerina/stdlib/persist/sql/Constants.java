@@ -33,5 +33,9 @@ public final class Constants {
     public static final String PERSIST_SQL_STREAM = "PersistSQLStream";
     public static final BString STRINGS = StringUtils.fromString("strings");
     public static final BString INSERTIONS = StringUtils.fromString("insertions");
+    public static final BString KEY_FIELDS = StringUtils.fromString("keyFields");
+    public static final String ERROR = "Error";
+    public static final String RUN_READ_QUERY_METHOD = "runReadQuery";
+    public static final String RUN_READ_BY_KEY_QUERY_METHOD = "runReadByKeyQuery";
     
 }

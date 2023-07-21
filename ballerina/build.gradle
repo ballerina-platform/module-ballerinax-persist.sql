@@ -39,6 +39,9 @@ def tomlVersion = stripBallerinaExtensionVersion("${project.version}")
 
 def ballerinaTomlFilePlaceHolder = new File("${project.rootDir}/build-config/resources/Ballerina.toml")
 def ballerinaTomlFile = new File("$project.projectDir/Ballerina.toml")
+def compilerPluginTomlFilePlaceHolder = new File("${project.rootDir}/build-config/resources/CompilerPlugin.toml")
+def compilerPluginTomlFile = new File("$project.projectDir/CompilerPlugin.toml")
+
 
 def stripBallerinaExtensionVersion(String extVersion) {
     if (extVersion.matches(project.ext.timestampedVersionRegex)) {
@@ -78,6 +81,11 @@ task updateTomlFiles {
         newConfig = newConfig.replace('@persist.version@', stdlibDependentPersistVersion)
         newConfig = newConfig.replace('@persist.native.version@', project.stdlibPersistVersion)
         ballerinaTomlFile.text = newConfig
+
+        def newCompilerPluginToml = compilerPluginTomlFilePlaceHolder.text.replace("@project.version@", project.version)
+        newCompilerPluginToml = newCompilerPluginToml.replace('@persist.version@', stdlibDependentPersistVersion)
+        newCompilerPluginToml = newCompilerPluginToml.replace('@persist.native.version@', project.stdlibPersistVersion)
+        compilerPluginTomlFile.text = newCompilerPluginToml
     }
 }
 
@@ -86,9 +94,9 @@ task commitTomlFiles {
         project.exec {
             ignoreExitValue true
             if (Os.isFamily(Os.FAMILY_WINDOWS)) {
-                commandLine 'cmd', '/c', "git commit -m \"[Automated] Update native jar versions in toml files\" Ballerina.toml Dependencies.toml"
+                commandLine 'cmd', '/c', "git commit -m \"[Automated] Update native jar versions in toml files\" Ballerina.toml Dependencies.toml CompilerPlugin.toml"
             } else {
-                commandLine 'sh', '-c', "git commit -m \"[Automated] Update native jar versions in toml files\" Ballerina.toml Dependencies.toml"
+                commandLine 'sh', '-c', "git commit -m \"[Automated] Update native jar versions in toml files\" Ballerina.toml Dependencies.toml CompilerPlugin.toml"
             }
         }
     }
@@ -198,18 +206,18 @@ task createMSSQLTestDockerImage(type: Exec) {
     }
 }
 
-def checkMSSQLTestDockerContainerStatus(containerName) {
-    if (!Os.isFamily(Os.FAMILY_WINDOWS)) {
-        try {
-            return exec {
-                commandLine 'sh', '-c',
-                        "docker exec ${containerName} /opt/mssql-tools/bin/sqlcmd -S localhost -U sa -P Test123#"
-            }.exitValue
-        } catch (all) {
-            return 1;
-        }
-    }
-}
+//def checkMSSQLTestDockerContainerStatus(containerName) {
+//    if (!Os.isFamily(Os.FAMILY_WINDOWS)) {
+//        try {
+//            return exec {
+//                commandLine 'sh', '-c',
+//                        "docker exec ${containerName} /opt/mssql-tools/bin/sqlcmd -S localhost -U sa -P Test123#"
+//            }.exitValue
+//        } catch (all) {
+//            return 1;
+//        }
+//    }
+//}
 
 task startMSSQLTestDockerContainer(type: Exec) {
     if (!Os.isFamily(Os.FAMILY_WINDOWS)) {
@@ -220,14 +228,14 @@ task startMSSQLTestDockerContainer(type: Exec) {
         def counter = 0;
         doLast {
             checkExecResult(execResult, 'Error', standardOutput)
-            while (healthCheck != 0 && counter < 12) {
-                sleep(5 * 1000)
-                healthCheck = checkMSSQLTestDockerContainerStatus("ballerina-persist-mssql")
-                counter = counter + 1;
-            }
-            if (healthCheck != 0) {
-                throw new GradleException("Docker container 'ballerina-persist-mssql' health test exceeded timeout!")
-            }
+//            while (healthCheck != 0 && counter < 12) {
+//                sleep(5 * 1000)
+//                healthCheck = checkMSSQLTestDockerContainerStatus("ballerina-persist-mssql")
+//                counter = counter + 1;
+//            }
+//            if (healthCheck != 0) {
+//                throw new GradleException("Docker container 'ballerina-persist-mssql' health test exceeded timeout!")
+//            }
         }
     }
 }
@@ -251,13 +259,14 @@ task stopMSSQLTestDockerContainer() {
 
 updateTomlFiles.dependsOn copyStdlibs
 startMySQLTestDockerContainer.dependsOn createMySQLTestDockerImage
-//startMSSQLTestDockerContainer.dependsOn createMSSQLTestDockerImage
+startMSSQLTestDockerContainer.dependsOn createMSSQLTestDockerImage
 
 build.dependsOn "generatePomFileForMavenPublication"
+build.dependsOn ":${packageName}-compiler-plugin:build"
 build.dependsOn ":${packageName}-native:build"
 build.finalizedBy stopMySQLTestDockerContainer
-//build.finalizedBy stopMSSQLTestDockerContainer
+build.finalizedBy stopMSSQLTestDockerContainer
 
 test.dependsOn ":${packageName}-native:build"
 test.dependsOn startMySQLTestDockerContainer
-//test.dependsOn startMSSQLTestDockerContainer
+test.dependsOn startMSSQLTestDockerContainer

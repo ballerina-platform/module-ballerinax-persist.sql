@@ -34,14 +34,9 @@ public class MySQLProcessor {
     private MySQLProcessor() {
     }
 
-    public static BStream query(Environment env, BObject client, BTypedesc targetType) {
-//        PrintStream asd = System.out;
-//        BArray stringsArray = whereClause.getArrayValue(io.ballerina.stdlib.persist.sql.Constants.STRINGS);
-//        stringsArray.add(0, StringUtils.fromString("WHERE "));
-//        BArray insertions = whereClause.getArrayValue(Constants.INSERTIONS);
-//        asd.println(stringsArray);
-//        asd.println(insertions);
-        return SQLProcessor.query(env, client, targetType);
+    public static BStream query(Environment env, BObject client, BTypedesc targetType, BObject whereClause,
+                                BObject orderClause, BObject limitClause, BObject groupByClause) {
+        return SQLProcessor.query(env, client, targetType, whereClause, orderClause, limitClause, groupByClause);
     }
 
     public static Object queryOne(Environment env, BObject client, BArray path, BTypedesc targetType) {

@@ -15,9 +15,9 @@
 # under the License.
 
 # Use this if testing on an M1 machine
-# FROM mcr.microsoft.com/azure-sql-edge
+ FROM mcr.microsoft.com/azure-sql-edge
 
-FROM mcr.microsoft.com/mssql/server:2019-latest
+#FROM mcr.microsoft.com/mssql/server:2019-latest
 
 ENV ACCEPT_EULA=Y
 ENV SA_PASSWORD=DefaultPassword123

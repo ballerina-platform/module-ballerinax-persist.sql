@@ -35,13 +35,12 @@ import io.ballerina.runtime.api.values.BObject;
 import io.ballerina.runtime.api.values.BStream;
 import io.ballerina.runtime.api.values.BString;
 import io.ballerina.runtime.api.values.BTypedesc;
-import io.ballerina.stdlib.persist.Constants;
 import io.ballerina.stdlib.persist.ModuleUtils;
+import io.ballerina.stdlib.persist.sql.Constants;
 
+import java.io.PrintStream;
 import java.util.Map;
 
-import static io.ballerina.stdlib.persist.Constants.ERROR;
-import static io.ballerina.stdlib.persist.Constants.KEY_FIELDS;
 import static io.ballerina.stdlib.persist.Utils.getEntity;
 import static io.ballerina.stdlib.persist.Utils.getKey;
 import static io.ballerina.stdlib.persist.Utils.getMetadata;
@@ -58,10 +57,11 @@ import static io.ballerina.stdlib.persist.sql.ModuleUtils.getModule;
  */
 class SQLProcessor {
 
-    static BStream query(Environment env, BObject client, BTypedesc targetType) {
+    static BStream query(Environment env, BObject client, BTypedesc targetType, BObject whereClause,
+                         BObject orderByClause, BObject limitClause, BObject groupByClause) {
         BString entity = getEntity(env);
         BObject persistClient = getPersistClient(client, entity);
-        BArray keyFields = (BArray) persistClient.get(KEY_FIELDS);
+        BArray keyFields = (BArray) persistClient.get(Constants.KEY_FIELDS);
         RecordType recordType = (RecordType) targetType.getDescribingType();
 
         RecordType recordTypeWithIdFields = getRecordTypeWithKeyFields(keyFields, recordType);
@@ -98,10 +98,13 @@ class SQLProcessor {
 
                     @Override
                     public void notifyFailure(BError bError) {
+                        PrintStream asd = System.out;
+                        asd.println(bError.getErrorMessage().getValue());
                         balFuture.complete(bError);
                     }
                 }, trxContextProperties, streamTypeWithIdFields,
-                targetTypeWithIdFields, true, fields, true, includes, true
+                targetTypeWithIdFields, true, fields, true, includes, true, whereClause, true, orderByClause,
+                true, limitClause, true, groupByClause, true
         );
 
         return null;
@@ -112,14 +115,14 @@ class SQLProcessor {
         BString entity = getEntity(env);
         BObject persistClient = getPersistClient(client, entity);
 
-        BArray keyFields = (BArray) persistClient.get(KEY_FIELDS);
+        BArray keyFields = (BArray) persistClient.get(Constants.KEY_FIELDS);
         RecordType recordType = (RecordType) targetType.getDescribingType();
 
         Map<String, Object> trxContextProperties = getTransactionContextProperties();
 
         RecordType recordTypeWithIdFields = getRecordTypeWithKeyFields(keyFields, recordType);
         BTypedesc targetTypeWithIdFields = ValueCreator.createTypedescValue(recordTypeWithIdFields);
-        ErrorType persistErrorType = TypeCreator.createErrorType(ERROR, ModuleUtils.getModule());
+        ErrorType persistErrorType = TypeCreator.createErrorType(Constants.ERROR, ModuleUtils.getModule());
         Type unionType = TypeCreator.createUnionType(recordTypeWithIdFields, persistErrorType);
 
         BArray[] metadata = getMetadata(recordType);
@@ -149,4 +152,22 @@ class SQLProcessor {
 
         return null;
     }
+
+//    public static ParameterizedQuery getParameterizedSQLQuery(BObject paramString) {
+//        StringBuilder sqlQuery = new StringBuilder("WHERE ");
+//        List<Object> insertions = new ArrayList<>();
+//
+//        BArray bStringsArray = paramString.getArrayValue(Constants.STRINGS);
+//        BArray bInsertions = paramString.getArrayValue(Constants.INSERTIONS);
+//        for (int i = 0; i < bInsertions.size(); i++) {
+//            insertions.add(bInsertions.get(i));
+//        }
+//        sqlQuery.append(bStringsArray.getBString(bInsertions.size()));
+//        ParameterizedQuery whereClause  = new ParameterizedQuery(sqlQuery.toString(), insertions.toArray());
+//        PrintStream asd = System.out;
+//        asd.println(whereClause.getSqlQuery());
+//        asd.println(Arrays.toString(whereClause.getInsertions()));
+//
+//        return whereClause;
+//    }
 }

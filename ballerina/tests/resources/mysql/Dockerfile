@@ -14,7 +14,7 @@
 # specific language governing permissions and limitations
 # under the License.
 
-FROM mysql:8.0.21
+FROM --platform=linux/amd64 mysql:8.0.21
 
 COPY init.sql /docker-entrypoint-initdb.d/
 

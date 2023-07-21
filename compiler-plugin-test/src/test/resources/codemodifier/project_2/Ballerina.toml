@@ -1,0 +1,18 @@
+[package]
+org = "foo"
+name = "medical_center"
+version = "0.1.0"
+distribution = "2201.5.0"
+
+[build-options]
+observabilityIncluded = false
+
+[persist]
+datastore = "mysql"
+module = "medical_center"
+
+[[platform.java11.dependency]]
+groupId = "io.ballerina.stdlib"
+artifactId = "persist.sql-native"
+version = "1.0.0"
+

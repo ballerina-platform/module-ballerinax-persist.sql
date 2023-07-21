@@ -14,6 +14,7 @@
 // specific language governing permissions and limitations
 // under the License.
 
+import ballerina/log;
 import ballerina/sql;
 import ballerina/persist;
 
@@ -112,16 +113,82 @@ public isolated client class SQLClient {
     # + rowType - The type description of the entity to be retrieved
     # + fields - The fields to be retrieved
     # + include - The associations to be retrieved
+    # + whereClause - The `WHERE` clause of the query
+    # + orderByClause - The `ORDER BY` clause of the query
+    # + limitClause - The `LIMIT` clause of the query
+    # + groupByClause - The `GROUP BY` clause of the query
     # + return - A stream of records in the `rowType` type or a `persist:Error` if the operation fails
-    public isolated function runReadQuery(typedesc<record {}> rowType, string[] fields = [], string[] include = [])
-    returns stream<record {}, sql:Error?>|persist:Error {
+    public isolated function runReadQuery(typedesc<record {}> rowType, string[] fields = [], string[] include = [],
+                        sql:ParameterizedQuery whereClause = ``, sql:ParameterizedQuery orderByClause = ``,
+                        sql:ParameterizedQuery limitClause = ``, sql:ParameterizedQuery groupByClause = ``)
+                        returns stream<record {}, sql:Error?>|persist:Error|error {
         sql:ParameterizedQuery query = self.getSelectQuery(fields);
-
         foreach string joinKey in self.getJoinFields(include) {
             query = sql:queryConcat(query, check self.getJoinQuery(joinKey));
         }
+        if (whereClause.strings.length() != 0) {
+            query = sql:queryConcat(query, ` WHERE `, whereClause);
+        }
+        if (groupByClause.strings.length() != 0) {
+            if (groupByClause.insertions.length() == 0) {
+                query = sql:queryConcat(query, ` GROUP BY `, groupByClause);
+            } else {
+                string queryInString = "";
+                string[] groupByQuery = groupByClause.strings;
+                int i = 0;
+                foreach sql:Value insertion in groupByClause.insertions {
+                    queryInString +=  groupByQuery[i] + string `${insertion.toString()}`;
+                    i += 1;
+                }
+                queryInString += groupByQuery[i];
+                sql:ParameterizedQuery queryString = ``;
+                queryString.strings = [queryInString];
+                query = sql:queryConcat(query, ` GROUP BY `, queryString);
+            }
+        }
+        if (orderByClause.strings.length() != 0) {
+            if (orderByClause.insertions.length() == 0) {
+                query = sql:queryConcat(query, ` ORDER BY `, orderByClause);
+            } else {
+                string queryInString = "";
+                string[] orderByQuery = orderByClause.strings;
+                int i = 0;
+                foreach sql:Value insertion in orderByClause.insertions {
+                    queryInString += orderByQuery[i] + string `${insertion.toString()}`;
+                    i += 1;
+                }
+                queryInString += orderByQuery[i];
+                sql:ParameterizedQuery queryString = ``;
+                queryString.strings = [queryInString];
+                query = sql:queryConcat(query, ` ORDER BY `, queryString);
+            }
+        }
+        if (limitClause.strings.length() != 0) {
+            if (limitClause.insertions.length() != 0) {
+                string queryInString = "LIMIT " + limitClause.strings[0] + limitClause.insertions[0].toString();
+                sql:ParameterizedQuery queryString = ``;
+                queryString.strings = [queryInString];
+                query = sql:queryConcat(query, queryString);
+            } else {
+                query = sql:queryConcat(query, ` LIMIT `, limitClause);
+            }
+        }
+        log:printInfo("@@@@@@@@@@@@@@@@@@@@");
+        log:printInfo("Sql query      : " + query.strings.toBalString());
+        log:printInfo("Sql query      : " + query.insertions.toBalString());
+        log:printInfo("@@@@@@@@@@@@@@@@@@@@");
+
+        string stringValue = query.strings.toBalString();
+        foreach sql:Value insertion in query.insertions {
+            string:RegExp reg = re `","`;
+            stringValue = reg.replace(stringValue,  string `${insertion.toString()}`);
+        }
+        log:printInfo("SQL query: " + stringValue);
 
         stream<record {}, sql:Error?> resultStream = self.dbClient->query(query, rowType);
+        //record {|anydata...;|}[] asd = check from record {|anydata...;|} artist in resultStream
+        //    select artist;
+        //io:println(asd);
         return resultStream;
     }
 

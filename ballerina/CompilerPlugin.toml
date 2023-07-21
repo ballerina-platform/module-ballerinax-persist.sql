@@ -8,5 +8,5 @@ path = "../compiler-plugin/build/libs/persist.sql-compiler-plugin-1.1.0-SNAPSHOT
 [[platform.java11.dependency]]
 groupId = "io.ballerina.stdlib"
 artifactId = "persist-native"
-version = "@persist.version@"
-path = "./lib/persist-native-@persist.native.version@.jar"
+version = "1.1.1"
+path = "./lib/persist-native-1.1.1-SNAPSHOT.jar"

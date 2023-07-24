@@ -51,4 +51,3 @@ public type ProductUpdate record {|
     string name?;
     int age?;
 |};
-

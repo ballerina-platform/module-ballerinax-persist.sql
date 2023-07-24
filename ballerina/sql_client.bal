@@ -57,6 +57,7 @@ public isolated client class SQLClient {
     # or a `persist:Error` if the operation fails
     public isolated function runBatchInsertQuery(record {}[] insertRecords) returns sql:ExecutionResult[]|persist:Error {
         sql:ParameterizedQuery[] insertQueries = self.getInsertQueries(insertRecords);
+        logQuery(insertQueries, "SQL insert query: ");
         sql:ExecutionResult[]|sql:Error result = self.dbClient->batchExecute(insertQueries);
 
         if result is sql:Error {
@@ -88,6 +89,8 @@ public isolated client class SQLClient {
         }
 
         query = sql:queryConcat(query, check self.getWhereQuery(key));
+
+        logQuery(query, "SQL select query: ");
 
         record {}|error result = self.dbClient->queryRow(query, rowTypeWithIdFields);
 
@@ -130,65 +133,21 @@ public isolated client class SQLClient {
             query = sql:queryConcat(query, ` WHERE `, whereClause);
         }
         if (groupByClause.strings.length() != 0) {
-            if (groupByClause.insertions.length() == 0) {
-                query = sql:queryConcat(query, ` GROUP BY `, groupByClause);
-            } else {
-                string queryInString = "";
-                string[] groupByQuery = groupByClause.strings;
-                int i = 0;
-                foreach sql:Value insertion in groupByClause.insertions {
-                    queryInString +=  groupByQuery[i] + string `${insertion.toString()}`;
-                    i += 1;
-                }
-                queryInString += groupByQuery[i];
-                sql:ParameterizedQuery queryString = ``;
-                queryString.strings = [queryInString];
-                query = sql:queryConcat(query, ` GROUP BY `, queryString);
-            }
+            query = addClauseToQuery(query,  groupByClause, ` GROUP BY `);
         }
         if (orderByClause.strings.length() != 0) {
-            if (orderByClause.insertions.length() == 0) {
-                query = sql:queryConcat(query, ` ORDER BY `, orderByClause);
-            } else {
-                string queryInString = "";
-                string[] orderByQuery = orderByClause.strings;
-                int i = 0;
-                foreach sql:Value insertion in orderByClause.insertions {
-                    queryInString += orderByQuery[i] + string `${insertion.toString()}`;
-                    i += 1;
-                }
-                queryInString += orderByQuery[i];
-                sql:ParameterizedQuery queryString = ``;
-                queryString.strings = [queryInString];
-                query = sql:queryConcat(query, ` ORDER BY `, queryString);
-            }
+            query = addClauseToQuery(query, orderByClause, ` ORDER BY `);
         }
         if (limitClause.strings.length() != 0) {
             if (limitClause.insertions.length() != 0) {
                 string queryInString = "LIMIT " + limitClause.strings[0] + limitClause.insertions[0].toString();
-                sql:ParameterizedQuery queryString = ``;
-                queryString.strings = [queryInString];
-                query = sql:queryConcat(query, queryString);
+                query = sql:queryConcat(query, stringToParameterizedQuery(queryInString));
             } else {
                 query = sql:queryConcat(query, ` LIMIT `, limitClause);
             }
         }
-        log:printInfo("@@@@@@@@@@@@@@@@@@@@");
-        log:printInfo("Sql query      : " + query.strings.toBalString());
-        log:printInfo("Sql query      : " + query.insertions.toBalString());
-        log:printInfo("@@@@@@@@@@@@@@@@@@@@");
-
-        string stringValue = query.strings.toBalString();
-        foreach sql:Value insertion in query.insertions {
-            string:RegExp reg = re `","`;
-            stringValue = reg.replace(stringValue,  string `${insertion.toString()}`);
-        }
-        log:printInfo("SQL query: " + stringValue);
-
+        logQuery(query, "SQL select query : ");
         stream<record {}, sql:Error?> resultStream = self.dbClient->query(query, rowType);
-        //record {|anydata...;|}[] asd = check from record {|anydata...;|} artist in resultStream
-        //    select artist;
-        //io:println(asd);
         return resultStream;
     }
 
@@ -202,7 +161,7 @@ public isolated client class SQLClient {
     public isolated function runUpdateQuery(anydata key, record {} updateRecord) returns persist:ConstraintViolationError|persist:Error? {
         sql:ParameterizedQuery query = check self.getUpdateQuery(updateRecord);
         query = sql:queryConcat(query, check self.getWhereQuery(self.getKey(key)));
-
+        logQuery(query, "SQL update query: ");
         sql:ExecutionResult|sql:Error? e = self.dbClient->execute(query);
         if e is sql:Error {
             if e.message().indexOf(self.dataSourceSpecifics.constraintViolationErrorMessage) is int {
@@ -221,6 +180,7 @@ public isolated client class SQLClient {
     public isolated function runDeleteQuery(anydata deleteKey) returns persist:Error? {
         sql:ParameterizedQuery query = self.getDeleteQuery();
         query = sql:queryConcat(query, check self.getWhereQuery(deleteKey));
+        logQuery(query, "SQL delete query: ");
         sql:ExecutionResult|sql:Error e = self.dbClient->execute(query);
 
         if e is sql:Error {
@@ -521,4 +481,37 @@ public isolated client class SQLClient {
     private isolated function escape(string value) returns string {
         return self.dataSourceSpecifics.quoteOpen + value + self.dataSourceSpecifics.quoteClose;
     }
+}
+
+isolated function addClauseToQuery(sql:ParameterizedQuery query, sql:ParameterizedQuery clauseQuery, sql:ParameterizedQuery clause) returns sql:ParameterizedQuery {
+    if (clauseQuery.insertions.length() == 0) {
+        return sql:queryConcat(query, clause, clauseQuery);
+    } else {
+        string queryInString = "";
+        string[] queryStrings = clauseQuery.strings;
+        int i = 0;
+        foreach sql:Value insertion in clauseQuery.insertions {
+            queryInString +=  queryStrings[i] + string `${insertion.toString()}`;
+            i += 1;
+        }
+        queryInString += queryStrings[i];
+        sql:ParameterizedQuery queryString = ``;
+        queryString.strings = [queryInString];
+        return sql:queryConcat(query, clause, queryString);
+    }
+}
+
+isolated function logQuery(sql:ParameterizedQuery|sql:ParameterizedQuery[] queries, string msg) {
+    if queries is sql:ParameterizedQuery[] {
+        foreach sql:ParameterizedQuery query in queries {
+            logQuery(query, msg);
+        }
+        return;
+    }
+    string stringValue = queries.strings.toBalString();
+    foreach sql:Value insertion in queries.insertions {
+        string:RegExp reg = re `","`;
+        stringValue = reg.replace(stringValue,  string `${insertion.toString()}`);
+    }
+    log:printDebug(msg + stringValue);
 }

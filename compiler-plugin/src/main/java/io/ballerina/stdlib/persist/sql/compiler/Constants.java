@@ -44,6 +44,11 @@ public final class Constants {
     public static final String INTERPOLATION_START_TOKEN = "${";
     public static final String INTERPOLATION_END_TOKEN = "}";
     public static final String COMMA_WITH_SPACE = ", ";
+    public static final String COLON = ":";
+    public static final String GET = "get";
+    public static final String TARGET_TYPE = "targetType";
+    public static final String WHERE = "where";
+    public static final String ORDER_BY = "order by";
 
     /**
      * SQL keywords used to construct the query.

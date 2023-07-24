@@ -29,10 +29,22 @@ public function main() returns error? {
     io:println("Created need id: ", needIds[0]);
 
     entities:Product[] products = check from var e in mcClient->/products.get(targetType = entities:Product, whereClause = ``)
-        where e.id == value || e.id == 6
-        order by e.id descending
-        limit value
-        select e;
+            where e.id == value || e.id == 6
+            order by e.id descending
+            limit value
+            select e;
+
+    products = check from var e in mcClient->/products(entities:Product, ``, ``, ``, ``)
+            where e.id == value || e.id == 6
+            order by e.id descending
+            limit value
+            select e;
+
+    products = check from var e in mcClient->/products(entities:Product)
+                group by var id = e.id, var name = e.name, var age = e.age
+                where id == value || id == 6
+                limit 5
+                select {id, name, age};
 
     io:println("Products: ", products);
     check mcClient.close();

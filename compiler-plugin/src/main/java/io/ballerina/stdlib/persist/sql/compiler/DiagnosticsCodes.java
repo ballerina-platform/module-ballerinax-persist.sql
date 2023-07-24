@@ -28,7 +28,11 @@ import static io.ballerina.tools.diagnostics.DiagnosticSeverity.ERROR;
 public enum DiagnosticsCodes {
 
     PERSIST_SQL_201("PERSIST_201", "an entity should be a closed record", ERROR),
-    PERSIST_SQL_202("PERSIST_202", "''{0}'' argument is not allowed for the remote function call",
+    PERSIST_SQL_202("PERSIST_202", "persist remote function call does not support ''{0}'' argument",
+            ERROR),
+    PERSIST_SQL_203("PERSIST_203", "persist remote function call does not support this argument",
+            ERROR),
+    PERSIST_SQL_204("PERSIST_204", "''group by'' clause cannot be used before ''{0}'' clause",
             ERROR);
 
     private final String code;

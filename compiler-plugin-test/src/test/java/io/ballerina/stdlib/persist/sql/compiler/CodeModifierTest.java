@@ -27,13 +27,15 @@ import io.ballerina.projects.ProjectEnvironmentBuilder;
 import io.ballerina.projects.directory.BuildProject;
 import io.ballerina.projects.environment.Environment;
 import io.ballerina.projects.environment.EnvironmentBuilder;
+import io.ballerina.tools.diagnostics.Diagnostic;
 import io.ballerina.tools.diagnostics.DiagnosticSeverity;
 import org.testng.Assert;
 import org.testng.annotations.Test;
 
-import java.io.PrintStream;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.List;
+import java.util.stream.Collectors;
 
 /**
  * Code modifier related test cases.
@@ -64,8 +66,6 @@ public class CodeModifierTest {
 
             if (document.name().equals("main.bal")) {
                 String sourceCode = document.syntaxTree().toSourceCode();
-                PrintStream asd = System.out;
-                asd.println(sourceCode);
                 String modifiedFunction =
                         "entities:Product[] products = check from var e in mcClient->/products(" +
                                 "targetType = entities:Product, whereClause = ` id = ${value}  OR id = 6`, " +
@@ -94,10 +94,22 @@ public class CodeModifierTest {
                         "            limit getValue(4)\n" +
                         "            group by var id3 = getValue(4), var name = e.name, var age = e.age\n" +
                         "            select {id: id3, name: name , age: age};";
+                String modifiedFunction5 = "entities:Product[] output = check from entities:Product e in " +
+                        "mcClient->/products(targetType = entities:Product, whereClause = ` id = ${value}  OR " +
+                        "id = 6 OR id = 7 OR id <> 1 AND id >= 1 AND id <= 20 AND name = " +
+                        "${getStringValue(\"Person2\")} `, orderByClause = ` ${getStringValue(\"name\")} ASC , " +
+                        "age DESC `, groupByClause = ` ${getValue(4)}, name, age`, limitClause = ` ${getValue(4)}`)\n" +
+                        "                order by getStringValue(\"name\") ascending, e.age descending\n" +
+                        "                limit getValue(4)\n" +
+                        "                where e.id == value || e.id == 6 || e.id == 7 || e.id != 1  && e.id >= 1 " +
+                        "&& e.id <= 20 && e.name == getStringValue(\"Person2\")\n" +
+                        "                group by var id3 = getValue(4), var name = e.name, var age = e.age\n" +
+                        "                select {id: id3, name: name , age: age};\n";
                 Assert.assertTrue(sourceCode.contains(modifiedFunction));
                 Assert.assertTrue(sourceCode.contains(modifiedFunction1));
                 Assert.assertTrue(sourceCode.contains(modifiedFunction2));
                 Assert.assertTrue(sourceCode.contains(modifiedFunction3));
+                Assert.assertTrue(sourceCode.contains(modifiedFunction5));
             }
         }
     }
@@ -108,11 +120,16 @@ public class CodeModifierTest {
         DiagnosticResult diagnosticResult = currentPackage.getCompilation().diagnosticResult();
         Assert.assertEquals(diagnosticResult.errorCount(), 0);
         CodeModifierResult codeModifierResult = currentPackage.runCodeModifierPlugins();
-        codeModifierResult.reportedDiagnostics().diagnostics().forEach(diagnostic -> {
-            Assert.assertEquals(diagnostic.diagnosticInfo().severity(), DiagnosticSeverity.ERROR);
-            Assert.assertTrue(diagnostic.diagnosticInfo().messageFormat().contains("'whereClause' argument is not " +
-                    "allowed for the remote function call"));
-        });
+        List<Diagnostic> errorDiagnosticsList = codeModifierResult.reportedDiagnostics().diagnostics().stream()
+                .filter(r -> r.diagnosticInfo().severity().equals(DiagnosticSeverity.ERROR))
+                .collect(Collectors.toList());
+        Assert.assertEquals(errorDiagnosticsList.size(), 6);
+        String errorMessage = "persist remote function call does not support";
+        String errMessage = "group by clause cannot be used before where clause";
+        String msg = errorDiagnosticsList.get(5).message();
+        String message = errorDiagnosticsList.get(0).message();
+        Assert.assertTrue(message.contains(errorMessage) || msg.contains(errorMessage));
+        Assert.assertTrue(message.contains(errMessage) || msg.contains(errMessage));
     }
 
     private Package getModifiedPackage(String path) {

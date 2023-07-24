@@ -5,8 +5,5 @@ class = "io.ballerina.stdlib.persist.sql.compiler.PersistSqlCompilerPlugin"
 [[dependency]]
 path = "../compiler-plugin/build/libs/persist.sql-compiler-plugin-1.1.1-SNAPSHOT.jar"
 
-[[platform.java11.dependency]]
-groupId = "io.ballerina.stdlib"
-artifactId = "persist-native"
-version = "1.1.1"
-path = "./lib/persist-native-1.1.1-SNAPSHOT.jar"
+[[dependency]]
+path = "./lib/persist-native-1.1.1-20230725-121500-7a31b86.jar"

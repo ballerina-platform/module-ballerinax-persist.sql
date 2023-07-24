@@ -22,7 +22,6 @@ import io.ballerina.compiler.syntax.tree.AbstractNodeFactory;
 import io.ballerina.compiler.syntax.tree.BasicLiteralNode;
 import io.ballerina.compiler.syntax.tree.BindingPatternNode;
 import io.ballerina.compiler.syntax.tree.CaptureBindingPatternNode;
-import io.ballerina.compiler.syntax.tree.ChildNodeEntry;
 import io.ballerina.compiler.syntax.tree.ClientResourceAccessActionNode;
 import io.ballerina.compiler.syntax.tree.ExpressionNode;
 import io.ballerina.compiler.syntax.tree.FieldAccessExpressionNode;
@@ -37,7 +36,6 @@ import io.ballerina.compiler.syntax.tree.LimitClauseNode;
 import io.ballerina.compiler.syntax.tree.MappingBindingPatternNode;
 import io.ballerina.compiler.syntax.tree.ModulePartNode;
 import io.ballerina.compiler.syntax.tree.NameReferenceNode;
-import io.ballerina.compiler.syntax.tree.NamedArgumentNode;
 import io.ballerina.compiler.syntax.tree.Node;
 import io.ballerina.compiler.syntax.tree.NodeFactory;
 import io.ballerina.compiler.syntax.tree.NodeList;
@@ -61,68 +59,42 @@ import io.ballerina.projects.Package;
 import io.ballerina.projects.plugins.ModifierTask;
 import io.ballerina.projects.plugins.SourceModifierContext;
 import io.ballerina.stdlib.persist.sql.compiler.Constants;
-import io.ballerina.stdlib.persist.sql.compiler.DiagnosticsCodes;
 import io.ballerina.stdlib.persist.sql.compiler.exception.NotSupportedExpressionException;
 import io.ballerina.stdlib.persist.sql.compiler.expression.ExpressionBuilder;
 import io.ballerina.stdlib.persist.sql.compiler.expression.ExpressionVisitor;
+import io.ballerina.stdlib.persist.sql.compiler.model.Query;
 import io.ballerina.stdlib.persist.sql.compiler.utils.Utils;
-import io.ballerina.tools.diagnostics.Diagnostic;
-import io.ballerina.tools.diagnostics.DiagnosticFactory;
-import io.ballerina.tools.diagnostics.DiagnosticInfo;
 import org.ballerinalang.formatter.core.Formatter;
 import org.ballerinalang.formatter.core.FormatterException;
 
-import java.io.PrintStream;
-import java.text.MessageFormat;
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.List;
 import java.util.Map;
-import java.util.Optional;
-import java.util.stream.Collectors;
 
 /**
  * Code modifier for query expression.
  */
 public class QueryCodeModifierTask implements ModifierTask<SourceModifierContext> {
 
-    private final Map<String, String> variables;
-    private final List<String> entities;
-    private final List<String> persistClientNames;
-    private final List<String> persistClientVariables = new ArrayList<>();
-    private boolean isClientVariablesProcessed = false;
+    private final Map<QueryPipelineNode, Query> validatedQueries;
 
-    public QueryCodeModifierTask(List<String> persistClientNames, List<String> entities,
-                                 Map<String, String> variables) {
-        this.entities = entities;
-        this.variables = variables;
-        this.persistClientNames = persistClientNames;
+    public QueryCodeModifierTask(Map<QueryPipelineNode, Query> validatedQueries) {
+        this.validatedQueries = validatedQueries;
     }
 
     @Override
     public void modify(SourceModifierContext sourceModifierContext) {
-        if (persistClientNames.isEmpty()) {
-            return;
-        }
-        if (!isClientVariablesProcessed) {
-            processPersistClientVariables();
-        }
-
-        if (this.persistClientVariables.isEmpty()) {
-            return;
-        }
-
         Package pkg = sourceModifierContext.currentPackage();
         for (ModuleId moduleId : pkg.moduleIds()) {
             Module module = pkg.module(moduleId);
             for (DocumentId documentId : module.documentIds()) {
-                SyntaxTree syntaxTree = getUpdatedSyntaxTree(module, documentId, sourceModifierContext);
+                SyntaxTree syntaxTree = getUpdatedSyntaxTree(module, documentId, this.validatedQueries);
                 if (syntaxTree != null) {
                     sourceModifierContext.modifySourceFile(syntaxTree.textDocument(), documentId);
                 }
             }
             for (DocumentId documentId : module.testDocumentIds()) {
-                SyntaxTree syntaxTree = getUpdatedSyntaxTree(module, documentId, sourceModifierContext);
+                SyntaxTree syntaxTree = getUpdatedSyntaxTree(module, documentId, this.validatedQueries);
                 if (syntaxTree != null) {
                     sourceModifierContext.modifyTestSourceFile(syntaxTree.textDocument(), documentId);
                 }
@@ -130,11 +102,11 @@ public class QueryCodeModifierTask implements ModifierTask<SourceModifierContext
         }
     }
 
-    private SyntaxTree getUpdatedSyntaxTree(Module module, DocumentId documentId, SourceModifierContext ctx) {
+    private SyntaxTree getUpdatedSyntaxTree(Module module, DocumentId documentId,
+                                            Map<QueryPipelineNode, Query> validatedQueries) {
         Document document = module.document(documentId);
         ModulePartNode rootNode = document.syntaxTree().rootNode();
-        QueryConstructModifier queryConstructModifier = new QueryConstructModifier(entities,
-                persistClientVariables, ctx);
+        QueryConstructModifier queryConstructModifier = new QueryConstructModifier(validatedQueries);
         ModulePartNode newRoot = (ModulePartNode) rootNode.apply(queryConstructModifier);
         if (queryConstructModifier.isSourceCodeModified()) {
             SyntaxTree syntaxTree = document.syntaxTree().modifyWith(newRoot);
@@ -148,60 +120,34 @@ public class QueryCodeModifierTask implements ModifierTask<SourceModifierContext
         return null;
     }
 
-    private void processPersistClientVariables() {
-        for (Map.Entry<String, String> entry : this.variables.entrySet()) {
-            String[] strings = entry.getValue().split(":");
-            if (persistClientNames.contains(strings[strings.length - 1])) {
-                persistClientVariables.add(entry.getKey());
-            }
-        }
-        isClientVariablesProcessed = true;
-    }
-
     private static class QueryConstructModifier extends TreeModifier {
-        private final List<String> persistClientVariables;
-        private final List<String> entities;
         private boolean isSourceCodeModified = false;
-        private SourceModifierContext ctx;
+        private final Map<QueryPipelineNode, Query> validatedQueries;
 
-        public QueryConstructModifier(List<String> entities, List<String> persistClientVariables,
-                                      SourceModifierContext ctx) {
-            this.entities = entities;
-            this.persistClientVariables = persistClientVariables;
-            this.ctx = ctx;
+        public QueryConstructModifier(Map<QueryPipelineNode, Query> validatedQueries) {
+            this.validatedQueries = validatedQueries;
         }
 
         @Override
         public QueryPipelineNode transform(QueryPipelineNode queryPipelineNode) {
+            if (!validatedQueries.containsKey(queryPipelineNode)) {
+                return queryPipelineNode;
+            }
+            Query query = validatedQueries.get(queryPipelineNode);
+
+            if (query.getLetClauseNodes().size() > 0) {
+                return queryPipelineNode;
+            }
             FromClauseNode fromClauseNode = queryPipelineNode.fromClause();
-            if (!isQueryUsingPersistentClient(fromClauseNode)) {
-                return queryPipelineNode;
-            }
-
             NodeList<IntermediateClauseNode> intermediateClauseNodes = queryPipelineNode.intermediateClauses();
-            List<IntermediateClauseNode> letClauseNodes = intermediateClauseNodes.stream()
-                    .filter((node) -> node.kind().equals(SyntaxKind.LET_CLAUSE))
-                    .collect(Collectors.toList());
-            boolean isLetClauseNodesUsed = letClauseNodes.size() != 0;
-            if (isLetClauseNodesUsed) {
-                return queryPipelineNode;
-            }
 
-            List<IntermediateClauseNode> whereClauseNode = intermediateClauseNodes.stream()
-                    .filter((node) -> node instanceof WhereClauseNode)
-                    .collect(Collectors.toList());
+            List<IntermediateClauseNode> whereClauseNode = query.getWhereClause();
 
-            List<IntermediateClauseNode> orderByClauseNode = intermediateClauseNodes.stream()
-                    .filter((node) -> node instanceof OrderByClauseNode)
-                    .collect(Collectors.toList());
+            List<IntermediateClauseNode> orderByClauseNode = query.getOrderByClause();
 
-            List<IntermediateClauseNode> limitClauseNode = intermediateClauseNodes.stream()
-                    .filter((node) -> node instanceof LimitClauseNode)
-                    .collect(Collectors.toList());
+            List<IntermediateClauseNode> limitClauseNode = query.getLimitClauses();
 
-            List<IntermediateClauseNode> groupByClauseNode = intermediateClauseNodes.stream()
-                    .filter((node) -> node instanceof GroupByClauseNode)
-                    .collect(Collectors.toList());
+            List<IntermediateClauseNode> groupByClauseNode = query.getGroupByClauses();
 
             boolean isWhereClauseUsed = whereClauseNode.size() != 0;
             boolean isOrderByClauseUsed = orderByClauseNode.size() != 0;
@@ -214,12 +160,9 @@ public class QueryCodeModifierTask implements ModifierTask<SourceModifierContext
 
             ClientResourceAccessActionNode clientResourceAccessActionNode =
                     (ClientResourceAccessActionNode) fromClauseNode.expression();
-            Optional<ParenthesizedArgList> argument = clientResourceAccessActionNode.arguments();
-            if (argument.isEmpty()) {
-                return queryPipelineNode;
-            }
+            SeparatedNodeList<FunctionArgumentNode> queryArguments = query.getArguments();
             List<Node> arguments = new ArrayList<>();
-            arguments.add(argument.get().arguments().get(0));
+            arguments.add(queryArguments.get(0));
             if (isWhereClauseUsed) {
                 List<Node> whereClauseParameterizedQuery = new ArrayList<>();
                 whereClauseParameterizedQuery.add(Utils.getStringLiteralToken(Constants.SPACE));
@@ -308,7 +251,6 @@ public class QueryCodeModifierTask implements ModifierTask<SourceModifierContext
                         parameterizedQueryForOrder.expression()));
             }
             int argumentSize = arguments.size();
-            // todo: need to handle more than 4 arguments
             SeparatedNodeList<FunctionArgumentNode> separatedNodeList;
             if (argumentSize == 2) {
                 separatedNodeList = NodeFactory.createSeparatedNodeList(arguments.get(0),
@@ -357,67 +299,6 @@ public class QueryCodeModifierTask implements ModifierTask<SourceModifierContext
 
         public boolean isSourceCodeModified() {
             return this.isSourceCodeModified;
-        }
-
-        private boolean isQueryUsingPersistentClient(FromClauseNode fromClauseNode) {
-            // From clause should contain resource call invocation
-            if (fromClauseNode.expression() instanceof ClientResourceAccessActionNode) {
-                ClientResourceAccessActionNode remoteCall =
-                        (ClientResourceAccessActionNode) fromClauseNode.expression();
-                Collection<ChildNodeEntry> clientResourceChildEntries = remoteCall.childEntries();
-                int size = clientResourceChildEntries.size();
-                PrintStream asd = System.out;
-                asd.println("size: " + size);
-                if (size != 5 && size != 7) {
-                    return false;
-                }
-                if (remoteCall.expression() instanceof SimpleNameReferenceNode) {
-                    SimpleNameReferenceNode clientName = (SimpleNameReferenceNode) remoteCall.expression();
-                    if (!this.persistClientVariables.contains(clientName.name().text().trim())) {
-                        return false;
-                    }
-                    Object[] childEntries = clientResourceChildEntries.toArray();
-                    boolean validResourcePath = false;
-                    Optional<Node> resourcePath = ((ChildNodeEntry) childEntries[3]).node();
-                    if (resourcePath.isPresent() && this.entities.contains(resourcePath.get().toString().trim())) {
-                        validResourcePath = true;
-                        if (clientResourceChildEntries.size() == 7) {
-                            resourcePath = ((ChildNodeEntry) childEntries[5]).node();
-                            validResourcePath = resourcePath.isPresent() &&
-                                    resourcePath.get().toString().trim().equals("get");
-                        }
-                    }
-                    boolean hasTargetType = false;
-                    boolean hasClauseVariable = false;
-                    if (validResourcePath) {
-                        Optional<ParenthesizedArgList> arguments = remoteCall.arguments();
-                        if (arguments.isPresent()) {
-                            SeparatedNodeList<FunctionArgumentNode> argumentNodes = arguments.get().arguments();
-                            for (FunctionArgumentNode functionArgumentNode: argumentNodes) {
-                                if (functionArgumentNode instanceof NamedArgumentNode) {
-                                    NamedArgumentNode namedArgumentNode = (NamedArgumentNode) functionArgumentNode;
-                                    String argumentsName = namedArgumentNode.argumentName().toString().trim();
-                                    if (namedArgumentNode.argumentName().toString().trim().equals("targetType")) {
-                                        hasTargetType = true;
-                                    } else {
-                                        hasClauseVariable = true;
-                                        DiagnosticInfo diagnosticInfo = new DiagnosticInfo(DiagnosticsCodes.
-                                                PERSIST_SQL_202.getCode(), MessageFormat.format(
-                                                        DiagnosticsCodes.PERSIST_SQL_202.getMessage(), argumentsName),
-                                                DiagnosticsCodes.PERSIST_SQL_202.getSeverity());
-                                        Diagnostic diagnostic = DiagnosticFactory.createDiagnostic(diagnosticInfo,
-                                                functionArgumentNode.location());
-                                        ctx.reportDiagnostic(diagnostic);
-                                    }
-                                }
-                            }
-                            return hasTargetType && !hasClauseVariable;
-                        }
-                    }
-                    return validResourcePath;
-                }
-            }
-            return false;
         }
 
         private List<Node> processWhereClause(WhereClauseNode whereClauseNode, BindingPatternNode bindingPatternNode)

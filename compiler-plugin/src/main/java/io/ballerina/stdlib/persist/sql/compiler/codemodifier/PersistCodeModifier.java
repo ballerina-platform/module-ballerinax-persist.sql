@@ -18,9 +18,11 @@
 
 package io.ballerina.stdlib.persist.sql.compiler.codemodifier;
 
+import io.ballerina.compiler.syntax.tree.QueryPipelineNode;
 import io.ballerina.compiler.syntax.tree.SyntaxKind;
 import io.ballerina.projects.plugins.CodeModifier;
 import io.ballerina.projects.plugins.CodeModifierContext;
+import io.ballerina.stdlib.persist.sql.compiler.model.Query;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -34,20 +36,22 @@ import java.util.Map;
 public class PersistCodeModifier extends CodeModifier {
 
     private final List<String> persistClientNames = new ArrayList<>();
+    private final List<String> persistClientVariableNames = new ArrayList<>();
     private final Map<String, String> variables = new HashMap<>();
     private final List<String> entities = new ArrayList<>();
+    private final Map<QueryPipelineNode, Query> queries = new HashMap<>();
+    private final Map<QueryPipelineNode, Query> validatedQueries = new HashMap<>();
 
     @Override
     public void init(CodeModifierContext codeModifierContext) {
-        // Add validations for unsupported expressions in where clause
-        codeModifierContext.addSyntaxNodeAnalysisTask(new PersistQueryValidator(), SyntaxKind.QUERY_PIPELINE);
-        // Identify all persist client in the package and declared entity
+        // Add validations to find the query
+        codeModifierContext.addSyntaxNodeAnalysisTask(new PersistQueryValidator(entities, persistClientNames,
+                variables, queries, validatedQueries, persistClientVariableNames), SyntaxKind.QUERY_PIPELINE);
+        // Identify all persist client in the package and all declared entity and variable names with type.
         codeModifierContext.addSyntaxNodeAnalysisTask(new PersistEntityAndClassIdentifierTask(
-                entities, persistClientNames), SyntaxKind.MODULE_PART);
-        // Identify all declared variable names with type
-        codeModifierContext.addSyntaxNodeAnalysisTask(new PersistVariableIdentifierTask(variables),
-                Arrays.asList(SyntaxKind.LOCAL_VAR_DECL, SyntaxKind.MODULE_VAR_DECL));
+                entities, persistClientNames, variables, queries, validatedQueries, persistClientVariableNames),
+                Arrays.asList(SyntaxKind.LOCAL_VAR_DECL, SyntaxKind.MODULE_VAR_DECL, SyntaxKind.MODULE_PART));
 
-        codeModifierContext.addSourceModifierTask(new QueryCodeModifierTask(persistClientNames, entities, variables));
+        codeModifierContext.addSourceModifierTask(new QueryCodeModifierTask(validatedQueries));
     }
 }

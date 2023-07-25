@@ -63,7 +63,7 @@ public class PersistSQLStream {
 
                 string[] keyFields = (<SQLClient>self.persistClient).getKeyFields();
                 foreach string keyField in keyFields {
-                    if self.fields.indexOf(keyField) is () && value.hasKey(keyField) {
+                    if self.fields.indexOf(keyField) is () {
                         _ = value.remove(keyField);
                     }
                 }

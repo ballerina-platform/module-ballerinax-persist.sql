@@ -31,8 +31,7 @@ import static io.ballerina.compiler.syntax.tree.AbstractNodeFactory.createEmptyM
  */
 public class Utils {
 
-    private Utils() {
-    }
+    private Utils() {}
 
     public static boolean hasCompilationErrors(SyntaxNodeAnalysisContext context) {
         for (Diagnostic diagnostic : context.compilation().diagnosticResult().diagnostics()) {

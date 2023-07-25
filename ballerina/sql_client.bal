@@ -483,9 +483,9 @@ public isolated client class SQLClient {
     }
 }
 
-isolated function addClauseToQuery(sql:ParameterizedQuery query, sql:ParameterizedQuery clauseQuery, sql:ParameterizedQuery clause) returns sql:ParameterizedQuery {
+isolated function addClauseToQuery(sql:ParameterizedQuery query, sql:ParameterizedQuery clauseQuery, sql:ParameterizedQuery sqlKeyword) returns sql:ParameterizedQuery {
     if (clauseQuery.insertions.length() == 0) {
-        return sql:queryConcat(query, clause, clauseQuery);
+        return sql:queryConcat(query, sqlKeyword, clauseQuery);
     } else {
         string queryInString = "";
         string[] queryStrings = clauseQuery.strings;
@@ -497,7 +497,7 @@ isolated function addClauseToQuery(sql:ParameterizedQuery query, sql:Parameteriz
         queryInString += queryStrings[i];
         sql:ParameterizedQuery queryString = ``;
         queryString.strings = [queryInString];
-        return sql:queryConcat(query, clause, queryString);
+        return sql:queryConcat(query, sqlKeyword, queryString);
     }
 }
 

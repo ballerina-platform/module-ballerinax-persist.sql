@@ -57,6 +57,9 @@ import static io.ballerina.stdlib.persist.Utils.getTransactionContextProperties;
  */
 class SQLProcessor {
 
+    private SQLProcessor() {
+    }
+
     static BStream query(Environment env, BObject client, BTypedesc targetType, BObject whereClause,
                          BObject orderByClause, BObject limitClause, BObject groupByClause) {
         // This method will return `stream<targetType, persist:Error?>`

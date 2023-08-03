@@ -5,7 +5,7 @@
 
 [ballerina]
 dependencies-toml-version = "2"
-distribution-version = "2201.8.0-20230728-152600-1354792e"
+distribution-version = "2201.8.0-SNAPSHOT"
 
 [[package]]
 org = "ballerina"
@@ -408,7 +408,7 @@ modules = [
 [[package]]
 org = "ballerinax"
 name = "mysql"
-version = "1.10.1"
+version = "1.10.0"
 scope = "testOnly"
 dependencies = [
 	{org = "ballerina", name = "crypto"},

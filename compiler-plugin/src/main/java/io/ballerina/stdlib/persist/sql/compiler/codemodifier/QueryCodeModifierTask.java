@@ -39,6 +39,7 @@ import io.ballerina.compiler.syntax.tree.NameReferenceNode;
 import io.ballerina.compiler.syntax.tree.Node;
 import io.ballerina.compiler.syntax.tree.NodeFactory;
 import io.ballerina.compiler.syntax.tree.NodeList;
+import io.ballerina.compiler.syntax.tree.OptionalFieldAccessExpressionNode;
 import io.ballerina.compiler.syntax.tree.OrderByClauseNode;
 import io.ballerina.compiler.syntax.tree.OrderKeyNode;
 import io.ballerina.compiler.syntax.tree.ParenthesizedArgList;
@@ -169,10 +170,9 @@ public class QueryCodeModifierTask implements ModifierTask<SourceModifierContext
 
                 try {
                     List<Node> whereClause = processWhereClause(((WhereClauseNode) whereClauseNode.get(0)),
-                            fromClauseNode.typedBindingPattern().bindingPattern());
+                            fromClauseNode.typedBindingPattern().bindingPattern(), query);
                     whereClauseParameterizedQuery.addAll(whereClause);
                 } catch (NotSupportedExpressionException e) {
-                    // Need to
                     return queryPipelineNode;
                 }
 
@@ -194,7 +194,7 @@ public class QueryCodeModifierTask implements ModifierTask<SourceModifierContext
                 orderByClauseParameterizedQuery.add(Utils.getStringLiteralToken(Constants.SPACE));
 
                 Node orderByClause = processOrderByClause(((OrderByClauseNode) orderByClauseNode.get(0)),
-                        fromClauseNode.typedBindingPattern().bindingPattern());
+                        fromClauseNode.typedBindingPattern().bindingPattern(), query);
                 orderByClauseParameterizedQuery.add(orderByClause);
 
                 PositionalArgumentNode parameterizedQueryForOrder = NodeFactory.createPositionalArgumentNode(
@@ -216,7 +216,7 @@ public class QueryCodeModifierTask implements ModifierTask<SourceModifierContext
                 groupByClauseParameterizedQuery.add(Utils.getStringLiteralToken(Constants.SPACE));
 
                 Node groupByClause = processGroupByClause(((GroupByClauseNode) groupByClauseNode.get(0)),
-                        fromClauseNode.typedBindingPattern().bindingPattern());
+                        fromClauseNode.typedBindingPattern().bindingPattern(), query);
                 groupByClauseParameterizedQuery.add(groupByClause);
 
                 PositionalArgumentNode parameterizedQueryForGroupBy = NodeFactory.createPositionalArgumentNode(
@@ -301,37 +301,55 @@ public class QueryCodeModifierTask implements ModifierTask<SourceModifierContext
             return this.isSourceCodeModified;
         }
 
-        private List<Node> processWhereClause(WhereClauseNode whereClauseNode, BindingPatternNode bindingPatternNode)
+        private List<Node> processWhereClause(WhereClauseNode whereClauseNode, BindingPatternNode bindingPatternNode,
+                                              Query query)
                 throws NotSupportedExpressionException {
             ExpressionBuilder expressionBuilder = new ExpressionBuilder(whereClauseNode.expression(),
                     bindingPatternNode);
             ExpressionVisitor expressionVisitor = new ExpressionVisitor();
-            expressionBuilder.build(expressionVisitor);
+            expressionBuilder.build(expressionVisitor, query);
             return expressionVisitor.getExpression();
         }
 
         private Node processOrderByClause(OrderByClauseNode orderByClauseNode,
-                                          BindingPatternNode bindingPatternNode) {
+                                          BindingPatternNode bindingPatternNode, Query query) {
             StringBuilder orderByClause = new StringBuilder();
             SeparatedNodeList<OrderKeyNode> orderKeyNodes = orderByClauseNode.orderKey();
+            String tableName = query.getTableName();
             for (int i = 0; i < orderKeyNodes.size(); i++) {
                 if (i != 0) {
                     orderByClause.append(Constants.COMMA_WITH_SPACE);
                 }
                 ExpressionNode expression = orderKeyNodes.get(i).expression();
                 if (expression instanceof FieldAccessExpressionNode) {
-                    FieldAccessExpressionNode fieldAccessNode = (FieldAccessExpressionNode) expression;
                     if (!(bindingPatternNode instanceof CaptureBindingPatternNode)) {
                         // If this is not capture pattern there is compilation error
                         return null;
                     }
-                    String bindingVariableName = ((CaptureBindingPatternNode) bindingPatternNode).variableName().text();
-                    String recordName = ((SimpleNameReferenceNode) fieldAccessNode.expression()).name().text();
-                    if (!bindingVariableName.equals(recordName)) {
-                        return null;
+                    String bindingVariableName = ((CaptureBindingPatternNode) bindingPatternNode).
+                            variableName().text();
+                    FieldAccessExpressionNode fieldAccessNode = (FieldAccessExpressionNode) expression;
+                    Node node = fieldAccessNode.expression();
+                    if (node instanceof FieldAccessExpressionNode) {
+                        FieldAccessExpressionNode accessExpressionNode = ((FieldAccessExpressionNode) node);
+                        if (!bindingVariableName.equals(accessExpressionNode.expression().toSourceCode().trim())) {
+                            return null;
+                        }
+                        String relationalTableName = Utils.stripEscapeCharacter(accessExpressionNode.fieldName().
+                                toSourceCode().trim());
+                        orderByClause.append(relationalTableName).append(".").
+                                append(Utils.stripEscapeCharacter(((FieldAccessExpressionNode) expression).fieldName().
+                                        toSourceCode().trim()));
+                    } else {
+                        String recordName = Utils.stripEscapeCharacter(((SimpleNameReferenceNode) fieldAccessNode.
+                                expression()).name().text());
+                        if (!bindingVariableName.equals(recordName)) {
+                            return null;
+                        }
+                        orderByClause.append(tableName).append(".").append(
+                                Utils.stripEscapeCharacter(((SimpleNameReferenceNode) fieldAccessNode.fieldName()).
+                                        name().text()));
                     }
-                    String fieldName = ((SimpleNameReferenceNode) fieldAccessNode.fieldName()).name().text();
-                    orderByClause.append(fieldName);
                 } else if (expression instanceof SimpleNameReferenceNode) {
                     String fieldName = ((SimpleNameReferenceNode) expression).name().text();
 
@@ -351,15 +369,14 @@ public class QueryCodeModifierTask implements ModifierTask<SourceModifierContext
                     if (!isCorrectField) {
                         return null;
                     }
-                    orderByClause.append(fieldName);
+                    orderByClause.append(tableName).append(".").append(fieldName);
+                } else if (expression instanceof OptionalFieldAccessExpressionNode) {
+                    OptionalFieldAccessExpressionNode fieldNode = (OptionalFieldAccessExpressionNode) expression;
+                    orderByClause.append(Utils.getReferenceTableName(fieldNode)).append(".").
+                            append(Utils.stripEscapeCharacter(fieldNode.fieldName().toSourceCode().trim()));
                 } else if (expression instanceof FunctionCallExpressionNode) {
-                    FunctionCallExpressionNode functionCallExpressionNode = (FunctionCallExpressionNode) expression;
-                    NameReferenceNode fun = functionCallExpressionNode.functionName();
-                    SeparatedNodeList<FunctionArgumentNode> arguments = functionCallExpressionNode.arguments();
-                    String referencedName =  Constants.INTERPOLATION_START_TOKEN + fun.toSourceCode().trim() +
-                            functionCallExpressionNode.openParenToken().text() +  arguments.get(0).toSourceCode() +
-                            functionCallExpressionNode.closeParenToken().text() +  Constants.INTERPOLATION_END_TOKEN;
-                    orderByClause.append(referencedName);
+                    orderByClause.append(Constants.INTERPOLATION_START_TOKEN).append(Utils.getReferenceTableName(
+                            (FunctionCallExpressionNode) expression)).append(Constants.INTERPOLATION_END_TOKEN);
                 } else {
                     // Persistent client does not support order by using parameters
                     return null;
@@ -379,9 +396,10 @@ public class QueryCodeModifierTask implements ModifierTask<SourceModifierContext
         }
 
         private Node processGroupByClause(GroupByClauseNode groupByClauseNode,
-                                          BindingPatternNode bindingPatternNode) {
+                                          BindingPatternNode bindingPatternNode, Query query) {
             StringBuilder groupByClause = new StringBuilder();
             SeparatedNodeList<Node> groupingKey = groupByClauseNode.groupingKey();
+            String tableName = query.getTableName();
             for (int i = 0; i < groupingKey.size(); i++) {
                 if (i != 0) {
                     groupByClause.append(Constants.COMMA_WITH_SPACE);
@@ -398,16 +416,16 @@ public class QueryCodeModifierTask implements ModifierTask<SourceModifierContext
                     if (!bindingVariableName.equals(recordName)) {
                         return null;
                     }
-                    String fieldName = ((SimpleNameReferenceNode) fieldAccessNode.fieldName()).name().text();
-                    groupByClause.append(fieldName);
+                    String fieldName = Utils.stripEscapeCharacter(((SimpleNameReferenceNode) fieldAccessNode.
+                            fieldName()).name().text());
+                    groupByClause.append(tableName).append(".").append(fieldName);
+                } else if (expression instanceof OptionalFieldAccessExpressionNode) {
+                    OptionalFieldAccessExpressionNode fieldNode = (OptionalFieldAccessExpressionNode) expression;
+                    groupByClause.append(Utils.getReferenceTableName(fieldNode)).
+                            append(".").append(Utils.stripEscapeCharacter(fieldNode.fieldName().toSourceCode().trim()));
                 } else if (expression instanceof FunctionCallExpressionNode) {
-                    FunctionCallExpressionNode functionCallExpressionNode = (FunctionCallExpressionNode) expression;
-                    NameReferenceNode fun = functionCallExpressionNode.functionName();
-                    SeparatedNodeList<FunctionArgumentNode> arguments = functionCallExpressionNode.arguments();
-                    String referencedName = Constants.INTERPOLATION_START_TOKEN + fun.toSourceCode().trim() +
-                            functionCallExpressionNode.openParenToken().text() +  arguments.get(0).toSourceCode() +
-                            functionCallExpressionNode.closeParenToken().text() + Constants.INTERPOLATION_END_TOKEN;
-                    groupByClause.append(referencedName);
+                    groupByClause.append(Constants.INTERPOLATION_START_TOKEN).append(Utils.getReferenceTableName(
+                            (FunctionCallExpressionNode) expression)).append(Constants.INTERPOLATION_END_TOKEN);
                 } else {
                     // Persistent client does not support group by using parameters
                     return null;

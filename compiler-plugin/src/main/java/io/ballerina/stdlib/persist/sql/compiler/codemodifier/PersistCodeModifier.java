@@ -38,7 +38,7 @@ public class PersistCodeModifier extends CodeModifier {
     private final List<String> persistClientNames = new ArrayList<>();
     private final List<String> persistClientVariableNames = new ArrayList<>();
     private final Map<String, String> variables = new HashMap<>();
-    private final List<String> entities = new ArrayList<>();
+    private final Map<String, String> entities = new HashMap<>();
     private final Map<QueryPipelineNode, Query> queries = new HashMap<>();
     private final Map<QueryPipelineNode, Query> validatedQueries = new HashMap<>();
 

@@ -44,12 +44,13 @@ import java.util.stream.Collectors;
  * Analysis task to identify all declared entities and clients.
  */
 public class PersistEntityAndClassIdentifierTask implements AnalysisTask<SyntaxNodeAnalysisContext>  {
-    private final List<String> entities;
+
+    private final Map<String, String> entities;
     private final List<String> persistClientNames;
     private final Map<String, String> variables;
     PersistQueryValidator queryValidator;
 
-    PersistEntityAndClassIdentifierTask(List<String> entities, List<String> persistClientNames,
+    PersistEntityAndClassIdentifierTask(Map<String, String> entities, List<String> persistClientNames,
                                         Map<String, String> variables, Map<QueryPipelineNode, Query> queries,
                                         Map<QueryPipelineNode, Query> validatedQueries,
                                         List<String> persistClientVariableNames) {
@@ -70,11 +71,16 @@ public class PersistEntityAndClassIdentifierTask implements AnalysisTask<SyntaxN
             ModulePartNode rootNode = (ModulePartNode) ctx.node();
             for (ModuleMemberDeclarationNode member : rootNode.members()) {
                 if (member instanceof TypeDefinitionNode) {
+                    if (!ctx.node().syntaxTree().filePath().equals("persist_types.bal")) {
+                        continue;
+                    }
                     TypeDefinitionNode typeDefinitionNode = (TypeDefinitionNode) member;
                     TypeDescriptorNode typeDescriptorNode = (TypeDescriptorNode) typeDefinitionNode.typeDescriptor();
                     if (typeDescriptorNode instanceof RecordTypeDescriptorNode) {
-                        entities.add(Pluralizer.pluralize(typeDefinitionNode.typeName().text()).
-                                toLowerCase(Locale.ROOT));
+                        String typeName = typeDefinitionNode.typeName().text().trim();
+                        entities.put(Pluralizer.pluralize(Utils.stripEscapeCharacter(typeName).
+                                toLowerCase(Locale.ROOT)), typeName.substring(0, 1).toLowerCase(Locale.ROOT) +
+                                typeName.substring(1));
                     }
                 } else if (member instanceof ClassDefinitionNode) {
                     ClassDefinitionNode classDefinitionNode = (ClassDefinitionNode) member;
@@ -99,4 +105,26 @@ public class PersistEntityAndClassIdentifierTask implements AnalysisTask<SyntaxN
         }
         queryValidator.validateQuery(ctx);
     }
+
+//    private void addTableName(String entityName) {
+//        if (this.tables.size() == 0) {
+//            this.tables.add(entityName);
+//        } else {
+//            boolean isEntity = false;
+//            for (String key : this.tables) {
+//                if (entityName.equalsIgnoreCase(key) ||
+//                        entityName.equalsIgnoreCase(key + "Optionalized") ||
+//                        entityName.equalsIgnoreCase(key + "WithRelations") ||
+//                        entityName.equalsIgnoreCase(key + "TargetType") ||
+//                        entityName.equalsIgnoreCase(key + "Insert") ||
+//                        entityName.equalsIgnoreCase(key + "Update")) {
+//                    isEntity = true;
+//                    break;
+//                }
+//            }
+//            if (!isEntity) {
+//                this.tables.add(entityName);
+//            }
+//        }
+//    }
 }

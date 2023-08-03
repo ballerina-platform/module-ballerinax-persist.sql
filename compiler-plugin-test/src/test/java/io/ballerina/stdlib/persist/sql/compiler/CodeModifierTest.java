@@ -68,37 +68,39 @@ public class CodeModifierTest {
                 String sourceCode = document.syntaxTree().toSourceCode();
                 String modifiedFunction =
                         "entities:Product[] products = check from var e in mcClient->/products(" +
-                                "targetType = entities:Product, whereClause = ` id = ${value}  OR id = 6`, " +
-                                "orderByClause = ` id DESC `, limitClause = ` ${value}`)\n" +
+                                "targetType = entities:Product, whereClause = ` product.id = ${value}  OR " +
+                                "product.id = 6`, orderByClause = ` product.id DESC `, limitClause = ` ${value}`)\n" +
                                 "        where e.id == value || e.id == 6\n" +
                                 "        order by e.id descending\n" +
                                 "        limit value\n" +
                                 "        select e;\n";
                 String modifiedFunction1 =
                         "entities:Product[]|error result = from var e in mcClient->/products(targetType = " +
-                                "entities:Product, whereClause = ` id = ${value}  AND id >= 2 AND id <= 25`)\n" +
-                                "            where e.id == value && e.id >= 2 && e.id <= 25\n" +
+                                "entities:Product, whereClause = ` product.id = ${value}  AND product.id >= 2 AND " +
+                                "product.id <= 25`)\n            where e.id == value && e.id >= 2 && e.id <= 25\n" +
                                 "            select e;\n";
                 String modifiedFunction2 = "products = check from var e in mcClient->/products(targetType = " +
-                        "entities:Product, whereClause = ` ( id = ${value}  OR id = 6)  AND id <> 8`)\n" +
-                        "            where (e.id == value || e.id == 6) && e.id != 8\n" +
+                        "entities:Product, whereClause = ` ( product.id = ${value}  OR product.id = 6)  " +
+                        "AND product.id <> 8`)\n            where (e.id == value || e.id == 6) && e.id != 8\n" +
                         "            select e;\n";
                 String modifiedFunction3 = "entities:Product[] results1 = check from entities:Product e in " +
-                        "mcClient->/products(targetType = entities:Product, whereClause = ` id = ${value}  OR " +
-                        "id = 6 OR id = 7 OR id <> 1 AND id >= 1 AND id <= 20 AND name = " +
-                        "${getStringValue(\"Person2\")} `, orderByClause = ` ${getStringValue(\"name\")} ASC , " +
-                        "age DESC `, groupByClause = ` ${getValue(4)}, name, age`, limitClause = ` ${getValue(4)}`)\n" +
+                        "mcClient->/products(targetType = entities:Product, whereClause = ` product.id = ${value}  " +
+                        "OR product.id = 6 OR product.id = 7 OR product.id <> 1 AND product.id >= 1 AND " +
+                        "product.id <= 20 AND product.name = ${getStringValue(\"Person2\")} `, orderByClause = " +
+                        "` ${getStringValue(\"name\")} ASC , product.age DESC `, groupByClause = " +
+                        "` ${getValue(4)}, product.name, product.age`, limitClause = ` ${getValue(4)}`)\n" +
                         "            where e.id == value || e.id == 6 || e.id == 7 || e.id != 1  && e.id >= 1 " +
                         "&& e.id <= 20 && e.name == getStringValue(\"Person2\")\n" +
                         "            order by getStringValue(\"name\") ascending, e.age descending\n" +
                         "            limit getValue(4)\n" +
                         "            group by var id3 = getValue(4), var name = e.name, var age = e.age\n" +
-                        "            select {id: id3, name: name , age: age};";
+                        "            select {id: id3, name: name , age: age};\n";
                 String modifiedFunction5 = "entities:Product[] output = check from entities:Product e in " +
-                        "mcClient->/products(targetType = entities:Product, whereClause = ` id = ${value}  OR " +
-                        "id = 6 OR id = 7 OR id <> 1 AND id >= 1 AND id <= 20 AND name = " +
-                        "${getStringValue(\"Person2\")} `, orderByClause = ` ${getStringValue(\"name\")} ASC , " +
-                        "age DESC `, groupByClause = ` ${getValue(4)}, name, age`, limitClause = ` ${getValue(4)}`)\n" +
+                        "mcClient->/products(targetType = entities:Product, whereClause = ` product.id = ${value}  " +
+                        "OR product.id = 6 OR product.id = 7 OR product.id <> 1 AND product.id >= 1 AND " +
+                        "product.id <= 20 AND product.name = ${getStringValue(\"Person2\")} `, " +
+                        "orderByClause = ` ${getStringValue(\"name\")} ASC , product.age DESC `, groupByClause = " +
+                        "` ${getValue(4)}, product.name, product.age`, limitClause = ` ${getValue(4)}`)\n" +
                         "                order by getStringValue(\"name\") ascending, e.age descending\n" +
                         "                limit getValue(4)\n" +
                         "                where e.id == value || e.id == 6 || e.id == 7 || e.id != 1  && e.id >= 1 " +
@@ -110,6 +112,126 @@ public class CodeModifierTest {
                 Assert.assertTrue(sourceCode.contains(modifiedFunction2));
                 Assert.assertTrue(sourceCode.contains(modifiedFunction3));
                 Assert.assertTrue(sourceCode.contains(modifiedFunction5));
+            }
+        }
+    }
+
+    @Test
+    public void testCodeModifierWithRelationTables() {
+
+        Package newPackage = getModifiedPackage("project_3");
+
+        for (DocumentId documentId : newPackage.getDefaultModule().documentIds()) {
+            Document document = newPackage.getDefaultModule().document(documentId);
+
+            if (document.name().equals("main.bal")) {
+                String sourceCode = document.syntaxTree().toSourceCode();
+                String modifiedFunction = "entities:ProductWithRelations[] out =  check from " +
+                        "entities:ProductWithRelations e in mcClient->/products(targetType = " +
+                        "entities:ProductWithRelations, whereClause = ` product.id = ${val}  OR product.id = 6 " +
+                        "OR product.id = 7 OR product.id <> 1 AND product.id >= 1 AND product.id <= 20 " +
+                        "AND product.name = ${getStringValue(\"abc\")}  OR manufacture.id = \"1\"`, " +
+                        "orderByClause = ` ${getStringValue(\"name\")} ASC `, limitClause = ` ${getValue(2)}`)\n" +
+                        "               order by getStringValue(\"name\") ascending\n" +
+                        "               limit getValue(2)\n" +
+                        "               where e.id == val || e.id == 6 || e.id == 7 || e.id != 1  && " +
+                        "e.id >= 1 && e.id <= 20 && e.name == getStringValue(\"abc\") || " +
+                        "e.manufacture[0].id == \"1\"\n" +
+                        "               select e;\n";
+                String modifiedFunction1 = "entities:ManufactureWithRelations[] output = check from " +
+                        "entities:ManufactureWithRelations e in mcClient->/manufactures(targetType = " +
+                        "entities:ManufactureWithRelations, whereClause = ` manufacture.id = ${value}  " +
+                        "OR manufacture.id = \"6\" OR manufacture.id = \"7\" OR products.id = 1`, orderByClause = " +
+                        "` ${getStringValue(\"name\")} ASC , products.id DESC `, limitClause = ` ${getValue(2)}`)\n" +
+                        "               order by getStringValue(\"name\") ascending, e.products?.id descending\n" +
+                        "               limit getValue(2)\n" +
+                        "               where e.id == value || e.id == \"6\" || e.id == \"7\" || " +
+                        "e.products?.id == 1\n" +
+                        "               select e;\n";
+                Assert.assertTrue(sourceCode.contains(modifiedFunction));
+                Assert.assertTrue(sourceCode.contains(modifiedFunction1));
+            }
+        }
+    }
+
+    @Test
+    public void testCodeModifierWhenNameHasEscapeCharacter() {
+
+        Package newPackage = getModifiedPackage("project_4");
+
+        for (DocumentId documentId : newPackage.getDefaultModule().documentIds()) {
+            Document document = newPackage.getDefaultModule().document(documentId);
+
+            if (document.name().equals("main.bal")) {
+                String sourceCode = document.syntaxTree().toSourceCode();
+                String modifiedFunction = "entities:Employee[] output = check from entities:Employee e in " +
+                        "mcClient->/employees(targetType = entities:Employee, whereClause = ` employee.lastName = " +
+                        "${getStringValue(value)}  OR employee.empNo = \"001\"`, orderByClause = ` " +
+                        "employee.lastName ASC , employee.empNo DESC `, groupByClause = ` employee.lastName, " +
+                        "employee.empNo, employee.birthDate, employee.firstName, employee.gender, " +
+                        "employee.hireDate`, limitClause = ` ${getValue(2)}`)\n" +
+                        "                order by e.'lastName ascending, e.empNo descending\n" +
+                        "                limit getValue(2)\n" +
+                        "                where e.'lastName == getStringValue(value) || e.empNo == \"001\"\n" +
+                        "                group by var 'lastName = e.'lastName, var empNo = e.empNo, var " +
+                        "birthDate = e.birthDate, var 'firstName = e.'firstName, var gender = e.gender, " +
+                        "var hireDate = e.hireDate\n" +
+                        "                select {'lastName, empNo, birthDate, 'firstName, gender, hireDate};";
+                String modifiedFunction1 = "entities:WorkspaceWithRelations[] results = check from " +
+                        "entities:WorkspaceWithRelations e in mcClient->/workspaces(targetType = " +
+                        "entities:WorkspaceWithRelations, whereClause = ` employee.firstName = " +
+                        "${getStringValue(value)}  OR workspace.workspaceId = \"001\" AND location.buildingCode" +
+                        " = ${value} `, orderByClause = ` employee.firstName ASC , location.buildingCode DESC `," +
+                        " groupByClause = ` workspace.workspaceId, location.buildingCode`, limitClause = " +
+                        "` ${getValue(5)}`)\n" +
+                        "                order by e.'employee?.'firstName ascending, e.'location?.buildingCode " +
+                        "descending\n" +
+                        "                limit getValue(5)\n" +
+                        "                where e.'employee?.'firstName == getStringValue(value) || " +
+                        "e.workspaceId == \"001\" && e.'location?.buildingCode == value\n" +
+                        "                group by var workspaceId = e.workspaceId, var buildingCode = " +
+                        "e.'location?.buildingCode\n" +
+                        "                select {workspaceId, 'location: {buildingCode}};";
+                String modifiedFunction2 = "entities:BuildingWithRelations[] res = check from " +
+                        "entities:BuildingWithRelations e in mcClient->/buildings(targetType = " +
+                        "entities:BuildingWithRelations)\n" +
+                        "                order by e.buildingCode descending\n" +
+                        "                limit getValue(5)\n" +
+                        "                let entities:WorkspaceOptionalized[]? workSpace = e.'workspaces\n" +
+                        "                where workSpace !is () && workSpace[0].workspaceEmpNo == \"1\"\n" +
+                        "                group by var buildingCode = e.buildingCode, var city = e.city, " +
+                        "var workspaces = workSpace[0].workspaceEmpNo \n" +
+                        "                select {buildingCode, city};";
+                Assert.assertTrue(sourceCode.contains(modifiedFunction));
+                Assert.assertTrue(sourceCode.contains(modifiedFunction1));
+                Assert.assertTrue(sourceCode.contains(modifiedFunction2));
+            }
+        }
+    }
+
+
+    @Test
+    public void testCodeModifierWhenFieldIsInTypeDescriptor() {
+
+        Package newPackage = getModifiedPackage("project_5");
+
+        for (DocumentId documentId : newPackage.getDefaultModule().documentIds()) {
+            Document document = newPackage.getDefaultModule().document(documentId);
+
+            if (document.name().equals("main.bal")) {
+                String sourceCode = document.syntaxTree().toSourceCode();
+                String modifiedFunction = "entities:WorkspaceWithRelations[] results = check " +
+                        "from entities:WorkspaceWithRelations e in mcClient->/workspaces(targetType = " +
+                        "entities:WorkspaceWithRelations, whereClause = ` employee.firstName = " +
+                        "${getStringValue(value)}  OR workspace.workspaceId = \"001\" AND " +
+                        "location.buildingCode = ${value} `, orderByClause = ` employee.empNo ASC , " +
+                        "location.buildingCode DESC `, limitClause = ` ${getValue(5)}`)\n" +
+                        "                order by e.employee?.empNo ascending, e.location?.buildingCode descending\n" +
+                        "                limit getValue(5)\n" +
+                        "                where e.employee?.firstName == getStringValue(value) || " +
+                        "e.workspaceId == \"001\" && e.location?.buildingCode == value\n" +
+                        "                select e;";
+                Assert.assertTrue(sourceCode.contains(modifiedFunction));
             }
         }
     }

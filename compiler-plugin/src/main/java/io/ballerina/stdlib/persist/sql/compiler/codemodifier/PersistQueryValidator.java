@@ -18,7 +18,6 @@
 
 package io.ballerina.stdlib.persist.sql.compiler.codemodifier;
 
-import io.ballerina.compiler.syntax.tree.BindingPatternNode;
 import io.ballerina.compiler.syntax.tree.ChildNodeEntry;
 import io.ballerina.compiler.syntax.tree.ClientResourceAccessActionNode;
 import io.ballerina.compiler.syntax.tree.ExpressionNode;
@@ -44,9 +43,6 @@ import io.ballerina.projects.plugins.AnalysisTask;
 import io.ballerina.projects.plugins.SyntaxNodeAnalysisContext;
 import io.ballerina.stdlib.persist.sql.compiler.Constants;
 import io.ballerina.stdlib.persist.sql.compiler.DiagnosticsCodes;
-import io.ballerina.stdlib.persist.sql.compiler.exception.NotSupportedExpressionException;
-import io.ballerina.stdlib.persist.sql.compiler.expression.ExpressionBuilder;
-import io.ballerina.stdlib.persist.sql.compiler.expression.ExpressionVisitor;
 import io.ballerina.stdlib.persist.sql.compiler.model.Query;
 import io.ballerina.stdlib.persist.sql.compiler.utils.Utils;
 import io.ballerina.tools.diagnostics.Diagnostic;
@@ -65,14 +61,14 @@ import java.util.stream.Collectors;
  */
 public class PersistQueryValidator implements AnalysisTask<SyntaxNodeAnalysisContext> {
 
-    private final List<String> entities;
+    private final Map<String, String> entities;
     private final List<String> persistClientNames;
     private final List<String> persistClientVariableNames;
     private final Map<String, String> variables;
     private final Map<QueryPipelineNode, Query> queries;
     private final Map<QueryPipelineNode, Query> validatedQueries;
 
-    public PersistQueryValidator(List<String> entities, List<String> persistClientNames,
+    public PersistQueryValidator(Map<String, String> entities, List<String> persistClientNames,
                                  Map<String, String> variables, Map<QueryPipelineNode, Query> queries,
                                  Map<QueryPipelineNode, Query> validatedQueries,
                                  List<String> persistClientVariableNames) {
@@ -153,19 +149,6 @@ public class PersistQueryValidator implements AnalysisTask<SyntaxNodeAnalysisCon
                 }
             }
         }
-
-        if (isWhereClauseUsed) {
-            BindingPatternNode bindingPatternNode = fromClauseNode.typedBindingPattern().bindingPattern();
-            WhereClauseNode whereClauseNode = (WhereClauseNode) whereClauseNodes.get(0);
-            try {
-                ExpressionBuilder expressionBuilder = new ExpressionBuilder(whereClauseNode.expression(),
-                        bindingPatternNode);
-                ExpressionVisitor expressionVisitor = new ExpressionVisitor();
-                expressionBuilder.build(expressionVisitor);
-            } catch (NotSupportedExpressionException e) {
-                ctx.reportDiagnostic(e.getDiagnostic());
-            }
-        }
         query.addWhereClause(whereClauseNodes);
         query.addLimitClauses(limitClauseNode);
         query.addGroupByClauses(groupByClauseNode);
@@ -210,19 +193,24 @@ public class PersistQueryValidator implements AnalysisTask<SyntaxNodeAnalysisCon
                 if (query.isValidated()) {
                     continue;
                 }
+                // Validate whether the client name is a persist client or not
                 if (!this.persistClientVariableNames.contains(query.getClientName())) {
                     query.validated = true;
                     continue;
                 }
+                // Validate the resource path
                 SeparatedNodeList<Node> resourcePath = query.getPath();
                 if (resourcePath.size() == 0) {
                     query.validated = true;
                     continue;
                 }
-                if (!this.entities.contains(resourcePath.get(0).toString().trim())) {
+                String path = resourcePath.get(0).toString().trim();
+                if (!this.entities.containsKey(path)) {
                     query.validated = true;
                     continue;
                 }
+                query.addTableName(this.entities.get(path));
+                // Validate arguments
                 SeparatedNodeList<FunctionArgumentNode> argumentNodes = query.getArguments();
                 if (argumentNodes.size() == 0) {
                     query.validated = true;
@@ -235,6 +223,9 @@ public class PersistQueryValidator implements AnalysisTask<SyntaxNodeAnalysisCon
                         NamedArgumentNode namedArgumentNode = (NamedArgumentNode) functionArgumentNode;
                         String argumentsName = namedArgumentNode.argumentName().toString().trim();
                         if (namedArgumentNode.argumentName().toString().trim().equals(Constants.TARGET_TYPE)) {
+//                            query.addTargetType(Utils.stripEscapeCharacter(
+//                                    ((QualifiedNameReferenceNode) namedArgumentNode.expression()).identifier().
+//                                            text().trim()));
                             hasTargetType = true;
                         } else {
                             hasClauseVariable = true;
@@ -250,6 +241,8 @@ public class PersistQueryValidator implements AnalysisTask<SyntaxNodeAnalysisCon
                         PositionalArgumentNode positionalArgumentNode = (PositionalArgumentNode) functionArgumentNode;
                         ExpressionNode expression = positionalArgumentNode.expression();
                         if (expression instanceof SimpleNameReferenceNode) {
+//                            query.addTargetType(Utils.stripEscapeCharacter(
+//                                    ((SimpleNameReferenceNode) expression).name().text()));
                             hasTargetType = true;
                         } else if (expression instanceof TemplateExpressionNode) {
                             hasClauseVariable = true;

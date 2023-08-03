@@ -37,8 +37,8 @@ public class Query {
     private final SeparatedNodeList<FunctionArgumentNode> arguments;
     public boolean validated = false;
     private final SeparatedNodeList<Node> path;
-
     private final String clientName;
+    private String tableName;
 
     public Query(String clientName, SeparatedNodeList<FunctionArgumentNode> arguments, SeparatedNodeList<Node> path) {
         this.clientName = clientName;
@@ -100,5 +100,12 @@ public class Query {
 
     public boolean isValidated() {
         return this.validated;
+    }
+
+    public void addTableName(String tableName) {
+        this.tableName = tableName;
+    }
+    public String getTableName() {
+        return this.tableName;
     }
 }

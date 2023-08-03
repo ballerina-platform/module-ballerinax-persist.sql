@@ -27,16 +27,18 @@ import io.ballerina.compiler.syntax.tree.ChildNodeList;
 import io.ballerina.compiler.syntax.tree.ExpressionNode;
 import io.ballerina.compiler.syntax.tree.FieldAccessExpressionNode;
 import io.ballerina.compiler.syntax.tree.FieldBindingPatternVarnameNode;
-import io.ballerina.compiler.syntax.tree.FunctionArgumentNode;
 import io.ballerina.compiler.syntax.tree.FunctionCallExpressionNode;
+import io.ballerina.compiler.syntax.tree.IndexedExpressionNode;
 import io.ballerina.compiler.syntax.tree.LiteralValueToken;
 import io.ballerina.compiler.syntax.tree.MappingBindingPatternNode;
-import io.ballerina.compiler.syntax.tree.NameReferenceNode;
+import io.ballerina.compiler.syntax.tree.OptionalFieldAccessExpressionNode;
 import io.ballerina.compiler.syntax.tree.SeparatedNodeList;
 import io.ballerina.compiler.syntax.tree.SimpleNameReferenceNode;
 import io.ballerina.compiler.syntax.tree.SyntaxKind;
 import io.ballerina.stdlib.persist.sql.compiler.DiagnosticsCodes;
 import io.ballerina.stdlib.persist.sql.compiler.exception.NotSupportedExpressionException;
+import io.ballerina.stdlib.persist.sql.compiler.model.Query;
+import io.ballerina.stdlib.persist.sql.compiler.utils.Utils;
 import io.ballerina.tools.diagnostics.Diagnostic;
 import io.ballerina.tools.diagnostics.DiagnosticFactory;
 import io.ballerina.tools.diagnostics.DiagnosticInfo;
@@ -52,8 +54,13 @@ public class ExpressionBuilder {
     private boolean isCaptureBindingPattern = false;
     private String bindingVariableName = "";
     private final List<String> fieldNames = new ArrayList<>();
+//    private final List<String> models;
+//    private final Map<String, TypeDefinitionNode> entities;
+
     public ExpressionBuilder(ExpressionNode expression, BindingPatternNode bindingPatternNode) {
         this.expressionNode = expression;
+//        this.entities = entities;
+//        this.models = models;
         if (bindingPatternNode instanceof CaptureBindingPatternNode) {
             this.isCaptureBindingPattern = true;
             this.bindingVariableName = ((CaptureBindingPatternNode) bindingPatternNode).variableName().text();
@@ -66,12 +73,14 @@ public class ExpressionBuilder {
             }
         }
     }
-    public void build(ExpressionVisitor expressionVisitor) throws NotSupportedExpressionException {
-        buildVariableExecutors(expressionNode, expressionVisitor);
+    public void build(ExpressionVisitor expressionVisitor, Query query) throws NotSupportedExpressionException {
+        buildVariableExecutors(expressionNode, expressionVisitor, query);
     }
-    private void buildVariableExecutors(ExpressionNode expressionNode, ExpressionVisitor expressionVisitor)
+    private void buildVariableExecutors(ExpressionNode expressionNode, ExpressionVisitor expressionVisitor,
+                                        Query query)
             throws NotSupportedExpressionException {
         try {
+            String tableName = query.getTableName();
             if (expressionNode instanceof BinaryExpressionNode) {
                 // Simple Compare
                 ChildNodeList expressionChildren = expressionNode.children();
@@ -79,49 +88,62 @@ public class ExpressionBuilder {
                 if (tokenKind == SyntaxKind.LOGICAL_AND_TOKEN) {
                     expressionVisitor.beginVisitAnd();
                     expressionVisitor.beginVisitAndLeftOperand();
-                    buildVariableExecutors((ExpressionNode) expressionChildren.get(0), expressionVisitor);
+                    buildVariableExecutors((ExpressionNode) expressionChildren.get(0), expressionVisitor, query);
                     expressionVisitor.endVisitAndLeftOperand();
                     expressionVisitor.beginVisitAndRightOperand();
-                    buildVariableExecutors((ExpressionNode) expressionChildren.get(2), expressionVisitor);
+                    buildVariableExecutors((ExpressionNode) expressionChildren.get(2), expressionVisitor, query);
                     expressionVisitor.endVisitAndRightOperand();
                     expressionVisitor.endVisitAnd();
                 } else if (tokenKind == SyntaxKind.LOGICAL_OR_TOKEN) {
                     expressionVisitor.beginVisitOr();
                     expressionVisitor.beginVisitOrLeftOperand();
-                    buildVariableExecutors((ExpressionNode) expressionChildren.get(0), expressionVisitor);
+                    buildVariableExecutors((ExpressionNode) expressionChildren.get(0), expressionVisitor, query);
                     expressionVisitor.endVisitOrLeftOperand();
                     expressionVisitor.beginVisitOrRightOperand();
-                    buildVariableExecutors((ExpressionNode) expressionChildren.get(2), expressionVisitor);
+                    buildVariableExecutors((ExpressionNode) expressionChildren.get(2), expressionVisitor, query);
                     expressionVisitor.endVisitOrRightOperand();
                     expressionVisitor.endVisitOr();
                 } else {
                     expressionVisitor.beginVisitCompare(tokenKind);
                     expressionVisitor.beginVisitCompareLeftOperand(tokenKind);
-                    buildVariableExecutors((ExpressionNode) expressionChildren.get(0), expressionVisitor);
+                    buildVariableExecutors((ExpressionNode) expressionChildren.get(0), expressionVisitor, query);
                     expressionVisitor.endVisitCompareLeftOperand(tokenKind);
                     expressionVisitor.beginVisitCompareRightOperand(tokenKind);
-                    buildVariableExecutors((ExpressionNode) expressionChildren.get(2), expressionVisitor);
+                    buildVariableExecutors((ExpressionNode) expressionChildren.get(2), expressionVisitor, query);
                     expressionVisitor.endVisitCompareRightOperand(tokenKind);
                     expressionVisitor.endVisitCompare(tokenKind);
                 }
             } else if (expressionNode instanceof BracedExpressionNode) {
                 expressionVisitor.beginVisitBraces();
-                buildVariableExecutors(((BracedExpressionNode) expressionNode).expression(), expressionVisitor);
+                buildVariableExecutors(((BracedExpressionNode) expressionNode).expression(), expressionVisitor, query);
                 expressionVisitor.endVisitBraces();
             } else if (expressionNode instanceof FieldAccessExpressionNode) {
-                // Bracketed Multi Expression
-                String fieldAccessName = ((SimpleNameReferenceNode) expressionNode.children().get(0)).name().text();
-                if (this.isCaptureBindingPattern &&
-                        bindingVariableName.equals(fieldAccessName)) {
-                    expressionVisitor.beginVisitStoreVariable(
-                            ((SimpleNameReferenceNode) expressionNode.children().get(2)).name().text());
-                    expressionVisitor.endVisitStoreVariable(
-                            ((SimpleNameReferenceNode) expressionNode.children().get(2)).name().text());
+                FieldAccessExpressionNode exp = (FieldAccessExpressionNode) expressionNode;
+                String fieldName = Utils.stripEscapeCharacter(exp.fieldName().toSourceCode().trim());
+                ExpressionNode fieldAccessName = exp.expression();
+                if (this.isCaptureBindingPattern && bindingVariableName.equals(fieldAccessName.toSourceCode().trim())) {
+                    updateExpressionVisitor(tableName + "." + fieldName, expressionVisitor);
                 } else {
-                    throw new NotSupportedExpressionException("Unsupported field access in where clause");
+                    if (fieldAccessName instanceof FieldAccessExpressionNode) {
+                        tableName = Utils.stripEscapeCharacter(((FieldAccessExpressionNode) fieldAccessName).
+                                fieldName().toSourceCode().trim());
+                        updateExpressionVisitor(tableName + "." + fieldName, expressionVisitor);
+                    } else if (fieldAccessName instanceof IndexedExpressionNode) {
+                        IndexedExpressionNode indexedExpressionNode = (IndexedExpressionNode) fieldAccessName;
+                        tableName = Utils.stripEscapeCharacter(((FieldAccessExpressionNode) indexedExpressionNode.
+                                containerExpression()).fieldName().toSourceCode().trim());
+                        updateExpressionVisitor(tableName + "." + fieldName, expressionVisitor);
+                    } else {
+                        throw new NotSupportedExpressionException("Unsupported field access in where clause");
+                    }
                 }
+            } else if (expressionNode instanceof OptionalFieldAccessExpressionNode) {
+                OptionalFieldAccessExpressionNode fieldNode = (OptionalFieldAccessExpressionNode) expressionNode;
+                updateExpressionVisitor(Utils.getReferenceTableName(fieldNode) + "." +
+                        Utils.stripEscapeCharacter(fieldNode.fieldName().toSourceCode().trim()), expressionVisitor);
             } else if (expressionNode instanceof SimpleNameReferenceNode) {
-                String referencedName = ((SimpleNameReferenceNode) expressionNode).name().text();
+                String referencedName = Utils.stripEscapeCharacter(
+                        ((SimpleNameReferenceNode) expressionNode).name().text());
                 if (this.isCaptureBindingPattern) {
                     expressionVisitor.beginVisitBalVariable(referencedName);
                     expressionVisitor.endVisitBalVariable(referencedName);
@@ -132,8 +154,7 @@ public class ExpressionBuilder {
                         expressionVisitor.endVisitStoreVariable(referencedName);
                     } else {
                         // todo Here wrong reference name cannot be identified as error
-                        expressionVisitor.beginVisitBalVariable(referencedName);
-                        expressionVisitor.endVisitBalVariable(referencedName);
+                        updateExpressionVisitor(referencedName, expressionVisitor);
                     }
                 }
             } else if (expressionNode instanceof BasicLiteralNode) {
@@ -141,12 +162,7 @@ public class ExpressionBuilder {
                 expressionVisitor.beginVisitConstant(literalValueToken.text(), literalValueToken.kind());
                 expressionVisitor.endVisitConstant(literalValueToken.text(), literalValueToken.kind());
             } else if (expressionNode instanceof FunctionCallExpressionNode) {
-                FunctionCallExpressionNode functionCallExpressionNode = (FunctionCallExpressionNode) expressionNode;
-                NameReferenceNode fun = functionCallExpressionNode.functionName();
-                SeparatedNodeList<FunctionArgumentNode> arguments = functionCallExpressionNode.arguments();
-                String referencedName = fun.toSourceCode().trim() +
-                        functionCallExpressionNode.openParenToken().text() +  arguments.get(0).toSourceCode() +
-                        functionCallExpressionNode.closeParenToken().text();
+                String referencedName = Utils.getReferenceTableName((FunctionCallExpressionNode) expressionNode);
                 expressionVisitor.beginVisitBalVariable(referencedName);
                 expressionVisitor.endVisitBalVariable(referencedName);
             } else {
@@ -162,5 +178,10 @@ public class ExpressionBuilder {
                 throw e;
             }
         }
+    }
+
+    private void updateExpressionVisitor(String fieldName, ExpressionVisitor expressionVisitor) {
+        expressionVisitor.beginVisitStoreVariable(fieldName);
+        expressionVisitor.endVisitStoreVariable(fieldName);
     }
 }

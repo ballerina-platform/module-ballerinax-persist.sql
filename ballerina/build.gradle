@@ -119,154 +119,154 @@ publishing {
     }
 }
 
-static def checkExecResult(execResult, failText, standardOutput) {
-    if (execResult) {
-        if (execResult.getExitValue() != 0) {
-            throw new GradleException('Non-zero exit value: ' + execResult.getExitValue())
-        }
-        if (standardOutput.toString().contains(failText)) {
-            throw new GradleException('"' + failText + '" string in output: ' + standardOutput.toString())
-        }
-    } else {
-        throw new GradleException('Returned a null execResult object')
-    }
-}
-
-task createMySQLTestDockerImage(type: Exec) {
-    if (!Os.isFamily(Os.FAMILY_WINDOWS)) {
-        def standardOutput = new ByteArrayOutputStream()
-        commandLine 'sh', '-c', "docker build --platform linux/amd64 -f $project.projectDir/tests/resources/mysql/Dockerfile -t ballerina-persist-mysql" +
-                " -q $project.projectDir/tests/resources/mysql/"
-        doLast {
-            checkExecResult(execResult, 'Error', standardOutput)
-            sleep(10 * 1000)
-        }
-    }
-}
-
-def checkMySQLTestDockerContainerStatus(dockerName) {
-    if (!Os.isFamily(Os.FAMILY_WINDOWS)) {
-        try {
-            return exec {
-                commandLine 'sh', '-c',
-                        "docker exec ${dockerName} mysqladmin ping -hlocalhost -uroot -pTest123# --silent"
-            }.exitValue
-        } catch (all) {
-            return 1
-        }
-    }
-}
-
-task startMySQLTestDockerContainer(type: Exec) {
-    if (!Os.isFamily(Os.FAMILY_WINDOWS)) {
-        def standardOutput = new ByteArrayOutputStream()
-        commandLine 'sh', '-c', 'docker run --rm -d --name ballerina-persist-mysql -p 3305:3306 -t ballerina-persist-mysql'
-        def healthCheck = 1
-        def counter = 0
-        doLast {
-            checkExecResult(execResult, 'Error', standardOutput)
-            while (healthCheck != 0 && counter < 12) {
-                sleep(5 * 1000)
-                healthCheck = checkMySQLTestDockerContainerStatus('ballerina-persist-mysql')
-                counter = counter + 1
-            }
-            if (healthCheck != 0) {
-                throw new GradleException("Docker container 'ballerina-persist-mysql' health test exceeded timeout!")
-            }
-        }
-    }
-}
-
-task stopMySQLTestDockerContainer() {
-    doLast {
-        if (!Os.isFamily(Os.FAMILY_WINDOWS)) {
-            try {
-                def stdOut = new ByteArrayOutputStream()
-                exec {
-                    commandLine 'sh', '-c', 'docker stop ballerina-persist-mysql'
-                    standardOutput = stdOut
-                }
-            } catch (all) {
-                println('Gradle process can safely ignore stopMySQLTestDockerContainer task')
-            }
-        }
-    }
-}
-
-task createMSSQLTestDockerImage(type: Exec) {
-    if (!Os.isFamily(Os.FAMILY_WINDOWS)) {
-        def standardOutput = new ByteArrayOutputStream()
-        commandLine 'sh', '-c', "docker build -f $project.projectDir/tests/resources/mssql/Dockerfile -t ballerina-persist-mssql" +
-                " -q $project.projectDir/tests/resources/mssql/"
-        doLast {
-            checkExecResult(execResult, 'Error', standardOutput)
-            sleep(10 * 1000)
-        }
-    }
-}
-
-def checkMSSQLTestDockerContainerStatus(containerName) {
-    if (!Os.isFamily(Os.FAMILY_WINDOWS)) {
-        try {
-            return exec {
-                commandLine 'sh', '-c',
-                        "docker exec ${containerName} /opt/mssql-tools/bin/sqlcmd -S localhost -U sa -P Test123#"
-            }.exitValue
-        } catch (all) {
-            return 1;
-        }
-    }
-}
-
-task startMSSQLTestDockerContainer(type: Exec) {
-    if (!Os.isFamily(Os.FAMILY_WINDOWS)) {
-        def standardOutput = new ByteArrayOutputStream()
-        commandLine 'sh', '-c',
-                "docker run --rm -d --name ballerina-persist-mssql -e ACCEPT_EULA=1 -e SA_PASSWORD=Test123# -p 1433:1433 -d ballerina-persist-mssql"
-        def healthCheck = 1;
-        def counter = 0;
-        doLast {
-            checkExecResult(execResult, 'Error', standardOutput)
-            while (healthCheck != 0 && counter < 12) {
-                sleep(5 * 1000)
-                healthCheck = checkMSSQLTestDockerContainerStatus("ballerina-persist-mssql")
-                counter = counter + 1;
-            }
-            if (healthCheck != 0) {
-                throw new GradleException("Docker container 'ballerina-persist-mssql' health test exceeded timeout!")
-            }
-        }
-    }
-}
-
-task stopMSSQLTestDockerContainer() {
-    doLast {
-        if (!Os.isFamily(Os.FAMILY_WINDOWS)) {
-            try {
-                def stdOut = new ByteArrayOutputStream()
-                exec {
-                    commandLine 'sh', '-c', "docker stop ballerina-persist-mssql"
-                    standardOutput = stdOut
-                }
-            } catch (all) {
-                println("Process can safely ignore stopTestDockerContainer task")
-            }
-        }
-    }
-}
+//static def checkExecResult(execResult, failText, standardOutput) {
+//    if (execResult) {
+//        if (execResult.getExitValue() != 0) {
+//            throw new GradleException('Non-zero exit value: ' + execResult.getExitValue())
+//        }
+//        if (standardOutput.toString().contains(failText)) {
+//            throw new GradleException('"' + failText + '" string in output: ' + standardOutput.toString())
+//        }
+//    } else {
+//        throw new GradleException('Returned a null execResult object')
+//    }
+//}
+//
+//task createMySQLTestDockerImage(type: Exec) {
+//    if (!Os.isFamily(Os.FAMILY_WINDOWS)) {
+//        def standardOutput = new ByteArrayOutputStream()
+//        commandLine 'sh', '-c', "docker build --platform linux/amd64 -f $project.projectDir/tests/resources/mysql/Dockerfile -t ballerina-persist-mysql" +
+//                " -q $project.projectDir/tests/resources/mysql/"
+//        doLast {
+//            checkExecResult(execResult, 'Error', standardOutput)
+//            sleep(10 * 1000)
+//        }
+//    }
+//}
+//
+//def checkMySQLTestDockerContainerStatus(dockerName) {
+//    if (!Os.isFamily(Os.FAMILY_WINDOWS)) {
+//        try {
+//            return exec {
+//                commandLine 'sh', '-c',
+//                        "docker exec ${dockerName} mysqladmin ping -hlocalhost -uroot -pTest123# --silent"
+//            }.exitValue
+//        } catch (all) {
+//            return 1
+//        }
+//    }
+//}
+//
+//task startMySQLTestDockerContainer(type: Exec) {
+//    if (!Os.isFamily(Os.FAMILY_WINDOWS)) {
+//        def standardOutput = new ByteArrayOutputStream()
+//        commandLine 'sh', '-c', 'docker run --rm -d --name ballerina-persist-mysql -p 3305:3306 -t ballerina-persist-mysql'
+//        def healthCheck = 1
+//        def counter = 0
+//        doLast {
+//            checkExecResult(execResult, 'Error', standardOutput)
+//            while (healthCheck != 0 && counter < 12) {
+//                sleep(5 * 1000)
+//                healthCheck = checkMySQLTestDockerContainerStatus('ballerina-persist-mysql')
+//                counter = counter + 1
+//            }
+//            if (healthCheck != 0) {
+//                throw new GradleException("Docker container 'ballerina-persist-mysql' health test exceeded timeout!")
+//            }
+//        }
+//    }
+//}
+//
+//task stopMySQLTestDockerContainer() {
+//    doLast {
+//        if (!Os.isFamily(Os.FAMILY_WINDOWS)) {
+//            try {
+//                def stdOut = new ByteArrayOutputStream()
+//                exec {
+//                    commandLine 'sh', '-c', 'docker stop ballerina-persist-mysql'
+//                    standardOutput = stdOut
+//                }
+//            } catch (all) {
+//                println('Gradle process can safely ignore stopMySQLTestDockerContainer task')
+//            }
+//        }
+//    }
+//}
+//
+//task createMSSQLTestDockerImage(type: Exec) {
+//    if (!Os.isFamily(Os.FAMILY_WINDOWS)) {
+//        def standardOutput = new ByteArrayOutputStream()
+//        commandLine 'sh', '-c', "docker build -f $project.projectDir/tests/resources/mssql/Dockerfile -t ballerina-persist-mssql" +
+//                " -q $project.projectDir/tests/resources/mssql/"
+//        doLast {
+//            checkExecResult(execResult, 'Error', standardOutput)
+//            sleep(10 * 1000)
+//        }
+//    }
+//}
+//
+//def checkMSSQLTestDockerContainerStatus(containerName) {
+//    if (!Os.isFamily(Os.FAMILY_WINDOWS)) {
+//        try {
+//            return exec {
+//                commandLine 'sh', '-c',
+//                        "docker exec ${containerName} /opt/mssql-tools/bin/sqlcmd -S localhost -U sa -P Test123#"
+//            }.exitValue
+//        } catch (all) {
+//            return 1;
+//        }
+//    }
+//}
+//
+//task startMSSQLTestDockerContainer(type: Exec) {
+//    if (!Os.isFamily(Os.FAMILY_WINDOWS)) {
+//        def standardOutput = new ByteArrayOutputStream()
+//        commandLine 'sh', '-c',
+//                "docker run --rm -d --name ballerina-persist-mssql -e ACCEPT_EULA=1 -e SA_PASSWORD=Test123# -p 1433:1433 -d ballerina-persist-mssql"
+//        def healthCheck = 1;
+//        def counter = 0;
+////        doLast {
+////            checkExecResult(execResult, 'Error', standardOutput)
+////            while (healthCheck != 0 && counter < 12) {
+////                sleep(5 * 1000)
+////                healthCheck = checkMSSQLTestDockerContainerStatus("ballerina-persist-mssql")
+////                counter = counter + 1;
+////            }
+////            if (healthCheck != 0) {
+////                throw new GradleException("Docker container 'ballerina-persist-mssql' health test exceeded timeout!")
+////            }
+////        }
+//    }
+//}
+//
+//task stopMSSQLTestDockerContainer() {
+//    doLast {
+//        if (!Os.isFamily(Os.FAMILY_WINDOWS)) {
+//            try {
+//                def stdOut = new ByteArrayOutputStream()
+//                exec {
+//                    commandLine 'sh', '-c', "docker stop ballerina-persist-mssql"
+//                    standardOutput = stdOut
+//                }
+//            } catch (all) {
+//                println("Process can safely ignore stopTestDockerContainer task")
+//            }
+//        }
+//    }
+//}
 
 
 updateTomlFiles.dependsOn copyStdlibs
-startMySQLTestDockerContainer.dependsOn createMySQLTestDockerImage
-startMSSQLTestDockerContainer.dependsOn createMSSQLTestDockerImage
+//startMySQLTestDockerContainer.dependsOn createMySQLTestDockerImage
+//startMSSQLTestDockerContainer.dependsOn createMSSQLTestDockerImage
 
 build.dependsOn "generatePomFileForMavenPublication"
 build.dependsOn ":${packageName}-compiler-plugin:build"
 build.dependsOn ":${packageName}-native:build"
-build.finalizedBy stopMySQLTestDockerContainer
-build.finalizedBy stopMSSQLTestDockerContainer
+//build.finalizedBy stopMySQLTestDockerContainer
+//build.finalizedBy stopMSSQLTestDockerContainer
 
 test.dependsOn ":${packageName}-compiler-plugin:build"
 test.dependsOn ":${packageName}-native:build"
-test.dependsOn startMySQLTestDockerContainer
-test.dependsOn startMSSQLTestDockerContainer
+//test.dependsOn startMySQLTestDockerContainer
+//test.dependsOn startMSSQLTestDockerContainer

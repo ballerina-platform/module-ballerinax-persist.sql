@@ -57,7 +57,7 @@ public isolated client class SQLClient {
     # or a `persist:Error` if the operation fails
     public isolated function runBatchInsertQuery(record {}[] insertRecords) returns sql:ExecutionResult[]|persist:Error {
         sql:ParameterizedQuery[] insertQueries = self.getInsertQueries(insertRecords);
-        logQuery(insertQueries, "SQL insert query: ");
+        logQuery("SQL insert query: ", insertQueries);
         sql:ExecutionResult[]|sql:Error result = self.dbClient->batchExecute(insertQueries);
 
         if result is sql:Error {
@@ -82,7 +82,7 @@ public isolated client class SQLClient {
     # + typeDescriptions - The type descriptions of the relations to be retrieved
     # + return - A record in the `rowType` type or a `persist:Error` if the operation fails
     public isolated function runReadByKeyQuery(typedesc<record {}> rowType, typedesc<record {}> rowTypeWithIdFields, anydata key, string[] fields = [], string[] include = [], typedesc<record {}>[] typeDescriptions = []) returns record {}|persist:Error {
-        sql:ParameterizedQuery query = self.getSelectQuery(fields);
+        sql:ParameterizedQuery query = self.getSelectQuery(self.getSelectableFields(fields));
 
         foreach string joinKey in self.getJoinFields(include) {
             query = sql:queryConcat(query, check self.getJoinQuery(joinKey));
@@ -90,7 +90,7 @@ public isolated client class SQLClient {
 
         query = sql:queryConcat(query, check self.getWhereQuery(key));
 
-        logQuery(query, "SQL select query: ");
+        logQuery("SQL select query: ", query);
 
         record {}|error result = self.dbClient->queryRow(query, rowTypeWithIdFields);
 
@@ -125,7 +125,12 @@ public isolated client class SQLClient {
                         sql:ParameterizedQuery whereClause = ``, sql:ParameterizedQuery orderByClause = ``,
                         sql:ParameterizedQuery limitClause = ``, sql:ParameterizedQuery groupByClause = ``)
                         returns stream<record {}, sql:Error?>|persist:Error|error {
-        sql:ParameterizedQuery query = self.getSelectQuery(fields);
+        sql:ParameterizedQuery query;
+        if self.getManyRelationFields(include).length() > 0 {
+            query = self.getSelectQuery(self.getSelectableFields(fields));
+        } else {
+            query = self.getSelectQuery(self.getSelectableFieldsForNonManyRelation(fields));
+        }
         foreach string joinKey in self.getJoinFields(include) {
             query = sql:queryConcat(query, check self.getJoinQuery(joinKey));
         }
@@ -146,7 +151,7 @@ public isolated client class SQLClient {
                 query = sql:queryConcat(query, ` LIMIT `, limitClause);
             }
         }
-        logQuery(query, "SQL select query : ");
+        logQuery("SQL select query : ", query);
         stream<record {}, sql:Error?> resultStream = self.dbClient->query(query, rowType);
         return resultStream;
     }
@@ -161,7 +166,7 @@ public isolated client class SQLClient {
     public isolated function runUpdateQuery(anydata key, record {} updateRecord) returns persist:ConstraintViolationError|persist:Error? {
         sql:ParameterizedQuery query = check self.getUpdateQuery(updateRecord);
         query = sql:queryConcat(query, check self.getWhereQuery(self.getKey(key)));
-        logQuery(query, "SQL update query: ");
+        logQuery("SQL update query: ", query);
         sql:ExecutionResult|sql:Error? e = self.dbClient->execute(query);
         if e is sql:Error {
             if e.message().indexOf(self.dataSourceSpecifics.constraintViolationErrorMessage) is int {
@@ -180,7 +185,7 @@ public isolated client class SQLClient {
     public isolated function runDeleteQuery(anydata deleteKey) returns persist:Error? {
         sql:ParameterizedQuery query = self.getDeleteQuery();
         query = sql:queryConcat(query, check self.getWhereQuery(deleteKey));
-        logQuery(query, "SQL delete query: ");
+        logQuery("SQL delete query: ", query);
         sql:ExecutionResult|sql:Error e = self.dbClient->execute(query);
 
         if e is sql:Error {
@@ -212,7 +217,7 @@ public isolated client class SQLClient {
                 ` FROM `, stringToParameterizedQuery(joinMetadata.refTable),
                 ` WHERE`, check self.getWhereClauses(whereFilter, true)
             );
-
+            logQuery("SQL select query : ", query);
             stream<record {}, sql:Error?> joinStream = self.dbClient->query(query, joinRelationTypedesc);
             record {}[]|error arr = from record {} item in joinStream
                 select item;
@@ -278,10 +283,10 @@ public isolated client class SQLClient {
         return params;
     }
 
-    private isolated function getSelectColumnNames(string[] fields) returns sql:ParameterizedQuery {
+    private isolated function getSelectColumnNames(string[] selectableFields) returns sql:ParameterizedQuery {
         string[] columnNames = [];
 
-        foreach string key in self.getSelectableFields(fields) {
+        foreach string key in selectableFields {
             string fieldName = self.getFieldFromKey(key);
             FieldMetadata fieldMetadata = self.fieldMetadata.get(key);
 
@@ -404,9 +409,9 @@ public isolated client class SQLClient {
             select sql:queryConcat(`INSERT INTO `, stringToParameterizedQuery(self.escape(self.tableName)), ` (`, self.getInsertColumnNames(), ` ) `, `VALUES `, self.getInsertQueryParams(insertRecord));
     }
 
-    private isolated function getSelectQuery(string[] fields) returns sql:ParameterizedQuery {
+    private isolated function getSelectQuery(string[] selectableFields) returns sql:ParameterizedQuery {
         return sql:queryConcat(
-            `SELECT `, self.getSelectColumnNames(fields), ` FROM `, stringToParameterizedQuery(self.escape(self.tableName)), ` AS `, stringToParameterizedQuery(self.escape(self.entityName))
+            `SELECT `, self.getSelectColumnNames(selectableFields), ` FROM `, stringToParameterizedQuery(self.escape(self.tableName)), ` AS `, stringToParameterizedQuery(self.escape(self.entityName))
         );
     }
 
@@ -478,6 +483,12 @@ public isolated client class SQLClient {
             select key;
     }
 
+    private isolated function getSelectableFieldsForNonManyRelation(string[] fields) returns string[] {
+        return from string key in fields
+            where (fields.indexOf(key) != () || self.keyFields.indexOf(key) != ()) && !key.includes("[]")
+            select key;
+    }
+
     private isolated function escape(string value) returns string {
         return self.dataSourceSpecifics.quoteOpen + value + self.dataSourceSpecifics.quoteClose;
     }
@@ -501,10 +512,10 @@ isolated function addClauseToQuery(sql:ParameterizedQuery query, sql:Parameteriz
     }
 }
 
-isolated function logQuery(sql:ParameterizedQuery|sql:ParameterizedQuery[] queries, string msg) {
+isolated function logQuery(string msg, sql:ParameterizedQuery|sql:ParameterizedQuery[] queries) {
     if queries is sql:ParameterizedQuery[] {
         foreach sql:ParameterizedQuery query in queries {
-            logQuery(query, msg);
+            logQuery(msg, query);
         }
         return;
     }

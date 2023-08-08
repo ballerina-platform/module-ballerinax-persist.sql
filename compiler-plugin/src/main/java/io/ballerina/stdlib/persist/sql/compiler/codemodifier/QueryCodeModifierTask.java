@@ -114,7 +114,7 @@ public class QueryCodeModifierTask implements ModifierTask<SourceModifierContext
             try {
                 Formatter.format(syntaxTree);
             } catch (FormatterException e) {
-                // throw new RuntimeException("Syntax tree formatting failed for the file: " + document.name());
+                // ignore
             }
             return syntaxTree;
         }
@@ -383,12 +383,13 @@ public class QueryCodeModifierTask implements ModifierTask<SourceModifierContext
                 }
                 if (orderKeyNodes.get(i).orderDirection().isPresent()) {
                     Token orderDirection = orderKeyNodes.get(i).orderDirection().get();
-                    if (orderDirection.text().equals(Constants.ASCENDING)) {
-                        orderByClause.append(Constants.SPACE).append(Constants.SQLKeyWords.ORDER_BY_ASCENDING);
+                    if (orderDirection.text().equals(Constants.DESCENDING)) {
+                        orderByClause.append(Constants.SPACE).append(Constants.SQLKeyWords.ORDER_BY_DESCENDING);
                     } else {
-                        orderByClause.append(Constants.SPACE).append(Constants.SQLKeyWords.ORDER_BY_DECENDING);
+                        orderByClause.append(Constants.SPACE).append(Constants.SQLKeyWords.ORDER_BY_ASCENDING);
                     }
-                    // Any typos are recognised as order by direction missing
+                } else {
+                    orderByClause.append(Constants.SPACE).append(Constants.SQLKeyWords.ORDER_BY_ASCENDING);
                 }
                 orderByClause.append(Constants.SPACE);
             }
@@ -421,8 +422,8 @@ public class QueryCodeModifierTask implements ModifierTask<SourceModifierContext
                     groupByClause.append(tableName).append(".").append(fieldName);
                 } else if (expression instanceof OptionalFieldAccessExpressionNode) {
                     OptionalFieldAccessExpressionNode fieldNode = (OptionalFieldAccessExpressionNode) expression;
-                    groupByClause.append(Utils.getReferenceTableName(fieldNode)).
-                            append(".").append(Utils.stripEscapeCharacter(fieldNode.fieldName().toSourceCode().trim()));
+                    groupByClause.append(Utils.getReferenceTableName(fieldNode)).append(".").
+                            append(Utils.stripEscapeCharacter(fieldNode.fieldName().toSourceCode().trim()));
                 } else if (expression instanceof FunctionCallExpressionNode) {
                     groupByClause.append(Constants.INTERPOLATION_START_TOKEN).append(Utils.getReferenceTableName(
                             (FunctionCallExpressionNode) expression)).append(Constants.INTERPOLATION_END_TOKEN);

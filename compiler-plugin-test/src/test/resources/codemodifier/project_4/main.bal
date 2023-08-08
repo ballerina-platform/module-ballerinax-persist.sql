@@ -21,14 +21,6 @@ public function main() returns error? {
                 where e.'employee?.'firstName == getStringValue(value) || e.workspaceId == "001" && e.'location?.buildingCode == value
                 group by var workspaceId = e.workspaceId, var buildingCode = e.'location?.buildingCode
                 select {workspaceId, 'location: {buildingCode}};
-
-    entities:BuildingWithRelations[] res = check from entities:BuildingWithRelations e in mcClient->/buildings(targetType = entities:BuildingWithRelations)
-                order by e.buildingCode descending
-                limit getValue(5)
-                let entities:WorkspaceOptionalized[]? workSpace = e.'workspaces
-                where workSpace !is () && workSpace[0].workspaceEmpNo == "1"
-                group by var buildingCode = e.buildingCode, var city = e.city, var workspaces = workSpace[0].workspaceEmpNo 
-                select {buildingCode, city};
 }
 
 function getValue(int value) returns int {

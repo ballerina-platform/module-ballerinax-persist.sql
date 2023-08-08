@@ -28,7 +28,8 @@ public function main() returns error? {
     int[] needIds = check mcClient->/products.post([product]);
     io:println("Created need id: ", needIds[0]);
 
-    entities:Product[] products = check from var e in mcClient->/products.get(targetType = entities:Product, whereClause = ``)
+    entities:Product[] products = check from var e in mcClient->/products.get(targetType = entities:Product, whereClause = ``, orderByClause  = ``, limitClause = ``, groupByClause = `` )
+            where e.id == value || e.id == 6
             where e.id == value || e.id == 6
             order by e.id descending
             limit value
@@ -41,11 +42,15 @@ public function main() returns error? {
             select e;
 
     products = check from var e in mcClient->/products(entities:Product)
-                group by var id = e.id, var name = e.name, var age = e.age
-                where id == value || id == 6
-                limit 5
-                select {id, name, age};
+                limit e.id
+                select e;
 
+    entities:ProductWithRelations1[] out =  check from entities:ProductWithRelations1 e in mcClient->/products(targetType = entities:ProductWithRelations1)
+                   order by getStringValue("name") ascending, e.manufacture[0].id descending
+                   limit getValue(2)
+                   where e.id == 5 || e.id == 6 || e.id == 7 || e.id != 1  || e.manufacture[0].productsId == 1 && e.id >= 1 && e.id <= 20 && e.name == getStringValue("abc") || e.manufacture[0].id == "1"
+                   group by var id =  e.id, var productsId = e.manufacture[0].productsId, var name = e.name, var age = e.age, var manufactureId = e.manufacture[0].id
+                   select {id, name, age, manufacture: [{id: manufactureId, productsId: productsId}]};
     io:println("Products: ", products);
     check mcClient.close();
 }

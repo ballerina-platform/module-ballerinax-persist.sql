@@ -18,12 +18,19 @@
 
 package io.ballerina.stdlib.persist.sql.compiler.codemodifier;
 
+import io.ballerina.compiler.syntax.tree.BasicLiteralNode;
+import io.ballerina.compiler.syntax.tree.BinaryExpressionNode;
 import io.ballerina.compiler.syntax.tree.ChildNodeEntry;
+import io.ballerina.compiler.syntax.tree.ChildNodeList;
 import io.ballerina.compiler.syntax.tree.ClientResourceAccessActionNode;
 import io.ballerina.compiler.syntax.tree.ExpressionNode;
+import io.ballerina.compiler.syntax.tree.FieldAccessExpressionNode;
 import io.ballerina.compiler.syntax.tree.FromClauseNode;
 import io.ballerina.compiler.syntax.tree.FunctionArgumentNode;
+import io.ballerina.compiler.syntax.tree.FunctionCallExpressionNode;
 import io.ballerina.compiler.syntax.tree.GroupByClauseNode;
+import io.ballerina.compiler.syntax.tree.GroupingKeyVarDeclarationNode;
+import io.ballerina.compiler.syntax.tree.IndexedExpressionNode;
 import io.ballerina.compiler.syntax.tree.IntermediateClauseNode;
 import io.ballerina.compiler.syntax.tree.LimitClauseNode;
 import io.ballerina.compiler.syntax.tree.NamedArgumentNode;
@@ -31,6 +38,7 @@ import io.ballerina.compiler.syntax.tree.Node;
 import io.ballerina.compiler.syntax.tree.NodeList;
 import io.ballerina.compiler.syntax.tree.NodeLocation;
 import io.ballerina.compiler.syntax.tree.OrderByClauseNode;
+import io.ballerina.compiler.syntax.tree.OrderKeyNode;
 import io.ballerina.compiler.syntax.tree.ParenthesizedArgList;
 import io.ballerina.compiler.syntax.tree.PositionalArgumentNode;
 import io.ballerina.compiler.syntax.tree.QueryPipelineNode;
@@ -48,6 +56,7 @@ import io.ballerina.stdlib.persist.sql.compiler.utils.Utils;
 import io.ballerina.tools.diagnostics.Diagnostic;
 import io.ballerina.tools.diagnostics.DiagnosticFactory;
 import io.ballerina.tools.diagnostics.DiagnosticInfo;
+import io.ballerina.tools.diagnostics.DiagnosticSeverity;
 
 import java.text.MessageFormat;
 import java.util.Collection;
@@ -98,7 +107,7 @@ public class PersistQueryValidator implements AnalysisTask<SyntaxNodeAnalysisCon
                 .filter((node) -> node instanceof WhereClauseNode)
                 .collect(Collectors.toList());
 
-        List<IntermediateClauseNode> orderByClauseNode = intermediateClauseNodes.stream()
+        List<IntermediateClauseNode> orderByClauseNodes = intermediateClauseNodes.stream()
                 .filter((node) -> node instanceof OrderByClauseNode)
                 .collect(Collectors.toList());
 
@@ -111,7 +120,7 @@ public class PersistQueryValidator implements AnalysisTask<SyntaxNodeAnalysisCon
                 .collect(Collectors.toList());
 
         boolean isWhereClauseUsed = whereClauseNodes.size() != 0;
-        boolean isOrderByClauseUsed = orderByClauseNode.size() != 0;
+        boolean isOrderByClauseUsed = orderByClauseNodes.size() != 0;
         boolean isLimitClauseUsed = limitClauseNode.size() != 0;
         boolean groupByClauseUsed = groupByClauseNode.size() != 0;
 
@@ -123,36 +132,72 @@ public class PersistQueryValidator implements AnalysisTask<SyntaxNodeAnalysisCon
                 .filter((node) -> node.kind().equals(SyntaxKind.LET_CLAUSE))
                 .collect(Collectors.toList());
 
+        if (isWhereClauseUsed) {
+            if (hasArrayFieldExpression(((WhereClauseNode) whereClauseNodes.get(0)).expression(), ctx)) {
+                return;
+            }
+        }
+        if (isOrderByClauseUsed) {
+            SeparatedNodeList<OrderKeyNode> orderKeyNodes = ((OrderByClauseNode) orderByClauseNodes.get(0)).orderKey();
+            for (int i = 0; i < orderKeyNodes.size(); i++) {
+                ExpressionNode expression = orderKeyNodes.get(i).expression();
+                if (isArrayFieldExpression(expression)) {
+                    reportDiagnostic(DiagnosticsCodes.PERSIST_SQL_206.getCode(),
+                            MessageFormat.format(DiagnosticsCodes.PERSIST_SQL_206.getMessage(), "order by"),
+                            DiagnosticsCodes.PERSIST_SQL_206.getSeverity(),
+                            expression.location(), ctx);
+                    return;
+                }
+            }
+        }
         if (groupByClauseUsed) {
+            SeparatedNodeList<Node> groupingKey = ((GroupByClauseNode) groupByClauseNode.get(0)).groupingKey();
+            for (int i = 0; i < groupingKey.size(); i++) {
+                ExpressionNode expression = ((GroupingKeyVarDeclarationNode) groupingKey.get(i)).expression();
+                if (isArrayFieldExpression(expression)) {
+                    reportDiagnostic(DiagnosticsCodes.PERSIST_SQL_206.getCode(),
+                            MessageFormat.format(DiagnosticsCodes.PERSIST_SQL_206.getMessage(), "group by"),
+                            DiagnosticsCodes.PERSIST_SQL_206.getSeverity(),
+                            expression.location(), ctx);
+                    return;
+                }
+            }
             NodeLocation groupByClauseLocation = groupByClauseNode.get(0).location();
             int groupByClauseEndLine = groupByClauseLocation.lineRange().startLine().line();
             if (isWhereClauseUsed) {
-                if (groupByClauseEndLine < whereClauseNodes.get(0).location().lineRange().startLine().line()) {
-                    DiagnosticInfo diagnosticInfo = new DiagnosticInfo(DiagnosticsCodes.
-                            PERSIST_SQL_204.getCode(), MessageFormat.format(
+                if (isGroupClauseInBeforeWhereClauses(groupByClauseEndLine, whereClauseNodes)) {
+                    reportDiagnostic(DiagnosticsCodes.PERSIST_SQL_204.getCode(), MessageFormat.format(
                             DiagnosticsCodes.PERSIST_SQL_204.getMessage(), Constants.WHERE),
-                            DiagnosticsCodes.PERSIST_SQL_204.getSeverity());
-                    Diagnostic diagnostic = DiagnosticFactory.createDiagnostic(diagnosticInfo, groupByClauseLocation);
-                    ctx.reportDiagnostic(diagnostic);
+                            DiagnosticsCodes.PERSIST_SQL_204.getSeverity(), groupByClauseLocation, ctx);
                     return;
                 }
             }
             if (isOrderByClauseUsed) {
-                if (groupByClauseEndLine < orderByClauseNode.get(0).location().lineRange().startLine().line()) {
-                    DiagnosticInfo diagnosticInfo = new DiagnosticInfo(DiagnosticsCodes.
-                            PERSIST_SQL_204.getCode(), MessageFormat.format(
-                            DiagnosticsCodes.PERSIST_SQL_204.getMessage(), Constants.ORDER_BY),
-                            DiagnosticsCodes.PERSIST_SQL_204.getSeverity());
-                    Diagnostic diagnostic = DiagnosticFactory.createDiagnostic(diagnosticInfo, groupByClauseLocation);
-                    ctx.reportDiagnostic(diagnostic);
+                if (isGroupClauseInBeforeOrderClauses(groupByClauseEndLine, orderByClauseNodes)) {
+                    reportDiagnostic(DiagnosticsCodes.PERSIST_SQL_204.getCode(), MessageFormat.format(
+                                    DiagnosticsCodes.PERSIST_SQL_204.getMessage(), Constants.ORDER_BY),
+                            DiagnosticsCodes.PERSIST_SQL_204.getSeverity(), groupByClauseLocation, ctx);
                     return;
                 }
+            }
+
+        }
+        if (isLimitClauseUsed) {
+            ExpressionNode limitByExpression = ((LimitClauseNode) limitClauseNode.get(0)).expression();
+            if (!((limitByExpression instanceof BasicLiteralNode &&
+                    limitByExpression.kind() == SyntaxKind.NUMERIC_LITERAL) ||
+                    limitByExpression instanceof SimpleNameReferenceNode ||
+                    limitByExpression instanceof FunctionCallExpressionNode)) {
+                reportDiagnostic(DiagnosticsCodes.PERSIST_SQL_205.getCode(),
+                        DiagnosticsCodes.PERSIST_SQL_205.getMessage(), DiagnosticsCodes.PERSIST_SQL_202.getSeverity(),
+                        limitByExpression.location(), ctx);
+                return;
             }
         }
         query.addWhereClause(whereClauseNodes);
         query.addLimitClauses(limitClauseNode);
         query.addGroupByClauses(groupByClauseNode);
-        query.addOrderByClause(orderByClauseNode);
+        query.addOrderByClause(orderByClauseNodes);
         query.addLetClauseNodes(letClauseNodes);
         this.queries.put(queryPipelineNode, query);
         validateQuery(ctx);
@@ -223,9 +268,6 @@ public class PersistQueryValidator implements AnalysisTask<SyntaxNodeAnalysisCon
                         NamedArgumentNode namedArgumentNode = (NamedArgumentNode) functionArgumentNode;
                         String argumentsName = namedArgumentNode.argumentName().toString().trim();
                         if (namedArgumentNode.argumentName().toString().trim().equals(Constants.TARGET_TYPE)) {
-//                            query.addTargetType(Utils.stripEscapeCharacter(
-//                                    ((QualifiedNameReferenceNode) namedArgumentNode.expression()).identifier().
-//                                            text().trim()));
                             hasTargetType = true;
                         } else {
                             hasClauseVariable = true;
@@ -241,8 +283,6 @@ public class PersistQueryValidator implements AnalysisTask<SyntaxNodeAnalysisCon
                         PositionalArgumentNode positionalArgumentNode = (PositionalArgumentNode) functionArgumentNode;
                         ExpressionNode expression = positionalArgumentNode.expression();
                         if (expression instanceof SimpleNameReferenceNode) {
-//                            query.addTargetType(Utils.stripEscapeCharacter(
-//                                    ((SimpleNameReferenceNode) expression).name().text()));
                             hasTargetType = true;
                         } else if (expression instanceof TemplateExpressionNode) {
                             hasClauseVariable = true;
@@ -271,5 +311,48 @@ public class PersistQueryValidator implements AnalysisTask<SyntaxNodeAnalysisCon
                 this.persistClientVariableNames.add(entry.getKey());
             }
         }
+    }
+
+    private boolean hasArrayFieldExpression(ExpressionNode expression, SyntaxNodeAnalysisContext ctx) {
+        if (expression instanceof BinaryExpressionNode) {
+            ChildNodeList expressionChildren = expression.children();
+            hasArrayFieldExpression((ExpressionNode) expressionChildren.get(0), ctx);
+            hasArrayFieldExpression((ExpressionNode) expressionChildren.get(2), ctx);
+        } else {
+            if (isArrayFieldExpression(expression)) {
+                reportDiagnostic(DiagnosticsCodes.PERSIST_SQL_206.getCode(),
+                        MessageFormat.format(DiagnosticsCodes.PERSIST_SQL_206.getMessage(), "where"),
+                        DiagnosticsCodes.PERSIST_SQL_206.getSeverity(),
+                        expression.location(), ctx);
+                return true;
+            }
+        }
+        return false;
+    }
+
+    private boolean isArrayFieldExpression(ExpressionNode expression) {
+        if (expression instanceof FieldAccessExpressionNode) {
+            FieldAccessExpressionNode fieldAccessNode = (FieldAccessExpressionNode) expression;
+            ExpressionNode node = fieldAccessNode.expression();
+            return node instanceof IndexedExpressionNode;
+        }
+        return false;
+    }
+
+    private boolean isGroupClauseInBeforeOrderClauses(int groupByClauseEndLine,
+                                                      List<IntermediateClauseNode> orderByClauseNode) {
+        return groupByClauseEndLine < orderByClauseNode.get(0).location().lineRange().startLine().line();
+    }
+
+    private boolean isGroupClauseInBeforeWhereClauses(int groupByClauseEndLine,
+                                                      List<IntermediateClauseNode> whereClauseNodes) {
+        return groupByClauseEndLine < whereClauseNodes.get(0).location().lineRange().startLine().line();
+    }
+
+    private void reportDiagnostic(String code, String message, DiagnosticSeverity severity, NodeLocation location,
+                                  SyntaxNodeAnalysisContext ctx) {
+        DiagnosticInfo diagnosticInfo = new DiagnosticInfo(code, message, severity);
+        Diagnostic diagnostic = DiagnosticFactory.createDiagnostic(diagnosticInfo, location);
+        ctx.reportDiagnostic(diagnostic);
     }
 }

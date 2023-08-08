@@ -57,8 +57,8 @@ public class PersistEntityAndClassIdentifierTask implements AnalysisTask<SyntaxN
         this.entities = entities;
         this.persistClientNames = persistClientNames;
         this.variables = variables;
-        this.queryValidator = new PersistQueryValidator(entities, persistClientNames,
-                variables, queries, validatedQueries, persistClientVariableNames);
+        this.queryValidator = new PersistQueryValidator(entities, persistClientNames, variables, queries,
+                validatedQueries, persistClientVariableNames);
     }
 
     @Override
@@ -79,8 +79,7 @@ public class PersistEntityAndClassIdentifierTask implements AnalysisTask<SyntaxN
                     if (typeDescriptorNode instanceof RecordTypeDescriptorNode) {
                         String typeName = typeDefinitionNode.typeName().text().trim();
                         entities.put(Pluralizer.pluralize(Utils.stripEscapeCharacter(typeName).
-                                toLowerCase(Locale.ROOT)), typeName.substring(0, 1).toLowerCase(Locale.ROOT) +
-                                typeName.substring(1));
+                                toLowerCase(Locale.ROOT)), typeName);
                     }
                 } else if (member instanceof ClassDefinitionNode) {
                     ClassDefinitionNode classDefinitionNode = (ClassDefinitionNode) member;
@@ -105,26 +104,4 @@ public class PersistEntityAndClassIdentifierTask implements AnalysisTask<SyntaxN
         }
         queryValidator.validateQuery(ctx);
     }
-
-//    private void addTableName(String entityName) {
-//        if (this.tables.size() == 0) {
-//            this.tables.add(entityName);
-//        } else {
-//            boolean isEntity = false;
-//            for (String key : this.tables) {
-//                if (entityName.equalsIgnoreCase(key) ||
-//                        entityName.equalsIgnoreCase(key + "Optionalized") ||
-//                        entityName.equalsIgnoreCase(key + "WithRelations") ||
-//                        entityName.equalsIgnoreCase(key + "TargetType") ||
-//                        entityName.equalsIgnoreCase(key + "Insert") ||
-//                        entityName.equalsIgnoreCase(key + "Update")) {
-//                    isEntity = true;
-//                    break;
-//                }
-//            }
-//            if (!isEntity) {
-//                this.tables.add(entityName);
-//            }
-//        }
-//    }
 }

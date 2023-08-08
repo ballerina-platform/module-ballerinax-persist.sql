@@ -57,47 +57,6 @@ public class Utils {
         return name.startsWith("'") ? name.substring(1) : name;
     }
 
-//    public static String findRelationalTableName(String fieldName, Map<String, TypeDefinitionNode> entities,
-//                                                 String targetType, List<String> tables) {
-//        String fieldType = getFieldType(fieldName, entities, targetType);
-//        for (String value : tables) {
-//            if (fieldType != null && (fieldType.startsWith(value) || fieldType.startsWith(value + "Optionalized") ||
-//                    fieldType.startsWith(value + "WithRelations") || fieldType.startsWith(value + "TargetType") ||
-//                    fieldType.startsWith(value + "Insert") || fieldType.startsWith(value + "Update"))) {
-//                return value.substring(0, 1).toLowerCase(Locale.ROOT) + value.substring(1);
-//            }
-//        }
-//        return null;
-//    }
-//
-//    private static String getFieldType(String fieldName, Map<String, TypeDefinitionNode> entities,
-//                                       String targetType) {
-//        TypeDefinitionNode typeDefinitionNode = entities.get(targetType);
-//        TypeDescriptorNode typeDescriptorNode = (TypeDescriptorNode) typeDefinitionNode.typeDescriptor();
-//        for (Node fieldNode : ((RecordTypeDescriptorNode) typeDescriptorNode).fields()) {
-//            if (fieldNode instanceof RecordFieldNode) {
-//                RecordFieldNode recordFieldNode = (RecordFieldNode) fieldNode;
-//                if (Utils.stripEscapeCharacter(recordFieldNode.fieldName().text().trim()).equals(fieldName)) {
-//                    return Utils.stripEscapeCharacter(recordFieldNode.typeName().toSourceCode().trim());
-//                }
-//            } else if (fieldNode instanceof RecordFieldWithDefaultValueNode) {
-//                RecordFieldWithDefaultValueNode defaultField = (RecordFieldWithDefaultValueNode) fieldNode;
-//                if (Utils.stripEscapeCharacter(defaultField.fieldName().text().trim()).equals(fieldName)) {
-//                    return Utils.stripEscapeCharacter(defaultField.typeName().toSourceCode().trim());
-//                }
-//
-//            } else if (fieldNode instanceof TypeReferenceNode) {
-//                TypeReferenceNode typeReferenceNode = (TypeReferenceNode) fieldNode;
-//                String fieldType =  getFieldType(fieldName, entities, Utils.stripEscapeCharacter(typeReferenceNode.
-//                        typeName().toSourceCode().trim()));
-//                if (fieldType != null) {
-//                    return fieldType;
-//                }
-//            }
-//        }
-//        return null;
-//    }
-
     public static String getReferenceTableName(FunctionCallExpressionNode expression) {
         NameReferenceNode functionName = expression.functionName();
         SeparatedNodeList<FunctionArgumentNode> arguments = expression.arguments();
@@ -108,6 +67,5 @@ public class Utils {
     public static String getReferenceTableName(OptionalFieldAccessExpressionNode expression) {
         return Utils.stripEscapeCharacter(((FieldAccessExpressionNode) expression.
                 expression()).fieldName().toSourceCode().trim());
-//        return Utils.findRelationalTableName(relationalTableName, entities, query.getTargetType(), tables);
     }
 }

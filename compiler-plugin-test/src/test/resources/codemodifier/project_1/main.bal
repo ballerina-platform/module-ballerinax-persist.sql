@@ -89,6 +89,13 @@ public function main() returns error? {
     products4 = check from var e in mcClient->/products(targetType = entities:Product)
                     where (e.id == value || e.id == 5) && e.id != 6
                     select e;
+    
+    output = check from entities:Product e in mcClient->/products(targetType = entities:Product)
+                order by getStringValue("name"), e.age
+                limit getValue(4)
+                where e.id == value || e.id == 6 || e.id == 7 || e.id != 1  && e.id >= 1 && e.id <= 20 && e.name == getStringValue("Person2")
+                group by var id3 = getValue(4), var name = e.name, var age = e.age
+                select {id: id3, name: name , age: age};
 
     io:println(products);
     io:println(results1);

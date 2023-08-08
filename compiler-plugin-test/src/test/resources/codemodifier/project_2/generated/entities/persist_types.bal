@@ -51,3 +51,8 @@ public type ProductUpdate record {|
     string name?;
     int age?;
 |};
+
+public type ProductWithRelations1 record {|
+    *ProductOptionalized;
+    ManufactureOptionalized[] manufacture;
+|};

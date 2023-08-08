@@ -35,7 +35,7 @@ public final class Constants {
     public static final String BACKTICK = "`";
     public static final String SPACE = " ";
     public static final String PERSIST_INHERITANCE_NODE = "*persist:AbstractPersistClient;";
-    public static final String ASCENDING = "ascending";
+    public static final String DESCENDING = "descending";
     public static final String OPEN_BRACES_WITH_SPACE = "( ";
     public static final String CLOSE_BRACES_WITH_SPACE = ") ";
     public static final String BAL_ESCAPE_TOKEN = "'";
@@ -60,7 +60,7 @@ public final class Constants {
         public static final String AND = "AND";
         public static final String OR = "OR";
         public static final String ORDER_BY_ASCENDING = "ASC";
-        public static final String ORDER_BY_DECENDING = "DESC";
+        public static final String ORDER_BY_DESCENDING = "DESC";
     }
 
     /**

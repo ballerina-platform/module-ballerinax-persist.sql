@@ -14,11 +14,6 @@ public function main() returns error? {
                limit getValue(2)
                where e.id == value || e.id == "6" || e.id == "7" || e.products?.id == 1
                select e;
-   entities:ProductWithRelations[] out =  check from entities:ProductWithRelations e in mcClient->/products(targetType = entities:ProductWithRelations)
-               order by getStringValue("name") ascending
-               limit getValue(2)
-               where e.id == val || e.id == 6 || e.id == 7 || e.id != 1  && e.id >= 1 && e.id <= 20 && e.name == getStringValue("abc") || e.manufacture[0].id == "1"
-               select e;
 }
 
 function getValue(int value) returns int {

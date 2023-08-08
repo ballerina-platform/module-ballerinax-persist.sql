@@ -54,13 +54,9 @@ public class ExpressionBuilder {
     private boolean isCaptureBindingPattern = false;
     private String bindingVariableName = "";
     private final List<String> fieldNames = new ArrayList<>();
-//    private final List<String> models;
-//    private final Map<String, TypeDefinitionNode> entities;
 
     public ExpressionBuilder(ExpressionNode expression, BindingPatternNode bindingPatternNode) {
         this.expressionNode = expression;
-//        this.entities = entities;
-//        this.models = models;
         if (bindingPatternNode instanceof CaptureBindingPatternNode) {
             this.isCaptureBindingPattern = true;
             this.bindingVariableName = ((CaptureBindingPatternNode) bindingPatternNode).variableName().text();

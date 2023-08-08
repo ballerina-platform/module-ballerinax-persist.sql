@@ -30,9 +30,13 @@ public enum DiagnosticsCodes {
     PERSIST_SQL_201("PERSIST_201", "an entity should be a closed record", ERROR),
     PERSIST_SQL_202("PERSIST_202", "persist remote function call does not support ''{0}'' argument",
             ERROR),
-    PERSIST_SQL_203("PERSIST_203", "persist remote function call does not support this argument",
+    PERSIST_SQL_203("PERSIST_203", "A persist remote function call does not support anything " +
+            "other than a target type argument", ERROR),
+    PERSIST_SQL_204("PERSIST_204", "''group by'' clause cannot be defined before ''{0}'' clause",
             ERROR),
-    PERSIST_SQL_204("PERSIST_204", "''group by'' clause cannot be used before ''{0}'' clause",
+    PERSIST_SQL_205("PERSIST_205", "''limit'' clause cannot be defined by the entity's field",
+            ERROR),
+    PERSIST_SQL_206("PERSIST_206", "''{0}'' clause cannot be defined by the entity's array field",
             ERROR);
 
     private final String code;

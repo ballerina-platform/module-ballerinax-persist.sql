@@ -302,8 +302,7 @@ public class QueryCodeModifierTask implements ModifierTask<SourceModifierContext
         }
 
         private List<Node> processWhereClause(WhereClauseNode whereClauseNode, BindingPatternNode bindingPatternNode,
-                                              Query query)
-                throws NotSupportedExpressionException {
+                                              Query query) throws NotSupportedExpressionException {
             ExpressionBuilder expressionBuilder = new ExpressionBuilder(whereClauseNode.expression(),
                     bindingPatternNode);
             ExpressionVisitor expressionVisitor = new ExpressionVisitor();

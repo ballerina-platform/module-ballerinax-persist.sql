@@ -63,6 +63,7 @@ import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.stream.Collectors;
 
 /**
@@ -74,11 +75,11 @@ public class PersistQueryValidator implements AnalysisTask<SyntaxNodeAnalysisCon
     private final List<String> persistClientNames;
     private final List<String> persistClientVariableNames;
     private final Map<String, String> variables;
-    private final Map<QueryPipelineNode, Query> queries;
+    private final ConcurrentHashMap<QueryPipelineNode, Query> queries;
     private final Map<QueryPipelineNode, Query> validatedQueries;
 
     public PersistQueryValidator(Map<String, String> entities, List<String> persistClientNames,
-                                 Map<String, String> variables, Map<QueryPipelineNode, Query> queries,
+                                 Map<String, String> variables, ConcurrentHashMap<QueryPipelineNode, Query> queries,
                                  Map<QueryPipelineNode, Query> validatedQueries,
                                  List<String> persistClientVariableNames) {
         this.entities = entities;
@@ -232,33 +233,32 @@ public class PersistQueryValidator implements AnalysisTask<SyntaxNodeAnalysisCon
     public void validateQuery(SyntaxNodeAnalysisContext ctx) {
         if (!this.persistClientNames.isEmpty() && !this.entities.isEmpty()) {
             processPersistClientVariables();
-            Map<QueryPipelineNode, Query> temp = this.queries;
-            for (Map.Entry<QueryPipelineNode, Query> entry : temp.entrySet()) {
+            for (Map.Entry<QueryPipelineNode, Query> entry : this.queries.entrySet()) {
                 Query query = entry.getValue();
                 if (query.isValidated()) {
                     continue;
                 }
                 // Validate whether the client name is a persist client or not
                 if (!this.persistClientVariableNames.contains(query.getClientName())) {
-                    query.validated = true;
+                    this.queries.remove(entry.getKey());
                     continue;
                 }
                 // Validate the resource path
                 SeparatedNodeList<Node> resourcePath = query.getPath();
                 if (resourcePath.size() == 0) {
-                    query.validated = true;
+                    this.queries.remove(entry.getKey());
                     continue;
                 }
                 String path = resourcePath.get(0).toString().trim();
                 if (!this.entities.containsKey(path)) {
-                    query.validated = true;
+                    this.queries.remove(entry.getKey());
                     continue;
                 }
                 query.addTableName(this.entities.get(path));
                 // Validate arguments
                 SeparatedNodeList<FunctionArgumentNode> argumentNodes = query.getArguments();
                 if (argumentNodes.size() == 0) {
-                    query.validated = true;
+                    this.queries.remove(entry.getKey());
                     continue;
                 }
                 boolean hasTargetType = false;
@@ -296,10 +296,10 @@ public class PersistQueryValidator implements AnalysisTask<SyntaxNodeAnalysisCon
 
                     }
                 }
-                query.validated = true;
                 if (hasTargetType && !hasClauseVariable) {
                     this.validatedQueries.put(entry.getKey(), entry.getValue());
                 }
+                this.queries.remove(entry.getKey());
             }
         }
     }

@@ -38,6 +38,7 @@ import io.ballerina.stdlib.persist.sql.compiler.utils.Utils;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.stream.Collectors;
 
 /**
@@ -51,7 +52,8 @@ public class PersistEntityAndClassIdentifierTask implements AnalysisTask<SyntaxN
     PersistQueryValidator queryValidator;
 
     PersistEntityAndClassIdentifierTask(Map<String, String> entities, List<String> persistClientNames,
-                                        Map<String, String> variables, Map<QueryPipelineNode, Query> queries,
+                                        Map<String, String> variables,
+                                        ConcurrentHashMap<QueryPipelineNode, Query> queries,
                                         Map<QueryPipelineNode, Query> validatedQueries,
                                         List<String> persistClientVariableNames) {
         this.entities = entities;

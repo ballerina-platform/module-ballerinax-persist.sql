@@ -11,7 +11,7 @@ observabilityIncluded = false
 datastore = "mysql"
 module = "medical_center"
 
-[[platform.java11.dependency]]
+[[platform.java17.dependency]]
 groupId = "io.ballerina.stdlib"
 artifactId = "persist.sql-native"
 version = "1.0.0"

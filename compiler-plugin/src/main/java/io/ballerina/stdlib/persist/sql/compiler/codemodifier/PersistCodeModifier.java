@@ -29,6 +29,7 @@ import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 
 /**
  * Analyzes a Ballerina Persist.
@@ -39,7 +40,7 @@ public class PersistCodeModifier extends CodeModifier {
     private final List<String> persistClientVariableNames = new ArrayList<>();
     private final Map<String, String> variables = new HashMap<>();
     private final Map<String, String> entities = new HashMap<>();
-    private final Map<QueryPipelineNode, Query> queries = new HashMap<>();
+    private final ConcurrentHashMap<QueryPipelineNode, Query> queries = new ConcurrentHashMap<>();
     private final Map<QueryPipelineNode, Query> validatedQueries = new HashMap<>();
 
     @Override

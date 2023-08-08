@@ -5,7 +5,7 @@
 
 [ballerina]
 dependencies-toml-version = "2"
-distribution-version = "2201.7.0"
+distribution-version = "2201.8.0-20230726-145300-b2bdf796"
 
 [[package]]
 org = "ballerina"
@@ -400,7 +400,7 @@ modules = [
 [[package]]
 org = "ballerinax"
 name = "mssql.driver"
-version = "1.4.1"
+version = "1.5.0"
 scope = "testOnly"
 modules = [
 	{org = "ballerinax", packageName = "mssql.driver", moduleName = "mssql.driver"}
@@ -425,7 +425,7 @@ modules = [
 [[package]]
 org = "ballerinax"
 name = "mysql.driver"
-version = "1.4.1"
+version = "1.5.0"
 scope = "testOnly"
 modules = [
 	{org = "ballerinax", packageName = "mysql.driver", moduleName = "mysql.driver"}

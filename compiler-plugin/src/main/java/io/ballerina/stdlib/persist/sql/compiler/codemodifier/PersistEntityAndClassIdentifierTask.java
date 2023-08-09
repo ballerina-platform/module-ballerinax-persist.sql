@@ -72,19 +72,17 @@ public class PersistEntityAndClassIdentifierTask implements AnalysisTask<SyntaxN
         if (node instanceof ModulePartNode) {
             ModulePartNode rootNode = (ModulePartNode) ctx.node();
             for (ModuleMemberDeclarationNode member : rootNode.members()) {
-                if (member instanceof TypeDefinitionNode) {
+                if (member instanceof TypeDefinitionNode typeDefinitionNode) {
                     if (!ctx.node().syntaxTree().filePath().equals("persist_types.bal")) {
                         continue;
                     }
-                    TypeDefinitionNode typeDefinitionNode = (TypeDefinitionNode) member;
                     TypeDescriptorNode typeDescriptorNode = (TypeDescriptorNode) typeDefinitionNode.typeDescriptor();
                     if (typeDescriptorNode instanceof RecordTypeDescriptorNode) {
                         String typeName = typeDefinitionNode.typeName().text().trim();
                         entities.put(Pluralizer.pluralize(Utils.stripEscapeCharacter(typeName).
                                 toLowerCase(Locale.ROOT)), typeName);
                     }
-                } else if (member instanceof ClassDefinitionNode) {
-                    ClassDefinitionNode classDefinitionNode = (ClassDefinitionNode) member;
+                } else if (member instanceof ClassDefinitionNode classDefinitionNode) {
                     List<Node> persistTypeInheritanceNodes = classDefinitionNode.members().stream().filter(
                             (classMember) -> classMember.toString().trim().equals(
                                     Constants.PERSIST_INHERITANCE_NODE)).collect(Collectors.toList());
@@ -93,13 +91,11 @@ public class PersistEntityAndClassIdentifierTask implements AnalysisTask<SyntaxN
                     }
                 }
             }
-        } else if (node instanceof ModuleVariableDeclarationNode) {
-            ModuleVariableDeclarationNode moduleVariableNode = (ModuleVariableDeclarationNode) node;
+        } else if (node instanceof ModuleVariableDeclarationNode moduleVariableNode) {
             String type = moduleVariableNode.typedBindingPattern().typeDescriptor().toString().trim();
             String variableName = moduleVariableNode.typedBindingPattern().bindingPattern().toString().trim();
             variables.put(variableName, type);
-        } else if (node instanceof VariableDeclarationNode) {
-            VariableDeclarationNode moduleVariableNode = (VariableDeclarationNode) node;
+        } else if (node instanceof VariableDeclarationNode moduleVariableNode) {
             String type = moduleVariableNode.typedBindingPattern().typeDescriptor().toString().trim();
             String variableName = moduleVariableNode.typedBindingPattern().bindingPattern().toString().trim();
             variables.put(variableName, type);

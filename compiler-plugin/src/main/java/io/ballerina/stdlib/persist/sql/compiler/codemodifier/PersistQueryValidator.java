@@ -205,9 +205,7 @@ public class PersistQueryValidator implements AnalysisTask<SyntaxNodeAnalysisCon
     }
 
     private Query isQueryUsingPersistentClient(FromClauseNode fromClauseNode) {
-        if (fromClauseNode.expression() instanceof ClientResourceAccessActionNode) {
-            ClientResourceAccessActionNode remoteCall =
-                    (ClientResourceAccessActionNode) fromClauseNode.expression();
+        if (fromClauseNode.expression() instanceof ClientResourceAccessActionNode remoteCall) {
             SimpleNameReferenceNode clientName = (SimpleNameReferenceNode) remoteCall.expression();
             Collection<ChildNodeEntry> clientResourceChildEntries = remoteCall.childEntries();
             if (clientResourceChildEntries.size() == 5 || clientResourceChildEntries.size() == 7) {
@@ -264,8 +262,7 @@ public class PersistQueryValidator implements AnalysisTask<SyntaxNodeAnalysisCon
                 boolean hasTargetType = false;
                 boolean hasClauseVariable = false;
                 for (FunctionArgumentNode functionArgumentNode : argumentNodes) {
-                    if (functionArgumentNode instanceof NamedArgumentNode) {
-                        NamedArgumentNode namedArgumentNode = (NamedArgumentNode) functionArgumentNode;
+                    if (functionArgumentNode instanceof NamedArgumentNode namedArgumentNode) {
                         String argumentsName = namedArgumentNode.argumentName().toString().trim();
                         if (namedArgumentNode.argumentName().toString().trim().equals(Constants.TARGET_TYPE)) {
                             hasTargetType = true;
@@ -279,8 +276,7 @@ public class PersistQueryValidator implements AnalysisTask<SyntaxNodeAnalysisCon
                                     functionArgumentNode.location());
                             ctx.reportDiagnostic(diagnostic);
                         }
-                    } else if (functionArgumentNode instanceof PositionalArgumentNode) {
-                        PositionalArgumentNode positionalArgumentNode = (PositionalArgumentNode) functionArgumentNode;
+                    } else if (functionArgumentNode instanceof PositionalArgumentNode positionalArgumentNode) {
                         ExpressionNode expression = positionalArgumentNode.expression();
                         if (expression instanceof SimpleNameReferenceNode) {
                             hasTargetType = true;
@@ -331,8 +327,7 @@ public class PersistQueryValidator implements AnalysisTask<SyntaxNodeAnalysisCon
     }
 
     private boolean isArrayFieldExpression(ExpressionNode expression) {
-        if (expression instanceof FieldAccessExpressionNode) {
-            FieldAccessExpressionNode fieldAccessNode = (FieldAccessExpressionNode) expression;
+        if (expression instanceof FieldAccessExpressionNode fieldAccessNode) {
             ExpressionNode node = fieldAccessNode.expression();
             return node instanceof IndexedExpressionNode;
         }

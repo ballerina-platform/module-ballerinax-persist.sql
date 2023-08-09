@@ -113,8 +113,7 @@ public class ExpressionBuilder {
                 expressionVisitor.beginVisitBraces();
                 buildVariableExecutors(((BracedExpressionNode) expressionNode).expression(), expressionVisitor, query);
                 expressionVisitor.endVisitBraces();
-            } else if (expressionNode instanceof FieldAccessExpressionNode) {
-                FieldAccessExpressionNode exp = (FieldAccessExpressionNode) expressionNode;
+            } else if (expressionNode instanceof FieldAccessExpressionNode exp) {
                 String fieldName = Utils.stripEscapeCharacter(exp.fieldName().toSourceCode().trim());
                 ExpressionNode fieldAccessName = exp.expression();
                 if (this.isCaptureBindingPattern && bindingVariableName.equals(fieldAccessName.toSourceCode().trim())) {
@@ -124,8 +123,7 @@ public class ExpressionBuilder {
                         tableName = Utils.stripEscapeCharacter(((FieldAccessExpressionNode) fieldAccessName).
                                 fieldName().toSourceCode().trim());
                         updateExpressionVisitor(tableName + "." + fieldName, expressionVisitor);
-                    } else if (fieldAccessName instanceof IndexedExpressionNode) {
-                        IndexedExpressionNode indexedExpressionNode = (IndexedExpressionNode) fieldAccessName;
+                    } else if (fieldAccessName instanceof IndexedExpressionNode indexedExpressionNode) {
                         tableName = Utils.stripEscapeCharacter(((FieldAccessExpressionNode) indexedExpressionNode.
                                 containerExpression()).fieldName().toSourceCode().trim());
                         updateExpressionVisitor(tableName + "." + fieldName, expressionVisitor);
@@ -133,8 +131,7 @@ public class ExpressionBuilder {
                         throw new NotSupportedExpressionException("Unsupported field access in where clause");
                     }
                 }
-            } else if (expressionNode instanceof OptionalFieldAccessExpressionNode) {
-                OptionalFieldAccessExpressionNode fieldNode = (OptionalFieldAccessExpressionNode) expressionNode;
+            } else if (expressionNode instanceof OptionalFieldAccessExpressionNode fieldNode) {
                 updateExpressionVisitor(Utils.getReferenceTableName(fieldNode) + "." +
                         Utils.stripEscapeCharacter(fieldNode.fieldName().toSourceCode().trim()), expressionVisitor);
             } else if (expressionNode instanceof SimpleNameReferenceNode) {

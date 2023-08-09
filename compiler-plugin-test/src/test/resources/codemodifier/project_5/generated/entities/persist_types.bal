@@ -79,3 +79,7 @@ public type BuildingUpdate record {|
     string city?;
 |};
 
+public type WorkspaceWithRelations1 record {|
+    *WorkspaceOptionalized;
+    BuildingOptionalized location;
+|};

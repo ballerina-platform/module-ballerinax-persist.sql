@@ -25,7 +25,6 @@ import io.ballerina.compiler.syntax.tree.CaptureBindingPatternNode;
 import io.ballerina.compiler.syntax.tree.ClientResourceAccessActionNode;
 import io.ballerina.compiler.syntax.tree.ExpressionNode;
 import io.ballerina.compiler.syntax.tree.FieldAccessExpressionNode;
-import io.ballerina.compiler.syntax.tree.FieldBindingPatternVarnameNode;
 import io.ballerina.compiler.syntax.tree.FromClauseNode;
 import io.ballerina.compiler.syntax.tree.FunctionArgumentNode;
 import io.ballerina.compiler.syntax.tree.FunctionCallExpressionNode;
@@ -33,7 +32,6 @@ import io.ballerina.compiler.syntax.tree.GroupByClauseNode;
 import io.ballerina.compiler.syntax.tree.GroupingKeyVarDeclarationNode;
 import io.ballerina.compiler.syntax.tree.IntermediateClauseNode;
 import io.ballerina.compiler.syntax.tree.LimitClauseNode;
-import io.ballerina.compiler.syntax.tree.MappingBindingPatternNode;
 import io.ballerina.compiler.syntax.tree.ModulePartNode;
 import io.ballerina.compiler.syntax.tree.NameReferenceNode;
 import io.ballerina.compiler.syntax.tree.Node;
@@ -320,17 +318,15 @@ public class QueryCodeModifierTask implements ModifierTask<SourceModifierContext
                     orderByClause.append(Constants.COMMA_WITH_SPACE);
                 }
                 ExpressionNode expression = orderKeyNodes.get(i).expression();
-                if (expression instanceof FieldAccessExpressionNode) {
+                if (expression instanceof FieldAccessExpressionNode fieldAccessNode) {
                     if (!(bindingPatternNode instanceof CaptureBindingPatternNode)) {
                         // If this is not capture pattern there is compilation error
                         return null;
                     }
                     String bindingVariableName = ((CaptureBindingPatternNode) bindingPatternNode).
                             variableName().text();
-                    FieldAccessExpressionNode fieldAccessNode = (FieldAccessExpressionNode) expression;
                     Node node = fieldAccessNode.expression();
-                    if (node instanceof FieldAccessExpressionNode) {
-                        FieldAccessExpressionNode accessExpressionNode = ((FieldAccessExpressionNode) node);
+                    if (node instanceof FieldAccessExpressionNode accessExpressionNode) {
                         if (!bindingVariableName.equals(accessExpressionNode.expression().toSourceCode().trim())) {
                             return null;
                         }
@@ -350,27 +346,10 @@ public class QueryCodeModifierTask implements ModifierTask<SourceModifierContext
                                         name().text()));
                     }
                 } else if (expression instanceof SimpleNameReferenceNode) {
-                    String fieldName = ((SimpleNameReferenceNode) expression).name().text();
-
-                    if (!(bindingPatternNode instanceof MappingBindingPatternNode)) {
-                        // If this is not mapping pattern there is compilation error
-                        return null;
-                    }
-                    boolean isCorrectField = false;
-                    SeparatedNodeList<BindingPatternNode> bindingPatternNodes =
-                            ((MappingBindingPatternNode) bindingPatternNode).fieldBindingPatterns();
-                    for (BindingPatternNode patternNode : bindingPatternNodes) {
-                        String field = ((FieldBindingPatternVarnameNode) patternNode).variableName().name().text();
-                        if (fieldName.equals(field)) {
-                            isCorrectField = true;
-                        }
-                    }
-                    if (!isCorrectField) {
-                        return null;
-                    }
-                    orderByClause.append(tableName).append(".").append(fieldName);
-                } else if (expression instanceof OptionalFieldAccessExpressionNode) {
-                    OptionalFieldAccessExpressionNode fieldNode = (OptionalFieldAccessExpressionNode) expression;
+                    orderByClause.append(Constants.INTERPOLATION_START_TOKEN).append(
+                                    ((SimpleNameReferenceNode) expression).name().text()).
+                            append(Constants.INTERPOLATION_END_TOKEN);
+                } else if (expression instanceof OptionalFieldAccessExpressionNode fieldNode) {
                     orderByClause.append(Utils.getReferenceTableName(fieldNode)).append(".").
                             append(Utils.stripEscapeCharacter(fieldNode.fieldName().toSourceCode().trim()));
                 } else if (expression instanceof FunctionCallExpressionNode) {
@@ -405,27 +384,41 @@ public class QueryCodeModifierTask implements ModifierTask<SourceModifierContext
                     groupByClause.append(Constants.COMMA_WITH_SPACE);
                 }
                 ExpressionNode expression = ((GroupingKeyVarDeclarationNode) groupingKey.get(i)).expression();
-                if (expression instanceof FieldAccessExpressionNode) {
-                    FieldAccessExpressionNode fieldAccessNode = (FieldAccessExpressionNode) expression;
+                if (expression instanceof FieldAccessExpressionNode fieldAccessNode) {
                     if (!(bindingPatternNode instanceof CaptureBindingPatternNode)) {
                         // If this is not capture pattern there is compilation error
                         return null;
                     }
                     String bindingVariableName = ((CaptureBindingPatternNode) bindingPatternNode).variableName().text();
-                    String recordName = ((SimpleNameReferenceNode) fieldAccessNode.expression()).name().text();
-                    if (!bindingVariableName.equals(recordName)) {
-                        return null;
+                    Node node = fieldAccessNode.expression();
+                    if (node instanceof FieldAccessExpressionNode accessExpressionNode) {
+                        if (!bindingVariableName.equals(accessExpressionNode.expression().toSourceCode().trim())) {
+                            return null;
+                        }
+                        String relationalTableName = Utils.stripEscapeCharacter(accessExpressionNode.fieldName().
+                                toSourceCode().trim());
+                        groupByClause.append(relationalTableName).append(".").
+                                append(Utils.stripEscapeCharacter(((FieldAccessExpressionNode) expression).fieldName().
+                                        toSourceCode().trim()));
+                    } else {
+                        if (!bindingVariableName.equals(((SimpleNameReferenceNode) fieldAccessNode.
+                                expression()).name().text())) {
+                            return null;
+                        }
+                        String fieldName = Utils.stripEscapeCharacter(((SimpleNameReferenceNode) fieldAccessNode.
+                                fieldName()).name().text());
+                        groupByClause.append(tableName).append(".").append(fieldName);
                     }
-                    String fieldName = Utils.stripEscapeCharacter(((SimpleNameReferenceNode) fieldAccessNode.
-                            fieldName()).name().text());
-                    groupByClause.append(tableName).append(".").append(fieldName);
-                } else if (expression instanceof OptionalFieldAccessExpressionNode) {
-                    OptionalFieldAccessExpressionNode fieldNode = (OptionalFieldAccessExpressionNode) expression;
+                } else if (expression instanceof OptionalFieldAccessExpressionNode fieldNode) {
                     groupByClause.append(Utils.getReferenceTableName(fieldNode)).append(".").
                             append(Utils.stripEscapeCharacter(fieldNode.fieldName().toSourceCode().trim()));
                 } else if (expression instanceof FunctionCallExpressionNode) {
                     groupByClause.append(Constants.INTERPOLATION_START_TOKEN).append(Utils.getReferenceTableName(
                             (FunctionCallExpressionNode) expression)).append(Constants.INTERPOLATION_END_TOKEN);
+                } else if (expression instanceof SimpleNameReferenceNode) {
+                    groupByClause.append(Constants.INTERPOLATION_START_TOKEN).append(
+                            ((SimpleNameReferenceNode) expression).name().text()).
+                            append(Constants.INTERPOLATION_END_TOKEN);
                 } else {
                     // Persistent client does not support group by using parameters
                     return null;
@@ -444,8 +437,7 @@ public class QueryCodeModifierTask implements ModifierTask<SourceModifierContext
                 return Utils.getStringLiteralToken(Constants.INTERPOLATION_START_TOKEN +
                         ((SimpleNameReferenceNode) limitByExpression).name().text().trim() +
                         Constants.INTERPOLATION_END_TOKEN);
-            } else if (limitByExpression instanceof FunctionCallExpressionNode) {
-                FunctionCallExpressionNode functionCallExpressionNode = (FunctionCallExpressionNode) limitByExpression;
+            } else if (limitByExpression instanceof FunctionCallExpressionNode functionCallExpressionNode) {
                 NameReferenceNode fun = functionCallExpressionNode.functionName();
                 SeparatedNodeList<FunctionArgumentNode> arguments = functionCallExpressionNode.arguments();
                 return Utils.getStringLiteralToken(Constants.INTERPOLATION_START_TOKEN +

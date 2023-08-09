@@ -221,7 +221,22 @@ public class CodeModifierTest {
                         "                where e.employee?.firstName == getStringValue(value) || " +
                         "e.workspaceId == \"001\" && e.location?.buildingCode == value\n" +
                         "                select e;";
+                String modifiedFunction1 = "entities:WorkspaceWithRelations1[] result = check from entities:" +
+                        "WorkspaceWithRelations1 e in mcClient->/workspaces(targetType = entities:" +
+                        "WorkspaceWithRelations1, whereClause = ` employee.firstName = ${getStringValue(value)}  " +
+                        "OR Workspace.workspaceId = \"001\" AND location.buildingCode = ${value} `, orderByClause = " +
+                        "` employee.empNo ASC , ${name} DESC `, groupByClause = ` employee.firstName, " +
+                        "Workspace.workspaceId, ${name}`, limitClause = ` ${getValue(5)}`)\n" +
+                        "                    order by e.employee?.empNo ascending, name descending\n" +
+                        "                    limit getValue(5)\n" +
+                        "                    where e.employee?.firstName == getStringValue(value) || " +
+                        "e.workspaceId == \"001\" && e.location.buildingCode == value\n" +
+                        "                    group by var firstName = e.employee?.firstName,  var workspaceId = " +
+                        "e.workspaceId, var buildingCode = name\n" +
+                        "                    select {workspaceId: workspaceId, location: {buildingCode: " +
+                        "buildingCode}};\n";
                 Assert.assertTrue(sourceCode.contains(modifiedFunction));
+                Assert.assertTrue(sourceCode.contains(modifiedFunction1));
             }
         }
     }

@@ -190,7 +190,7 @@ public class PersistQueryValidator implements AnalysisTask<SyntaxNodeAnalysisCon
                     limitByExpression instanceof SimpleNameReferenceNode ||
                     limitByExpression instanceof FunctionCallExpressionNode)) {
                 reportDiagnostic(DiagnosticsCodes.PERSIST_SQL_205.getCode(),
-                        DiagnosticsCodes.PERSIST_SQL_205.getMessage(), DiagnosticsCodes.PERSIST_SQL_202.getSeverity(),
+                        DiagnosticsCodes.PERSIST_SQL_205.getMessage(), DiagnosticsCodes.PERSIST_SQL_205.getSeverity(),
                         limitByExpression.location(), ctx);
                 return;
             }
@@ -252,7 +252,7 @@ public class PersistQueryValidator implements AnalysisTask<SyntaxNodeAnalysisCon
                     this.queries.remove(entry.getKey());
                     continue;
                 }
-                query.addTableName(this.entities.get(path));
+                query.addTableName(Utils.stripEscapeCharacter(this.entities.get(path)));
                 // Validate arguments
                 SeparatedNodeList<FunctionArgumentNode> argumentNodes = query.getArguments();
                 if (argumentNodes.size() == 0) {

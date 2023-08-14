@@ -28,7 +28,6 @@ import io.ballerina.compiler.syntax.tree.ExpressionNode;
 import io.ballerina.compiler.syntax.tree.FieldAccessExpressionNode;
 import io.ballerina.compiler.syntax.tree.FieldBindingPatternVarnameNode;
 import io.ballerina.compiler.syntax.tree.FunctionCallExpressionNode;
-import io.ballerina.compiler.syntax.tree.IndexedExpressionNode;
 import io.ballerina.compiler.syntax.tree.LiteralValueToken;
 import io.ballerina.compiler.syntax.tree.MappingBindingPatternNode;
 import io.ballerina.compiler.syntax.tree.OptionalFieldAccessExpressionNode;
@@ -122,10 +121,6 @@ public class ExpressionBuilder {
                     if (fieldAccessName instanceof FieldAccessExpressionNode) {
                         tableName = Utils.stripEscapeCharacter(((FieldAccessExpressionNode) fieldAccessName).
                                 fieldName().toSourceCode().trim());
-                        updateExpressionVisitor(tableName + "." + fieldName, expressionVisitor);
-                    } else if (fieldAccessName instanceof IndexedExpressionNode indexedExpressionNode) {
-                        tableName = Utils.stripEscapeCharacter(((FieldAccessExpressionNode) indexedExpressionNode.
-                                containerExpression()).fieldName().toSourceCode().trim());
                         updateExpressionVisitor(tableName + "." + fieldName, expressionVisitor);
                     } else {
                         throw new NotSupportedExpressionException("Unsupported field access in where clause");

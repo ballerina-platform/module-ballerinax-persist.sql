@@ -80,7 +80,7 @@ public class PersistEntityAndClassIdentifierTask implements AnalysisTask<SyntaxN
                     if (typeDescriptorNode instanceof RecordTypeDescriptorNode) {
                         String typeName = typeDefinitionNode.typeName().text().trim();
                         entities.put(Pluralizer.pluralize(Utils.stripEscapeCharacter(typeName).
-                                toLowerCase(Locale.ROOT)), typeName);
+                                toLowerCase(Locale.ROOT)), Utils.stripEscapeCharacter(typeName));
                     }
                 } else if (member instanceof ClassDefinitionNode classDefinitionNode) {
                     List<Node> persistTypeInheritanceNodes = classDefinitionNode.members().stream().filter(

@@ -490,6 +490,9 @@ public isolated client class SQLClient {
     }
 
     private isolated function escape(string value) returns string {
+        if (value.startsWith("'")) {
+            return self.dataSourceSpecifics.quoteOpen + value.substring(1) + self.dataSourceSpecifics.quoteClose;
+        }
         return self.dataSourceSpecifics.quoteOpen + value + self.dataSourceSpecifics.quoteClose;
     }
 }

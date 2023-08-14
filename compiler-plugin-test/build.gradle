@@ -23,8 +23,8 @@ plugins {
     id 'jacoco'
 }
 
-jacoco {
-    toolVersion = "0.8.10"
+configurations {
+    jacocoRuntime
 }
 
 description = 'Ballerina - Persist SQL Compiler Plugin Test'
@@ -32,6 +32,7 @@ description = 'Ballerina - Persist SQL Compiler Plugin Test'
 def ballerinaDist = "${project.rootDir}/target/ballerina-runtime"
 
 dependencies {
+    jacocoRuntime "org.jacoco:org.jacoco.agent:${jacoco.toolVersion}:runtime"
     checkstyle project(':checkstyle')
     checkstyle "com.puppycrawl.tools:checkstyle:${puppycrawlCheckstyleVersion}"
     implementation project(":persist.sql-compiler-plugin")
@@ -64,6 +65,15 @@ test {
             }
         }
     }
+    finalizedBy jacocoTestReport
+}
+
+jacocoTestReport {
+    dependsOn test
+    reports {
+        xml.required = true
+    }
+    sourceSets project(':persist.sql-compiler-plugin').sourceSets.main
 }
 
 spotbugsMain {
@@ -126,3 +136,4 @@ compileJava {
 }
 
 test.dependsOn ":persist.sql-ballerina:build"
+build.dependsOn ":persist.sql-ballerina:build"

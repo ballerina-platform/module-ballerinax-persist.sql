@@ -52,7 +52,6 @@ import io.ballerina.projects.plugins.SyntaxNodeAnalysisContext;
 import io.ballerina.stdlib.persist.sql.compiler.Constants;
 import io.ballerina.stdlib.persist.sql.compiler.DiagnosticsCodes;
 import io.ballerina.stdlib.persist.sql.compiler.model.Query;
-import io.ballerina.stdlib.persist.sql.compiler.utils.Utils;
 import io.ballerina.tools.diagnostics.Diagnostic;
 import io.ballerina.tools.diagnostics.DiagnosticFactory;
 import io.ballerina.tools.diagnostics.DiagnosticInfo;
@@ -65,6 +64,9 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.stream.Collectors;
+
+import static io.ballerina.stdlib.persist.sql.compiler.codemodifier.QueryCodeModifierTask.hasCompilationErrors;
+import static io.ballerina.stdlib.persist.sql.compiler.codemodifier.QueryCodeModifierTask.stripEscapeCharacter;
 
 /**
  * Analysis task to validate queries.
@@ -92,7 +94,7 @@ public class PersistQueryValidator implements AnalysisTask<SyntaxNodeAnalysisCon
 
     @Override
     public void perform(SyntaxNodeAnalysisContext ctx) {
-        if (Utils.hasCompilationErrors(ctx)) {
+        if (hasCompilationErrors(ctx)) {
             return;
         }
 
@@ -252,7 +254,7 @@ public class PersistQueryValidator implements AnalysisTask<SyntaxNodeAnalysisCon
                     this.queries.remove(entry.getKey());
                     continue;
                 }
-                query.addTableName(Utils.stripEscapeCharacter(this.entities.get(path)));
+                query.addTableName(stripEscapeCharacter(this.entities.get(path)));
                 // Validate arguments
                 SeparatedNodeList<FunctionArgumentNode> argumentNodes = query.getArguments();
                 if (argumentNodes.size() == 0) {

@@ -32,6 +32,7 @@ import io.ballerina.compiler.syntax.tree.GroupByClauseNode;
 import io.ballerina.compiler.syntax.tree.GroupingKeyVarDeclarationNode;
 import io.ballerina.compiler.syntax.tree.IntermediateClauseNode;
 import io.ballerina.compiler.syntax.tree.LimitClauseNode;
+import io.ballerina.compiler.syntax.tree.LiteralValueToken;
 import io.ballerina.compiler.syntax.tree.ModulePartNode;
 import io.ballerina.compiler.syntax.tree.NameReferenceNode;
 import io.ballerina.compiler.syntax.tree.Node;
@@ -57,12 +58,14 @@ import io.ballerina.projects.ModuleId;
 import io.ballerina.projects.Package;
 import io.ballerina.projects.plugins.ModifierTask;
 import io.ballerina.projects.plugins.SourceModifierContext;
+import io.ballerina.projects.plugins.SyntaxNodeAnalysisContext;
 import io.ballerina.stdlib.persist.sql.compiler.Constants;
 import io.ballerina.stdlib.persist.sql.compiler.exception.NotSupportedExpressionException;
 import io.ballerina.stdlib.persist.sql.compiler.expression.ExpressionBuilder;
 import io.ballerina.stdlib.persist.sql.compiler.expression.ExpressionVisitor;
 import io.ballerina.stdlib.persist.sql.compiler.model.Query;
-import io.ballerina.stdlib.persist.sql.compiler.utils.Utils;
+import io.ballerina.tools.diagnostics.Diagnostic;
+import io.ballerina.tools.diagnostics.DiagnosticSeverity;
 import org.ballerinalang.formatter.core.Formatter;
 import org.ballerinalang.formatter.core.FormatterException;
 
@@ -164,7 +167,7 @@ public class QueryCodeModifierTask implements ModifierTask<SourceModifierContext
             arguments.add(queryArguments.get(0));
             if (isWhereClauseUsed) {
                 List<Node> whereClauseParameterizedQuery = new ArrayList<>();
-                whereClauseParameterizedQuery.add(Utils.getStringLiteralToken(Constants.SPACE));
+                whereClauseParameterizedQuery.add(getStringLiteralToken(Constants.SPACE));
 
                 try {
                     List<Node> whereClause = processWhereClause(((WhereClauseNode) whereClauseNode.get(0)),
@@ -189,7 +192,7 @@ public class QueryCodeModifierTask implements ModifierTask<SourceModifierContext
 
             if (isOrderByClauseUsed) {
                 List<Node> orderByClauseParameterizedQuery = new ArrayList<>();
-                orderByClauseParameterizedQuery.add(Utils.getStringLiteralToken(Constants.SPACE));
+                orderByClauseParameterizedQuery.add(getStringLiteralToken(Constants.SPACE));
 
                 Node orderByClause = processOrderByClause(((OrderByClauseNode) orderByClauseNode.get(0)),
                         fromClauseNode.typedBindingPattern().bindingPattern(), query);
@@ -211,7 +214,7 @@ public class QueryCodeModifierTask implements ModifierTask<SourceModifierContext
 
             if (isGroupByClauseUsed) {
                 List<Node> groupByClauseParameterizedQuery = new ArrayList<>();
-                groupByClauseParameterizedQuery.add(Utils.getStringLiteralToken(Constants.SPACE));
+                groupByClauseParameterizedQuery.add(getStringLiteralToken(Constants.SPACE));
 
                 Node groupByClause = processGroupByClause(((GroupByClauseNode) groupByClauseNode.get(0)),
                         fromClauseNode.typedBindingPattern().bindingPattern(), query);
@@ -232,7 +235,7 @@ public class QueryCodeModifierTask implements ModifierTask<SourceModifierContext
             }
             if (isLimitClauseUsed) {
                 List<Node> limitClauseParameterizedQuery = new ArrayList<>();
-                limitClauseParameterizedQuery.add(Utils.getStringLiteralToken(Constants.SPACE));
+                limitClauseParameterizedQuery.add(getStringLiteralToken(Constants.SPACE));
                 Node limitClause = processLimitClause(((LimitClauseNode) limitClauseNode.get(0)));
                 limitClauseParameterizedQuery.add(limitClause);
 
@@ -330,19 +333,19 @@ public class QueryCodeModifierTask implements ModifierTask<SourceModifierContext
                         if (!bindingVariableName.equals(accessExpressionNode.expression().toSourceCode().trim())) {
                             return null;
                         }
-                        String relationalTableName = Utils.stripEscapeCharacter(accessExpressionNode.fieldName().
+                        String relationalTableName = stripEscapeCharacter(accessExpressionNode.fieldName().
                                 toSourceCode().trim());
                         orderByClause.append(relationalTableName).append(".").
-                                append(Utils.stripEscapeCharacter(((FieldAccessExpressionNode) expression).fieldName().
+                                append(stripEscapeCharacter(((FieldAccessExpressionNode) expression).fieldName().
                                         toSourceCode().trim()));
                     } else {
-                        String recordName = Utils.stripEscapeCharacter(((SimpleNameReferenceNode) fieldAccessNode.
+                        String recordName = stripEscapeCharacter(((SimpleNameReferenceNode) fieldAccessNode.
                                 expression()).name().text());
                         if (!bindingVariableName.equals(recordName)) {
                             return null;
                         }
                         orderByClause.append(tableName).append(".").append(
-                                Utils.stripEscapeCharacter(((SimpleNameReferenceNode) fieldAccessNode.fieldName()).
+                                stripEscapeCharacter(((SimpleNameReferenceNode) fieldAccessNode.fieldName()).
                                         name().text()));
                     }
                 } else if (expression instanceof SimpleNameReferenceNode) {
@@ -350,10 +353,10 @@ public class QueryCodeModifierTask implements ModifierTask<SourceModifierContext
                                     ((SimpleNameReferenceNode) expression).name().text()).
                             append(Constants.INTERPOLATION_END_TOKEN);
                 } else if (expression instanceof OptionalFieldAccessExpressionNode fieldNode) {
-                    orderByClause.append(Utils.getReferenceTableName(fieldNode)).append(".").
-                            append(Utils.stripEscapeCharacter(fieldNode.fieldName().toSourceCode().trim()));
+                    orderByClause.append(getReferenceTableName(fieldNode)).append(".").
+                            append(stripEscapeCharacter(fieldNode.fieldName().toSourceCode().trim()));
                 } else if (expression instanceof FunctionCallExpressionNode) {
-                    orderByClause.append(Constants.INTERPOLATION_START_TOKEN).append(Utils.getReferenceTableName(
+                    orderByClause.append(Constants.INTERPOLATION_START_TOKEN).append(getReferenceTableName(
                             (FunctionCallExpressionNode) expression)).append(Constants.INTERPOLATION_END_TOKEN);
                 } else {
                     // Persistent client does not support order by using parameters
@@ -371,7 +374,7 @@ public class QueryCodeModifierTask implements ModifierTask<SourceModifierContext
                 }
                 orderByClause.append(Constants.SPACE);
             }
-            return Utils.getStringLiteralToken(orderByClause.toString());
+            return getStringLiteralToken(orderByClause.toString());
         }
 
         private Node processGroupByClause(GroupByClauseNode groupByClauseNode,
@@ -395,25 +398,25 @@ public class QueryCodeModifierTask implements ModifierTask<SourceModifierContext
                         if (!bindingVariableName.equals(accessExpressionNode.expression().toSourceCode().trim())) {
                             return null;
                         }
-                        String relationalTableName = Utils.stripEscapeCharacter(accessExpressionNode.fieldName().
+                        String relationalTableName = stripEscapeCharacter(accessExpressionNode.fieldName().
                                 toSourceCode().trim());
                         groupByClause.append(relationalTableName).append(".").
-                                append(Utils.stripEscapeCharacter(((FieldAccessExpressionNode) expression).fieldName().
+                                append(stripEscapeCharacter(((FieldAccessExpressionNode) expression).fieldName().
                                         toSourceCode().trim()));
                     } else {
                         if (!bindingVariableName.equals(((SimpleNameReferenceNode) fieldAccessNode.
                                 expression()).name().text())) {
                             return null;
                         }
-                        String fieldName = Utils.stripEscapeCharacter(((SimpleNameReferenceNode) fieldAccessNode.
+                        String fieldName = stripEscapeCharacter(((SimpleNameReferenceNode) fieldAccessNode.
                                 fieldName()).name().text());
                         groupByClause.append(tableName).append(".").append(fieldName);
                     }
                 } else if (expression instanceof OptionalFieldAccessExpressionNode fieldNode) {
-                    groupByClause.append(Utils.getReferenceTableName(fieldNode)).append(".").
-                            append(Utils.stripEscapeCharacter(fieldNode.fieldName().toSourceCode().trim()));
+                    groupByClause.append(getReferenceTableName(fieldNode)).append(".").
+                            append(stripEscapeCharacter(fieldNode.fieldName().toSourceCode().trim()));
                 } else if (expression instanceof FunctionCallExpressionNode) {
-                    groupByClause.append(Constants.INTERPOLATION_START_TOKEN).append(Utils.getReferenceTableName(
+                    groupByClause.append(Constants.INTERPOLATION_START_TOKEN).append(getReferenceTableName(
                             (FunctionCallExpressionNode) expression)).append(Constants.INTERPOLATION_END_TOKEN);
                 } else if (expression instanceof SimpleNameReferenceNode) {
                     groupByClause.append(Constants.INTERPOLATION_START_TOKEN).append(
@@ -424,23 +427,23 @@ public class QueryCodeModifierTask implements ModifierTask<SourceModifierContext
                     return null;
                 }
             }
-            return Utils.getStringLiteralToken(groupByClause.toString());
+            return getStringLiteralToken(groupByClause.toString());
         }
 
         private Node processLimitClause(LimitClauseNode limitClauseNode) {
             ExpressionNode limitByExpression = limitClauseNode.expression();
             if (limitByExpression instanceof BasicLiteralNode &&
                     limitByExpression.kind() == SyntaxKind.NUMERIC_LITERAL) {
-                return Utils.getStringLiteralToken(Constants.SPACE + ((BasicLiteralNode) limitByExpression).
+                return getStringLiteralToken(Constants.SPACE + ((BasicLiteralNode) limitByExpression).
                         literalToken().text());
             } else if (limitByExpression instanceof SimpleNameReferenceNode) {
-                return Utils.getStringLiteralToken(Constants.INTERPOLATION_START_TOKEN +
+                return getStringLiteralToken(Constants.INTERPOLATION_START_TOKEN +
                         ((SimpleNameReferenceNode) limitByExpression).name().text().trim() +
                         Constants.INTERPOLATION_END_TOKEN);
             } else if (limitByExpression instanceof FunctionCallExpressionNode functionCallExpressionNode) {
                 NameReferenceNode fun = functionCallExpressionNode.functionName();
                 SeparatedNodeList<FunctionArgumentNode> arguments = functionCallExpressionNode.arguments();
-                return Utils.getStringLiteralToken(Constants.INTERPOLATION_START_TOKEN +
+                return getStringLiteralToken(Constants.INTERPOLATION_START_TOKEN +
                         fun.toSourceCode().trim() + functionCallExpressionNode.openParenToken().text() +
                         arguments.get(0).toSourceCode() + functionCallExpressionNode.closeParenToken().text() +
                         Constants.INTERPOLATION_END_TOKEN);
@@ -448,5 +451,36 @@ public class QueryCodeModifierTask implements ModifierTask<SourceModifierContext
                 return null;
             }
         }
+    }
+
+    public static boolean hasCompilationErrors(SyntaxNodeAnalysisContext context) {
+        for (Diagnostic diagnostic : context.compilation().diagnosticResult().diagnostics()) {
+            if (diagnostic.diagnosticInfo().severity() == DiagnosticSeverity.ERROR) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    public static LiteralValueToken getStringLiteralToken(String value) {
+        return NodeFactory.createLiteralValueToken(
+                SyntaxKind.STRING_LITERAL, value, AbstractNodeFactory.createEmptyMinutiaeList(), 
+                AbstractNodeFactory.createEmptyMinutiaeList());
+    }
+
+    public static String stripEscapeCharacter(String name) {
+        return name.startsWith("'") ? name.substring(1) : name;
+    }
+
+    public static String getReferenceTableName(FunctionCallExpressionNode expression) {
+        NameReferenceNode functionName = expression.functionName();
+        SeparatedNodeList<FunctionArgumentNode> arguments = expression.arguments();
+        return functionName.toSourceCode().trim() + expression.openParenToken().text() +
+                arguments.get(0).toSourceCode() + expression.closeParenToken().text();
+    }
+
+    public static String getReferenceTableName(OptionalFieldAccessExpressionNode expression) {
+        return stripEscapeCharacter(((FieldAccessExpressionNode) expression.
+                expression()).fieldName().toSourceCode().trim());
     }
 }

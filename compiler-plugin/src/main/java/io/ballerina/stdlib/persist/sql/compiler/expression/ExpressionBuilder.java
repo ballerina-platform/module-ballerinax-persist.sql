@@ -37,13 +37,15 @@ import io.ballerina.compiler.syntax.tree.SyntaxKind;
 import io.ballerina.stdlib.persist.sql.compiler.DiagnosticsCodes;
 import io.ballerina.stdlib.persist.sql.compiler.exception.NotSupportedExpressionException;
 import io.ballerina.stdlib.persist.sql.compiler.model.Query;
-import io.ballerina.stdlib.persist.sql.compiler.utils.Utils;
 import io.ballerina.tools.diagnostics.Diagnostic;
 import io.ballerina.tools.diagnostics.DiagnosticFactory;
 import io.ballerina.tools.diagnostics.DiagnosticInfo;
 
 import java.util.ArrayList;
 import java.util.List;
+
+import static io.ballerina.stdlib.persist.sql.compiler.codemodifier.QueryCodeModifierTask.getReferenceTableName;
+import static io.ballerina.stdlib.persist.sql.compiler.codemodifier.QueryCodeModifierTask.stripEscapeCharacter;
 
 /**
  * Builder class to process where clause.
@@ -113,13 +115,13 @@ public class ExpressionBuilder {
                 buildVariableExecutors(((BracedExpressionNode) expressionNode).expression(), expressionVisitor, query);
                 expressionVisitor.endVisitBraces();
             } else if (expressionNode instanceof FieldAccessExpressionNode exp) {
-                String fieldName = Utils.stripEscapeCharacter(exp.fieldName().toSourceCode().trim());
+                String fieldName = stripEscapeCharacter(exp.fieldName().toSourceCode().trim());
                 ExpressionNode fieldAccessName = exp.expression();
                 if (this.isCaptureBindingPattern && bindingVariableName.equals(fieldAccessName.toSourceCode().trim())) {
                     updateExpressionVisitor(tableName + "." + fieldName, expressionVisitor);
                 } else {
                     if (fieldAccessName instanceof FieldAccessExpressionNode) {
-                        tableName = Utils.stripEscapeCharacter(((FieldAccessExpressionNode) fieldAccessName).
+                        tableName = stripEscapeCharacter(((FieldAccessExpressionNode) fieldAccessName).
                                 fieldName().toSourceCode().trim());
                         updateExpressionVisitor(tableName + "." + fieldName, expressionVisitor);
                     } else {
@@ -127,10 +129,10 @@ public class ExpressionBuilder {
                     }
                 }
             } else if (expressionNode instanceof OptionalFieldAccessExpressionNode fieldNode) {
-                updateExpressionVisitor(Utils.getReferenceTableName(fieldNode) + "." +
-                        Utils.stripEscapeCharacter(fieldNode.fieldName().toSourceCode().trim()), expressionVisitor);
+                updateExpressionVisitor(getReferenceTableName(fieldNode) + "." +
+                        stripEscapeCharacter(fieldNode.fieldName().toSourceCode().trim()), expressionVisitor);
             } else if (expressionNode instanceof SimpleNameReferenceNode) {
-                String referencedName = Utils.stripEscapeCharacter(
+                String referencedName = stripEscapeCharacter(
                         ((SimpleNameReferenceNode) expressionNode).name().text());
                 if (this.isCaptureBindingPattern) {
                     expressionVisitor.beginVisitBalVariable(referencedName);
@@ -150,7 +152,7 @@ public class ExpressionBuilder {
                 expressionVisitor.beginVisitConstant(literalValueToken.text(), literalValueToken.kind());
                 expressionVisitor.endVisitConstant(literalValueToken.text(), literalValueToken.kind());
             } else if (expressionNode instanceof FunctionCallExpressionNode) {
-                String referencedName = Utils.getReferenceTableName((FunctionCallExpressionNode) expressionNode);
+                String referencedName = getReferenceTableName((FunctionCallExpressionNode) expressionNode);
                 expressionVisitor.beginVisitBalVariable(referencedName);
                 expressionVisitor.endVisitBalVariable(referencedName);
             } else {

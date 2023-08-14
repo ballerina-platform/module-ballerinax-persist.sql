@@ -23,10 +23,11 @@ import io.ballerina.compiler.syntax.tree.NodeFactory;
 import io.ballerina.compiler.syntax.tree.SyntaxKind;
 import io.ballerina.stdlib.persist.sql.compiler.Constants;
 import io.ballerina.stdlib.persist.sql.compiler.exception.NotSupportedExpressionException;
-import io.ballerina.stdlib.persist.sql.compiler.utils.Utils;
 
 import java.util.ArrayList;
 import java.util.List;
+
+import static io.ballerina.stdlib.persist.sql.compiler.codemodifier.QueryCodeModifierTask.getStringLiteralToken;
 
 /**
  * Visitor class for generating WHERE clause.
@@ -37,7 +38,7 @@ public class ExpressionVisitor {
     StringBuilder expression = new StringBuilder();
 
     public List<Node> getExpression() {
-        whereExpressionNodes.add(Utils.getStringLiteralToken(this.expression.toString()));
+        whereExpressionNodes.add(getStringLiteralToken(this.expression.toString()));
         return whereExpressionNodes;
     }
 
@@ -178,9 +179,9 @@ public class ExpressionVisitor {
         }
 
         String partialClause = this.expression.toString();
-        whereExpressionNodes.add(Utils.getStringLiteralToken(partialClause));
+        whereExpressionNodes.add(getStringLiteralToken(partialClause));
         ExpressionNode expressionNode = NodeFactory.createSimpleNameReferenceNode(
-                Utils.getStringLiteralToken(processedAttributeName));
+                getStringLiteralToken(processedAttributeName));
         whereExpressionNodes.add(NodeFactory.createInterpolationNode(
                 Constants.TokenNodes.INTERPOLATION_START_TOKEN, expressionNode,
                 Constants.TokenNodes.INTERPOLATION_END_TOKEN));

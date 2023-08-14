@@ -33,13 +33,15 @@ import io.ballerina.projects.plugins.SyntaxNodeAnalysisContext;
 import io.ballerina.stdlib.persist.plural.Pluralizer;
 import io.ballerina.stdlib.persist.sql.compiler.Constants;
 import io.ballerina.stdlib.persist.sql.compiler.model.Query;
-import io.ballerina.stdlib.persist.sql.compiler.utils.Utils;
 
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.stream.Collectors;
+
+import static io.ballerina.stdlib.persist.sql.compiler.codemodifier.QueryCodeModifierTask.hasCompilationErrors;
+import static io.ballerina.stdlib.persist.sql.compiler.codemodifier.QueryCodeModifierTask.stripEscapeCharacter;
 
 /**
  * Analysis task to identify all declared entities and clients.
@@ -65,7 +67,7 @@ public class PersistEntityAndClassIdentifierTask implements AnalysisTask<SyntaxN
 
     @Override
     public void perform(SyntaxNodeAnalysisContext ctx) {
-        if (Utils.hasCompilationErrors(ctx)) {
+        if (hasCompilationErrors(ctx)) {
             return;
         }
         Node node = ctx.node();
@@ -79,8 +81,8 @@ public class PersistEntityAndClassIdentifierTask implements AnalysisTask<SyntaxN
                     TypeDescriptorNode typeDescriptorNode = (TypeDescriptorNode) typeDefinitionNode.typeDescriptor();
                     if (typeDescriptorNode instanceof RecordTypeDescriptorNode) {
                         String typeName = typeDefinitionNode.typeName().text().trim();
-                        entities.put(Pluralizer.pluralize(Utils.stripEscapeCharacter(typeName).
-                                toLowerCase(Locale.ROOT)), Utils.stripEscapeCharacter(typeName));
+                        entities.put(Pluralizer.pluralize(stripEscapeCharacter(typeName).
+                                toLowerCase(Locale.ROOT)), stripEscapeCharacter(typeName));
                     }
                 } else if (member instanceof ClassDefinitionNode classDefinitionNode) {
                     List<Node> persistTypeInheritanceNodes = classDefinitionNode.members().stream().filter(

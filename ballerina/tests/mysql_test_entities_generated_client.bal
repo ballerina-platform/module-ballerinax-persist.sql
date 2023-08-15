@@ -15,11 +15,10 @@
 // under the License.
 
 import ballerina/persist;
-import ballerina/sql;
 import ballerina/jballerina.java;
-import ballerina/sql;
 import ballerinax/mysql;
 import ballerinax/mysql.driver as _;
+import ballerina/sql;
 
 const ALL_TYPES = "alltypes";
 const STRING_ID_RECORD = "stringidrecords";

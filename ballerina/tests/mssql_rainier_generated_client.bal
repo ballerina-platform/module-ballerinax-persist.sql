@@ -15,11 +15,10 @@
 // under the License.
 
 import ballerina/persist;
-import ballerina/sql;
 import ballerina/jballerina.java;
-import ballerina/sql;
 import ballerinax/mssql;
 import ballerinax/mssql.driver as _;
+import ballerina/sql;
 
 const EMPLOYEE = "employees";
 const WORKSPACE = "workspaces";

@@ -163,7 +163,23 @@ function mysqlWorkspaceUpdateTest() returns error? {
 
 @test:Config {
     groups: ["workspace", "mysql"],
-    dependsOn: [mysqlWorkspaceReadOneTest, mysqlWorkspaceReadManyTest, mysqlWorkspaceReadManyDependentTest]
+    dependsOn: [mysqlWorkspaceCreateTest, mysqlWorkspaceCreateTest2]
+}
+function mysqlWorkspaceReadWithClauses() returns error? {
+    MySQLRainierClient rainierClient = check new ();
+    string value = "small";
+    string id = "Workspace.workspaceId";
+    int count = 2;
+    stream<Workspace, error?> workspaceStream = rainierClient->/workspaces.get(whereClause = `Workspace.workspaceType = ${value} OR Workspace.workspaceType ="medium"`, orderByClause = `Workspace.workspaceId DESC `, limitClause = ` ${count}`, groupByClause = `${id}`);
+    Workspace[] workspaces = check from Workspace workspace in workspaceStream
+            select workspace;
+    test:assertEquals(workspaces, [workspace3, workspace2]);
+    check rainierClient.close();
+}
+
+@test:Config {
+    groups: ["workspace", "mysql"],
+    dependsOn: [mysqlWorkspaceReadOneTest, mysqlWorkspaceReadManyTest, mysqlWorkspaceReadManyDependentTest, mysqlWorkspaceReadWithClauses]
 }
 function mysqlWorkspaceUpdateTestNegative1() returns error? {
     MySQLRainierClient rainierClient = check new ();
@@ -182,7 +198,7 @@ function mysqlWorkspaceUpdateTestNegative1() returns error? {
 
 @test:Config {
     groups: ["workspace", "mysql"],
-    dependsOn: [mysqlWorkspaceReadOneTest, mysqlWorkspaceReadManyTest, mysqlWorkspaceReadManyDependentTest]
+    dependsOn: [mysqlWorkspaceReadOneTest, mysqlWorkspaceReadManyTest, mysqlWorkspaceReadManyDependentTest, mysqlWorkspaceReadWithClauses]
 }
 function mysqlWorkspaceUpdateTestNegative2() returns error? {
     MySQLRainierClient rainierClient = check new ();

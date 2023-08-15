@@ -188,10 +188,10 @@ function mssqlNativeQueryComplexTest() returns error? {
     check rainierClient.close();
 }
 
-// @test:Config {
-//     groups: ["transactions", "mssql", "native"],
-//     dependsOn: [mssqlNativeExecuteTestNegative1, mssqlNativeQueryTest, mssqlNativeQueryTestNegative, mssqlNativeQueryComplexTest]
-// }
+@test:Config {
+    groups: ["transactions", "mssql", "native"],
+    dependsOn: [mssqlNativeExecuteTestNegative1, mssqlNativeQueryTest, mssqlNativeQueryTestNegative, mssqlNativeQueryComplexTest]
+}
 function mssqlNativeTransactionTest() returns error? {
     MSSQLRainierClient rainierClient = check new ();
     _ = check rainierClient->executeNativeSQL(`DELETE FROM Employee`);
@@ -233,10 +233,10 @@ function mssqlNativeTransactionTest() returns error? {
     check rainierClient.close();
 }
 
-// @test:Config {
-//     groups: ["transactions", "mssql", "native"],
-//     dependsOn: [mssqlNativeExecuteTestNegative1, mssqlNativeQueryTest, mssqlNativeQueryTestNegative, mssqlNativeQueryComplexTest]
-// }
+@test:Config {
+    groups: ["transactions", "mssql", "native"],
+    dependsOn: [mssqlNativeExecuteTestNegative1, mssqlNativeQueryTest, mssqlNativeQueryTestNegative, mssqlNativeQueryComplexTest]
+}
 function mssqlNativeTransactionTest2() returns error? {
     MSSQLRainierClient rainierClient = check new ();
 

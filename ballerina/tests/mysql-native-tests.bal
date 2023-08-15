@@ -234,7 +234,7 @@ function mysqlNativeTransactionTest() returns error? {
 }
 
 @test:Config {
-    groups: ["transactions", "mysql", "native", "x"],
+    groups: ["transactions", "mysql", "native"],
     dependsOn: [mysqlNativeExecuteTestNegative1, mysqlNativeQueryTest, mysqlNativeQueryTestNegative, mysqlNativeQueryComplexTest]
 }
 function mysqlNativeTransactionTest2() returns error? {

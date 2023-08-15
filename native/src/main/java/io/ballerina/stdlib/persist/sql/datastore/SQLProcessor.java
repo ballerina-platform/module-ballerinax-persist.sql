@@ -36,9 +36,12 @@ import io.ballerina.runtime.api.values.BObject;
 import io.ballerina.runtime.api.values.BStream;
 import io.ballerina.runtime.api.values.BString;
 import io.ballerina.runtime.api.values.BTypedesc;
+import io.ballerina.runtime.transactions.TransactionResourceManager;
 import io.ballerina.stdlib.persist.Constants;
 import io.ballerina.stdlib.persist.ModuleUtils;
 import io.ballerina.stdlib.persist.sql.Utils;
+import io.ballerina.stdlib.sql.parameterprocessor.DefaultResultParameterProcessor;
+import io.ballerina.stdlib.sql.parameterprocessor.DefaultStatementParameterProcessor;
 
 import java.util.Map;
 
@@ -178,18 +181,64 @@ public class SQLProcessor {
                                          BTypedesc targetType) {
         // This method will return `stream<targetType, persist:Error?>`
 
+        TransactionResourceManager trxResourceManager = TransactionResourceManager.getInstance();
+        if (!io.ballerina.stdlib.sql.utils.Utils.isWithinTrxBlock(trxResourceManager)) {
+            return queryNativeSQLBal(env, client, paramSQLString, targetType);
+        }
+
+        BObject dbClient = (BObject) client.get(DB_CLIENT);
+        BStream sqlStream = io.ballerina.stdlib.sql.nativeimpl.QueryProcessor.nativeQuery(env, dbClient,
+                paramSQLString, targetType, DefaultStatementParameterProcessor.getInstance(),
+                DefaultResultParameterProcessor.getInstance());
+
+        if (sqlStream != null) {
+            BObject persistNativeStream = createPersistNativeSQLStream(sqlStream, null);
+            RecordType streamConstraint =
+                    (RecordType) TypeUtils.getReferredType(targetType.getDescribingType());
+            return (ValueCreator.createStreamValue(TypeCreator.createStreamType(streamConstraint,
+                    PredefinedTypes.TYPE_NULL), persistNativeStream)
+            );
+        }
+
+        return null;
+    }
+
+    public static Object executeNativeSQL(Environment env, BObject client, BObject paramSQLString) {
+        // This method will return `persist:ExecutionResult|persist:Error`
+
+        TransactionResourceManager trxResourceManager = TransactionResourceManager.getInstance();
+        if (!io.ballerina.stdlib.sql.utils.Utils.isWithinTrxBlock(trxResourceManager)) {
+            return executeNativeSQLBal(env, client, paramSQLString);
+        }
+
+        BObject dbClient = (BObject) client.get(DB_CLIENT);
+        Object sqlExecutionResult = io.ballerina.stdlib.sql.nativeimpl.ExecuteProcessor.nativeExecute(env, dbClient,
+                paramSQLString, DefaultStatementParameterProcessor.getInstance());
+
+        if (sqlExecutionResult instanceof BMap) { // returned type is `sql:ExecutionResult`
+            return ValueCreator.createRecordValue(getModule(),
+                    io.ballerina.stdlib.persist.sql.Constants.PERSIST_EXECUTION_RESULT,
+                    (BMap<BString, Object>) sqlExecutionResult);
+        } else if (sqlExecutionResult instanceof BError) { // returned type is `sql:Error`
+            return wrapSQLError((BError) sqlExecutionResult);
+        }
+
+        return null;
+    }
+
+    public static BStream queryNativeSQLBal(Environment env, BObject client, BObject paramSQLString,
+                                            BTypedesc targetType) {
+        // This method will return `stream<targetType, persist:Error?>`
+
         BObject dbClient = (BObject) client.get(DB_CLIENT);
         RecordType recordType = (RecordType) targetType.getDescribingType();
         StreamType streamType = TypeCreator.createStreamType(recordType, PredefinedTypes.TYPE_NULL);
-
-        Map<String, Object> trxContextProperties = getTransactionContextProperties();
-        String strandName = env.getStrandName().isPresent() ? env.getStrandName().get() : null;
 
         Future balFuture = env.markAsync();
         env.getRuntime().invokeMethodAsyncSequentially(
                 // Call `sqlClient.query(paramSQLString, targetType)` which returns `stream<targetType, sql:Error?>`
 
-                dbClient, SQL_QUERY_METHOD, strandName, env.getStrandMetadata(), new Callback() {
+                dbClient, SQL_QUERY_METHOD, null, env.getStrandMetadata(), new Callback() {
                     @Override
                     public void notifySuccess(Object o) {
                         // returned type is `stream<record {}, sql:Error?>`
@@ -208,27 +257,22 @@ public class SQLProcessor {
                         BObject errorStream = Utils.createPersistNativeSQLStream(null, bError);
                         balFuture.complete(errorStream);
                     }
-                }, trxContextProperties, streamType, paramSQLString, true, targetType, true
+                }, null, streamType, paramSQLString, true, targetType, true
         );
 
         return null;
     }
 
-    public static Object executeNativeSQL(Environment env, BObject client, BObject paramSQLString) {
-        // This method will return `persist:ExecutionResult|persist:Error`
-
+    private static Object executeNativeSQLBal(Environment env, BObject client, BObject paramSQLString) {
         BObject dbClient = (BObject) client.get(DB_CLIENT);
         RecordType persistExecutionResultType = TypeCreator.createRecordType(
                 io.ballerina.stdlib.persist.sql.Constants.PERSIST_EXECUTION_RESULT, getModule(), 0, true, 0);
-
-        Map<String, Object> trxContextProperties = getTransactionContextProperties();
-        String strandName = env.getStrandName().isPresent() ? env.getStrandName().get() : null;
 
         Future balFuture = env.markAsync();
         env.getRuntime().invokeMethodAsyncSequentially(
                 // Call `sqlClient.execute(paramSQLString)` which returns `sql:ExecutionResult|sql:Error`
 
-                dbClient, SQL_EXECUTE_METHOD, strandName, env.getStrandMetadata(), new Callback() {
+                dbClient, SQL_EXECUTE_METHOD, null, env.getStrandMetadata(), new Callback() {
                     @Override
                     public void notifySuccess(Object o) {
                         if (o instanceof BMap) { // returned type is `sql:ExecutionResult`
@@ -248,7 +292,7 @@ public class SQLProcessor {
                         BError persistError = wrapError(bError);
                         balFuture.complete(persistError);
                     }
-                }, trxContextProperties, persistExecutionResultType, paramSQLString, true
+                }, null, persistExecutionResultType, paramSQLString, true
         );
 
         return null;

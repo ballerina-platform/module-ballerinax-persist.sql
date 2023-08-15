@@ -90,8 +90,8 @@ subprojects {
         ballerinaStdLibs "org.ballerinalang:transaction-ballerina:${stdlibTransactionVersion}"
         ballerinaStdLibs "io.ballerina.stdlib:sql-ballerina:${stdlibSqlVersion}"
         ballerinaStdLibs "io.ballerina.stdlib:persist-ballerina:${stdlibPersistVersion}"
-        ballerinaStdLibs "io.ballerina.stdlib:mysql-ballerina:${testStdlibMysqlVersion}"
-        ballerinaStdLibs "io.ballerina.stdlib:mssql-ballerina:${testStdlibMssqlVersion}"
+        ballerinaStdLibs "io.ballerina.stdlib:mysql-ballerina:${stdlibMysqlVersion}"
+        ballerinaStdLibs "io.ballerina.stdlib:mssql-ballerina:${stdlibMssqlVersion}"
         ballerinaStdLibs "io.ballerina.stdlib:mysql.driver-ballerina:${stdlibMysqlDriverVersion}"
         ballerinaStdLibs "io.ballerina.stdlib:mssql.driver-ballerina:${stdlibMssqlDriverVersion}"
         ballerinaStdLibs "io.ballerina.stdlib:observe-ballerina:${observeVersion}"
@@ -117,6 +117,10 @@ release {
 
 task build {
     dependsOn(":${packageName}-ballerina:build")
+    dependsOn(":${packageName}-native:build")
+    dependsOn(":${packageName}-compiler-plugin:build")
+    dependsOn(":${packageName}-ballerina:build")
+    dependsOn(":${packageName}-compiler-plugin-test:build")
 }
 
 publishToMavenLocal.dependsOn build

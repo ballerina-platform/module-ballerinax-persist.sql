@@ -65,7 +65,11 @@ import static io.ballerina.stdlib.persist.sql.Utils.wrapSQLError;
  */
 public class SQLProcessor {
 
-    static BStream query(Environment env, BObject client, BTypedesc targetType) {
+    private SQLProcessor() {
+    }
+
+    static BStream query(Environment env, BObject client, BTypedesc targetType, BObject whereClause,
+                         BObject orderByClause, BObject limitClause, BObject groupByClause) {
         // This method will return `stream<targetType, persist:Error?>`
 
         BString entity = getEntity(env);
@@ -112,7 +116,8 @@ public class SQLProcessor {
                                 typeDescriptions, persistClient, wrapError(bError)));
                     }
                 }, trxContextProperties, streamTypeWithIdFields,
-                targetTypeWithIdFields, true, fields, true, includes, true
+                targetTypeWithIdFields, true, fields, true, includes, true, whereClause, true, orderByClause,
+                true, limitClause, true, groupByClause, true
         );
 
         return null;

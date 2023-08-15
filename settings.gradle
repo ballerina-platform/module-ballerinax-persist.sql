@@ -8,7 +8,7 @@
  */
 
 plugins {
-    id "com.gradle.enterprise" version "3.2"
+    id "com.gradle.enterprise" version "3.13.2"
 }
 
 rootProject.name = 'ballerinax-persist.sql'
@@ -16,10 +16,14 @@ rootProject.name = 'ballerinax-persist.sql'
 include ':checkstyle'
 include ':persist.sql-native'
 include ':persist.sql-ballerina'
+include 'persist.sql-compiler-plugin'
+include 'persist.sql-compiler-plugin-test'
 
 project(':checkstyle').projectDir = file("build-config${File.separator}checkstyle")
 project(':persist.sql-native').projectDir = file('native')
 project(':persist.sql-ballerina').projectDir = file('ballerina')
+project(':persist.sql-compiler-plugin').projectDir = file('compiler-plugin')
+project(':persist.sql-compiler-plugin-test').projectDir = file('compiler-plugin-test')
 
 gradleEnterprise {
     buildScan {

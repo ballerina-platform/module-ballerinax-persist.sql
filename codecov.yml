@@ -1,3 +1,7 @@
+ignore:
+  - "compiler-plugin/src/main/java/io/ballerina/stdlib/persist/sql/compiler/exception/NotSupportedExpressionException.java"
+  - "native/src/main/java/io/ballerina/stdlib/persist/sql/Constants.java"
+
 coverage:
   precision: 2
   round: down

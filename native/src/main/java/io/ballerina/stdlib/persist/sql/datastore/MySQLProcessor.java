@@ -34,8 +34,9 @@ public class MySQLProcessor {
     private MySQLProcessor() {
     }
 
-    public static BStream query(Environment env, BObject client, BTypedesc targetType) {
-        return SQLProcessor.query(env, client, targetType);
+    public static BStream query(Environment env, BObject client, BTypedesc targetType, BObject whereClause,
+                                BObject orderClause, BObject limitClause, BObject groupByClause) {
+        return SQLProcessor.query(env, client, targetType, whereClause, orderClause, limitClause, groupByClause);
     }
 
     public static Object queryOne(Environment env, BObject client, BArray path, BTypedesc targetType) {

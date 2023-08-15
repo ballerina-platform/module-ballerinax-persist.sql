@@ -39,6 +39,9 @@ def tomlVersion = stripBallerinaExtensionVersion("${project.version}")
 
 def ballerinaTomlFilePlaceHolder = new File("${project.rootDir}/build-config/resources/Ballerina.toml")
 def ballerinaTomlFile = new File("$project.projectDir/Ballerina.toml")
+def compilerPluginTomlFilePlaceHolder = new File("${project.rootDir}/build-config/resources/CompilerPlugin.toml")
+def compilerPluginTomlFile = new File("$project.projectDir/CompilerPlugin.toml")
+
 
 def stripBallerinaExtensionVersion(String extVersion) {
     if (extVersion.matches(project.ext.timestampedVersionRegex)) {
@@ -78,6 +81,10 @@ task updateTomlFiles {
         newConfig = newConfig.replace('@persist.version@', stdlibDependentPersistVersion)
         newConfig = newConfig.replace('@persist.native.version@', project.stdlibPersistVersion)
         ballerinaTomlFile.text = newConfig
+
+        def newCompilerPluginToml = compilerPluginTomlFilePlaceHolder.text.replace("@project.version@", project.version)
+        newCompilerPluginToml = newCompilerPluginToml.replace('@persist.native.version@', project.stdlibPersistVersion)
+        compilerPluginTomlFile.text = newCompilerPluginToml
     }
 }
 
@@ -86,9 +93,9 @@ task commitTomlFiles {
         project.exec {
             ignoreExitValue true
             if (Os.isFamily(Os.FAMILY_WINDOWS)) {
-                commandLine 'cmd', '/c', "git commit -m \"[Automated] Update native jar versions in toml files\" Ballerina.toml Dependencies.toml"
+                commandLine 'cmd', '/c', "git commit -m \"[Automated] Update native jar versions in toml files\" Ballerina.toml Dependencies.toml CompilerPlugin.toml"
             } else {
-                commandLine 'sh', '-c', "git commit -m \"[Automated] Update native jar versions in toml files\" Ballerina.toml Dependencies.toml"
+                commandLine 'sh', '-c', "git commit -m \"[Automated] Update native jar versions in toml files\" Ballerina.toml Dependencies.toml CompilerPlugin.toml"
             }
         }
     }
@@ -112,10 +119,12 @@ publishing {
     }
 }
 
-static def checkExecResult(execResult, failText, standardOutput) {
-    if (execResult) {
-        if (execResult.getExitValue() != 0) {
-            throw new GradleException('Non-zero exit value: ' + execResult.getExitValue())
+static def checkExecResult(executionResult, failText, standardOutput) {
+    if (executionResult != null) {
+        Provider<ExecResult> execResultProvider = executionResult.getProvider()
+        int exitCode = execResultProvider.get().getExitValue()
+        if (exitCode != 0) {
+            throw new GradleException('Non-zero exit value: ' + exitCode)
         }
         if (standardOutput.toString().contains(failText)) {
             throw new GradleException('"' + failText + '" string in output: ' + standardOutput.toString())
@@ -131,7 +140,7 @@ task createMySQLTestDockerImage(type: Exec) {
         commandLine 'sh', '-c', "docker build --platform linux/amd64 -f $project.projectDir/tests/resources/mysql/Dockerfile -t ballerina-persist-mysql" +
                 " -q $project.projectDir/tests/resources/mysql/"
         doLast {
-            checkExecResult(execResult, 'Error', standardOutput)
+            checkExecResult(executionResult, 'Error', standardOutput)
             sleep(10 * 1000)
         }
     }
@@ -157,7 +166,7 @@ task startMySQLTestDockerContainer(type: Exec) {
         def healthCheck = 1
         def counter = 0
         doLast {
-            checkExecResult(execResult, 'Error', standardOutput)
+            checkExecResult(executionResult, 'Error', standardOutput)
             while (healthCheck != 0 && counter < 12) {
                 sleep(5 * 1000)
                 healthCheck = checkMySQLTestDockerContainerStatus('ballerina-persist-mysql')
@@ -192,7 +201,7 @@ task createMSSQLTestDockerImage(type: Exec) {
         commandLine 'sh', '-c', "docker build -f $project.projectDir/tests/resources/mssql/Dockerfile -t ballerina-persist-mssql" +
                 " -q $project.projectDir/tests/resources/mssql/"
         doLast {
-            checkExecResult(execResult, 'Error', standardOutput)
+            checkExecResult(executionResult, 'Error', standardOutput)
             sleep(10 * 1000)
         }
     }
@@ -219,7 +228,7 @@ task startMSSQLTestDockerContainer(type: Exec) {
         def healthCheck = 1;
         def counter = 0;
         doLast {
-            checkExecResult(execResult, 'Error', standardOutput)
+            checkExecResult(executionResult, 'Error', standardOutput)
             while (healthCheck != 0 && counter < 12) {
                 sleep(5 * 1000)
                 healthCheck = checkMSSQLTestDockerContainerStatus("ballerina-persist-mssql")
@@ -248,16 +257,17 @@ task stopMSSQLTestDockerContainer() {
     }
 }
 
-
 updateTomlFiles.dependsOn copyStdlibs
 startMySQLTestDockerContainer.dependsOn createMySQLTestDockerImage
 startMSSQLTestDockerContainer.dependsOn createMSSQLTestDockerImage
 
 build.dependsOn "generatePomFileForMavenPublication"
+build.dependsOn ":${packageName}-compiler-plugin:build"
 build.dependsOn ":${packageName}-native:build"
 build.finalizedBy stopMySQLTestDockerContainer
 build.finalizedBy stopMSSQLTestDockerContainer
 
+test.dependsOn ":${packageName}-compiler-plugin:build"
 test.dependsOn ":${packageName}-native:build"
 test.dependsOn startMySQLTestDockerContainer
 test.dependsOn startMSSQLTestDockerContainer

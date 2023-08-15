@@ -273,3 +273,31 @@ function mysqlNativeTransactionTest2() returns error? {
 
     check rainierClient.close();
 }
+
+@test:Config {
+    groups: ["mysql", "native"],
+    dependsOn: [mysqlAllTypesDeleteTest]
+}
+function mysqlNativeAllTypesTest() returns error? {
+    MySQLRainierClient rainierClient = check new ();
+    _ = check rainierClient->executeNativeSQL(`DELETE FROM AllTypes`);
+
+    ExecutionResult executionResult = check rainierClient->executeNativeSQL(`
+        INSERT INTO AllTypes (
+            id, booleanType, intType, floatType, decimalType, stringType, byteArrayType, dateType, timeOfDayType, civilType, booleanTypeOptional, intTypeOptional, 
+            floatTypeOptional, decimalTypeOptional, stringTypeOptional, dateTypeOptional, timeOfDayTypeOptional, civilTypeOptional, enumType, enumTypeOptional
+        ) VALUES (
+            ${allTypes1.id}, ${allTypes1.booleanType}, ${allTypes1.intType}, ${allTypes1.floatType}, ${allTypes1.decimalType}, ${allTypes1.stringType}, ${allTypes1.byteArrayType}, 
+            ${allTypes1.dateType}, ${allTypes1.timeOfDayType}, ${allTypes1.civilType}, ${allTypes1.booleanTypeOptional}, ${allTypes1.intTypeOptional}, ${allTypes1.floatTypeOptional}, 
+            ${allTypes1.decimalTypeOptional}, ${allTypes1.stringTypeOptional}, ${allTypes1.dateTypeOptional}, ${allTypes1.timeOfDayTypeOptional}, ${allTypes1.civilTypeOptional}, ${allTypes1.enumType}, ${allTypes1.enumTypeOptional}
+        )
+        `);
+    test:assertEquals(executionResult, {affectedRowCount: 1, lastInsertId: ()});
+
+    stream<AllTypes, persist:Error?> allTypesStream = rainierClient->queryNativeSQL(`SELECT * FROM AllTypes WHERE id = ${allTypes1.id}`);
+    AllTypes[] allTypes = check from AllTypes allType in allTypesStream
+        select allType;
+    check allTypesStream.close();
+    test:assertEquals(allTypes, [allTypes1]);
+    check rainierClient.close();
+}

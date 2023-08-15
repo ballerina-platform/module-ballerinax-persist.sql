@@ -71,5 +71,4 @@ public class Utils {
                 io.ballerina.stdlib.persist.sql.Constants.PERSIST_NATIVE_SQL_STREAM, sqlStream, error);
     }
 
-
 }

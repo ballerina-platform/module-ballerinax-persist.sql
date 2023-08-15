@@ -28,5 +28,4 @@ public final class Constants {
     }
 
     public static final String PERSIST_SQL_STREAM = "PersistSQLStream";
-    
 }

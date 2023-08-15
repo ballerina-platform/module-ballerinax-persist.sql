@@ -177,7 +177,7 @@ public class SQLProcessor {
         return null;
     }
 
-    public static BStream queryNativeSQL(Environment env, BObject client, BObject paramSQLString,
+    static BStream queryNativeSQL(Environment env, BObject client, BObject paramSQLString,
                                          BTypedesc targetType) {
         // This method will return `stream<targetType, persist:Error?>`
 
@@ -203,7 +203,7 @@ public class SQLProcessor {
         return null;
     }
 
-    public static Object executeNativeSQL(Environment env, BObject client, BObject paramSQLString) {
+    static Object executeNativeSQL(Environment env, BObject client, BObject paramSQLString) {
         // This method will return `persist:ExecutionResult|persist:Error`
 
         TransactionResourceManager trxResourceManager = TransactionResourceManager.getInstance();
@@ -226,7 +226,7 @@ public class SQLProcessor {
         return null;
     }
 
-    public static BStream queryNativeSQLBal(Environment env, BObject client, BObject paramSQLString,
+    private static BStream queryNativeSQLBal(Environment env, BObject client, BObject paramSQLString,
                                             BTypedesc targetType) {
         // This method will return `stream<targetType, persist:Error?>`
 

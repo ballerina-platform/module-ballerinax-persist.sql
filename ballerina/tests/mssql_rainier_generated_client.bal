@@ -345,11 +345,11 @@ public isolated client class MSSQLRainierClient {
     }
 
     remote isolated function queryNativeSQL(sql:ParameterizedQuery sqlQuery, typedesc<record {}> rowType = <>) returns stream<rowType, persist:Error?> = @java:Method {
-        'class: "io.ballerina.stdlib.persist.sql.datastore.SQLProcessor"
+        'class: "io.ballerina.stdlib.persist.sql.datastore.MSSQLProcessor"
     } external;
 
     remote isolated function executeNativeSQL(sql:ParameterizedQuery sqlQuery) returns ExecutionResult|persist:Error = @java:Method {
-        'class: "io.ballerina.stdlib.persist.sql.datastore.SQLProcessor"
+        'class: "io.ballerina.stdlib.persist.sql.datastore.MSSQLProcessor"
     } external;
 
     public isolated function close() returns persist:Error? {

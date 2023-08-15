@@ -43,4 +43,13 @@ public class MySQLProcessor {
         return SQLProcessor.queryOne(env, client, path, targetType);
     }
 
+    public static Object executeNativeSQL(Environment env, BObject client, BObject paramSQLString) {
+        return SQLProcessor.executeNativeSQL(env, client, paramSQLString);
+    }
+
+    public static BStream queryNativeSQL(Environment env, BObject client, BObject paramSQLString,
+                                            BTypedesc targetType) {
+        return SQLProcessor.queryNativeSQL(env, client, paramSQLString, targetType);
+    }
+
 }

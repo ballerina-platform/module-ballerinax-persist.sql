@@ -15,10 +15,10 @@
 // under the License.
 
 import ballerina/persist;
-import ballerina/sql;
 import ballerina/jballerina.java;
 import ballerinax/mysql;
 import ballerinax/mysql.driver as _;
+import ballerina/sql;
 
 const EMPLOYEE = "employees";
 const WORKSPACE = "workspaces";
@@ -343,6 +343,14 @@ public isolated client class MySQLRainierClient {
         _ = check sqlClient.runDeleteQuery({"orderId": orderId, "itemId": itemId});
         return result;
     }
+
+    remote isolated function queryNativeSQL(sql:ParameterizedQuery sqlQuery, typedesc<record {}> rowType = <>) returns stream<rowType, persist:Error?> = @java:Method {
+        'class: "io.ballerina.stdlib.persist.sql.datastore.MySQLProcessor"
+    } external;
+
+    remote isolated function executeNativeSQL(sql:ParameterizedQuery sqlQuery) returns ExecutionResult|persist:Error = @java:Method {
+        'class: "io.ballerina.stdlib.persist.sql.datastore.MySQLProcessor"
+    } external;
 
     public isolated function close() returns persist:Error? {
         error? result = self.dbClient.close();

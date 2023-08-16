@@ -23,3 +23,9 @@ groupId = "io.ballerina.stdlib"
 artifactId = "persist-native"
 version = "@persist.version@"
 path = "./lib/persist-native-@persist.native.version@.jar"
+
+[[platform.java17.dependency]]
+groupId = "io.ballerina.stdlib"
+artifactId = "sql-native"
+version = "@sql.native.version@"
+path = "./lib/sql-native-@sql.native.version@.jar"

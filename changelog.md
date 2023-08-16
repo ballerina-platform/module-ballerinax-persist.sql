@@ -7,6 +7,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
 
 ### Added
+- [Added support for executing native queries](https://github.com/ballerina-platform/ballerina-standard-library/issues/4546)
+
+### Changed
+
+## [1.1.0] - 2023-06-30
+
+### Added
 - [Added support for MSSQL as a datasource](https://github.com/ballerina-platform/ballerina-standard-library/issues/4506)
 
 ### Changed

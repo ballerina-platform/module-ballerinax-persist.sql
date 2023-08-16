@@ -15,10 +15,10 @@
 // under the License.
 
 import ballerina/persist;
-import ballerina/sql;
 import ballerina/jballerina.java;
 import ballerinax/mysql;
 import ballerinax/mysql.driver as _;
+import ballerina/sql;
 
 const ALL_TYPES = "alltypes";
 const STRING_ID_RECORD = "stringidrecords";
@@ -482,6 +482,14 @@ public isolated client class MySQLTestEntitiesClient {
         _ = check sqlClient.runDeleteQuery({"booleanType": booleanType, "intType": intType, "floatType": floatType, "decimalType": decimalType, "stringType": stringType});
         return result;
     }
+
+    remote isolated function queryNativeSQL(sql:ParameterizedQuery sqlQuery, typedesc<record {}> rowType = <>) returns stream<rowType, persist:Error?> = @java:Method {
+        'class: "io.ballerina.stdlib.persist.sql.datastore.MySQLProcessor"
+    } external;
+
+    remote isolated function executeNativeSQL(sql:ParameterizedQuery sqlQuery) returns ExecutionResult|persist:Error = @java:Method {
+        'class: "io.ballerina.stdlib.persist.sql.datastore.MySQLProcessor"
+    } external;
 
     public isolated function close() returns persist:Error? {
         error? result = self.dbClient.close();

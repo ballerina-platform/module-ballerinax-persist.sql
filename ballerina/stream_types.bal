@@ -69,7 +69,7 @@ public class PersistSQLStream {
                 }
                 record {}|error result = value.cloneWithType(self.targetType);
                 if result is error {
-                    return <persist:Error>error("Error occurred while converting the record: " +
+                    return error persist:Error("Error occurred while converting the record: " +
                                 result.detail().toString());
                 }
                 record {|record {} value;|} nextRecord = {value: result};

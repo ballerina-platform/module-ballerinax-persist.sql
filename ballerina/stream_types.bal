@@ -67,8 +67,12 @@ public class PersistSQLStream {
                         _ = value.remove(keyField);
                     }
                 }
-
-                record {|record {} value;|} nextRecord = {value: checkpanic value.cloneWithType(self.targetType)};
+                record {}|error result = value.cloneWithType(self.targetType);
+                if result is error {
+                    return <persist:Error>error("Error occurred while converting the record: " +
+                                result.detail().toString());
+                }
+                record {|record {} value;|} nextRecord = {value: result};
                 return nextRecord;
             }
         } else {

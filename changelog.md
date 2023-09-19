@@ -7,9 +7,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
 
 ### Added
-- [Added support for executing native queries](https://github.com/ballerina-platform/ballerina-standard-library/issues/4546)
 
 ### Changed
+
+## [1.2.0] - 2023-09-18
+
+### Added
+- [Added support for executing native queries](https://github.com/ballerina-platform/ballerina-standard-library/issues/4546)
 
 ## [1.1.0] - 2023-06-30
 

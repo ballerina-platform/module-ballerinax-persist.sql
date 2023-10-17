@@ -9,6 +9,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Added
 
 ### Changed
+- [Fix class cast exception when executing query with non-global variable](https://github.com/ballerina-platform/persist-tools/issues/311)
 
 ## [1.2.0] - 2023-09-18
 

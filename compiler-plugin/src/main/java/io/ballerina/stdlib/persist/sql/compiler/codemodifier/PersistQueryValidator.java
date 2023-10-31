@@ -208,6 +208,11 @@ public class PersistQueryValidator implements AnalysisTask<SyntaxNodeAnalysisCon
 
     private Query isQueryUsingPersistentClient(FromClauseNode fromClauseNode) {
         if (fromClauseNode.expression() instanceof ClientResourceAccessActionNode remoteCall) {
+            if (remoteCall.expression().kind() != SyntaxKind.SIMPLE_NAME_REFERENCE) {
+                // This improvement is tracked in
+                // https://github.com/ballerina-platform/ballerina-standard-library/issues/4943
+                return null;
+            }
             SimpleNameReferenceNode clientName = (SimpleNameReferenceNode) remoteCall.expression();
             Collection<ChildNodeEntry> clientResourceChildEntries = remoteCall.childEntries();
             if (clientResourceChildEntries.size() == 5 || clientResourceChildEntries.size() == 7) {

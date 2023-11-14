@@ -8,9 +8,6 @@ on:
 jobs:
   call_workflow:
     name: Run Release Workflow
-    env:
-      nexusUser: ${{ secrets.NEXUS_USERNAME }}
-      nexusPassword: ${{ secrets.NEXUS_PASSWORD }}
     if: ${{ github.repository_owner == 'ballerina-platform' }}
     uses: ballerina-platform/ballerina-standard-library/.github/workflows/release-package-template.yml@main
     secrets: inherit

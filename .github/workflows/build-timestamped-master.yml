@@ -62,3 +62,4 @@ jobs:
           nexusPassword: ${{ secrets.NEXUS_PASSWORD }}
         run: |
           ./gradlew clean publishMavenJavaPublicationToWSO2NexusRepository -x test --scan --no-daemon
+          

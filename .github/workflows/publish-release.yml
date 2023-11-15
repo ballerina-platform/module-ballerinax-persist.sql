@@ -74,3 +74,4 @@ jobs:
         run: |
           gh release create v$VERSION --title "module-ballerinax-persist.sql-v$VERSION"
           gh pr create --title "[Automated] Sync main after $VERSION release" --body "Sync main after $VERSION release"
+          

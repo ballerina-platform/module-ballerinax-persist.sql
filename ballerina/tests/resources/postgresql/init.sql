@@ -51,7 +51,7 @@ CREATE TABLE AllTypes (
 	floatType FLOAT NOT NULL,
 	decimalType DECIMAL(10, 2) NOT NULL,
 	stringType VARCHAR(191) NOT NULL,
-    byteArrayType BYTEA NOT NULL,
+	byteArrayType BYTEA NOT NULL,
 	dateType DATE NOT NULL,
 	timeOfDayType TIME NOT NULL,
 	civilType TIMESTAMP NOT NULL,

@@ -19,6 +19,8 @@ import ballerinax/mysql;
 import ballerinax/mysql.driver as _;
 import ballerinax/mssql;
 import ballerinax/mssql.driver as _;
+import ballerinax/postgresql;
+import ballerinax/postgresql.driver as _;
 import ballerina/time;
 
 configurable record {|
@@ -38,6 +40,15 @@ configurable record {|
     string password;
     mssql:Options connectionOptions = {};
 |} mssql = ?;
+
+configurable record {|
+    int port;
+    string host;
+    string user;
+    string database;
+    string password;
+    postgresql:Options connectionOptions = {};
+|} postgresql = ?;
 
 @test:BeforeSuite
 function initTests() returns error? {
@@ -210,6 +221,23 @@ function initTests() returns error? {
             PRIMARY KEY(id)
         );
     `);
+
+    // PostgreSQL
+    postgresql:Client postgresqlDbClient = check new (host = postgresql.host, username = postgresql.user, password = postgresql.password, database = postgresql.database, port = postgresql.port);
+    _ = check postgresqlDbClient->execute(`TRUNCATE Employee CASCADE`);
+    _ = check postgresqlDbClient->execute(`TRUNCATE Workspace CASCADE`);
+    _ = check postgresqlDbClient->execute(`TRUNCATE Building CASCADE`);
+    _ = check postgresqlDbClient->execute(`TRUNCATE Department CASCADE`);
+    _ = check postgresqlDbClient->execute(`TRUNCATE OrderItem CASCADE`);
+    _ = check postgresqlDbClient->execute(`TRUNCATE AllTypes CASCADE`);
+    _ = check postgresqlDbClient->execute(`TRUNCATE FloatIdRecord CASCADE`);
+    _ = check postgresqlDbClient->execute(`TRUNCATE StringIdRecord CASCADE`);
+    _ = check postgresqlDbClient->execute(`TRUNCATE DecimalIdRecord CASCADE`);
+    _ = check postgresqlDbClient->execute(`TRUNCATE BooleanIdRecord CASCADE`);
+    _ = check postgresqlDbClient->execute(`TRUNCATE IntIdRecord CASCADE`);
+    _ = check postgresqlDbClient->execute(`TRUNCATE AllTypesIdRecord CASCADE`);
+    _ = check postgresqlDbClient->execute(`TRUNCATE CompositeAssociationRecord CASCADE`);
+    check postgresqlDbClient.close();
 }
 
 AllTypes allTypes1 = {
@@ -218,7 +246,7 @@ AllTypes allTypes1 = {
     intType: 5,
     floatType: 6.0,
     decimalType: 23.44,
-    stringType: "test",
+    stringType: "test-2",
     byteArrayType: base16 `55 EE 66 FF 77 AB`,
     dateType: {year: 1993, month: 11, day: 3},
     timeOfDayType: {hour: 12, minute: 32, second: 34},

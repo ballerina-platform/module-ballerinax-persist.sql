@@ -323,7 +323,6 @@ task stopPostgreSQLTestDockerContainer() {
     }
 }
 
-
 updateTomlFiles.dependsOn copyStdlibs
 startMySQLTestDockerContainer.dependsOn createMySQLTestDockerImage
 startMSSQLTestDockerContainer.dependsOn createMSSQLTestDockerImage

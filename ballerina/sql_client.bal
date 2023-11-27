@@ -295,7 +295,7 @@ public isolated client class SQLClient {
                 columnNames.push(self.escape(self.entityName) + "." + self.escape(fieldMetadata.columnName) + " AS " + self.escape(key));
             } else {
                 // column is in another entity's table
-                columnNames.push(self.escape(fieldName) + "." + self.escape(fieldMetadata.relation.refField) + " AS \"" + self.escape(fieldName + "." + fieldMetadata.relation.refField) + "\"");
+                columnNames.push(self.escape(fieldName) + "." + self.escape(fieldMetadata.relation.refField) + " AS " + self.dataSourceSpecifics.columnIdentifier + self.escape(fieldName + "." + fieldMetadata.relation.refField) + self.dataSourceSpecifics.columnIdentifier);
             }
 
         }

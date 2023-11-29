@@ -20,8 +20,7 @@ public final DataSourceSpecifics & readonly MYSQL_SPECIFICS = {
     constraintViolationErrorMessage: "a foreign key constraint fails",
     duplicateEntryErrorMessage: "Duplicate entry",
     duplicateKeyStartIndicator: ".Duplicate entry '",
-    duplicateKeyEndIndicator: "' for key",
-    columnIdentifier: ""
+    duplicateKeyEndIndicator: "' for key"
 };
 
 public final DataSourceSpecifics & readonly MSSQL_SPECIFICS = {
@@ -30,16 +29,14 @@ public final DataSourceSpecifics & readonly MSSQL_SPECIFICS = {
     constraintViolationErrorMessage: "conflicted with the FOREIGN KEY constraint",
     duplicateEntryErrorMessage: "Cannot insert duplicate key",
     duplicateKeyStartIndicator: "The duplicate key value is (",
-    duplicateKeyEndIndicator: ")..",
-    columnIdentifier: ""
+    duplicateKeyEndIndicator: ").."
 };
 
 public final DataSourceSpecifics & readonly POSTGRESQL_SPECIFICS = {
-    quoteOpen: "",
-    quoteClose: "",
+    quoteOpen: "\"",
+    quoteClose: "\"",
     constraintViolationErrorMessage: "violates foreign key constraint",
     duplicateEntryErrorMessage: "duplicate key value violates unique constraint",
     duplicateKeyStartIndicator: "Detail: Key ",
-    duplicateKeyEndIndicator: " already exists.",
-    columnIdentifier: "\""
+    duplicateKeyEndIndicator: " already exists."
 };

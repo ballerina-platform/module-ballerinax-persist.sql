@@ -16,6 +16,7 @@
 
 import ballerina/test;
 import ballerina/persist;
+import ballerina/io;
 
 @test:Config {
     groups: ["employee", "postgresql"],
@@ -217,7 +218,8 @@ function postgresqlEmployeeUpdateTestNegative3() returns error? {
     });
 
     if employee is persist:ConstraintViolationError {
-        test:assertTrue(employee.message().includes("Detail: Key (workspaceworkspaceid)=(invalid-workspaceWorkspaceId) is not present in table \"workspace\".."));
+        io:println(employee.message());
+        test:assertTrue(employee.message().includes("Detail: Key (workspaceWorkspaceId)=(invalid-workspaceWorkspaceId) is not present in table \"Workspace\"."));
     } else {
         test:assertFail("persist:ConstraintViolationError expected.");
     }

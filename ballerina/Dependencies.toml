@@ -5,7 +5,7 @@
 
 [ballerina]
 dependencies-toml-version = "2"
-distribution-version = "2201.8.0"
+distribution-version = "2201.8.3-20231119-151400-9cb79da7"
 
 [[package]]
 org = "ballerina"
@@ -99,6 +99,9 @@ version = "1.6.0"
 dependencies = [
 	{org = "ballerina", name = "jballerina.java"},
 	{org = "ballerina", name = "lang.value"}
+]
+modules = [
+	{org = "ballerina", packageName = "io", moduleName = "io"}
 ]
 
 [[package]]
@@ -438,6 +441,7 @@ org = "ballerinax"
 name = "persist.sql"
 version = "1.2.2"
 dependencies = [
+	{org = "ballerina", name = "io"},
 	{org = "ballerina", name = "jballerina.java"},
 	{org = "ballerina", name = "log"},
 	{org = "ballerina", name = "persist"},

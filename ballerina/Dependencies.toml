@@ -23,7 +23,7 @@ dependencies = [
 [[package]]
 org = "ballerina"
 name = "cache"
-version = "3.7.1"
+version = "3.7.0"
 scope = "testOnly"
 dependencies = [
 	{org = "ballerina", name = "constraint"},
@@ -66,7 +66,7 @@ dependencies = [
 [[package]]
 org = "ballerina"
 name = "http"
-version = "2.10.4"
+version = "2.10.0"
 scope = "testOnly"
 dependencies = [
 	{org = "ballerina", name = "auth"},
@@ -108,7 +108,6 @@ modules = [
 org = "ballerina"
 name = "jballerina.java"
 version = "0.0.0"
-scope = "testOnly"
 modules = [
 	{org = "ballerina", packageName = "jballerina.java", moduleName = "jballerina.java"}
 ]
@@ -298,7 +297,7 @@ modules = [
 [[package]]
 org = "ballerina"
 name = "sql"
-version = "1.11.1"
+version = "1.11.0"
 dependencies = [
 	{org = "ballerina", name = "io"},
 	{org = "ballerina", name = "jballerina.java"},
@@ -336,7 +335,6 @@ modules = [
 org = "ballerina"
 name = "time"
 version = "2.4.0"
-scope = "testOnly"
 dependencies = [
 	{org = "ballerina", name = "jballerina.java"}
 ]
@@ -390,7 +388,7 @@ modules = [
 [[package]]
 org = "ballerinax"
 name = "mssql"
-version = "1.11.1"
+version = "1.11.0"
 scope = "testOnly"
 dependencies = [
 	{org = "ballerina", name = "crypto"},

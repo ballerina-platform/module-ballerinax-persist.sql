@@ -102,4 +102,5 @@ public type DataSourceSpecifics record {|
     string duplicateEntryErrorMessage;
     string duplicateKeyStartIndicator;
     string duplicateKeyEndIndicator;
+    string columnIdentifier;
 |};

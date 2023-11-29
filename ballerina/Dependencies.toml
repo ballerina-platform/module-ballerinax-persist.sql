@@ -5,7 +5,7 @@
 
 [ballerina]
 dependencies-toml-version = "2"
-distribution-version = "2201.8.0"
+distribution-version = "2201.8.3-20231119-151400-9cb79da7"
 
 [[package]]
 org = "ballerina"
@@ -23,7 +23,7 @@ dependencies = [
 [[package]]
 org = "ballerina"
 name = "cache"
-version = "3.7.0"
+version = "3.7.1"
 scope = "testOnly"
 dependencies = [
 	{org = "ballerina", name = "constraint"},
@@ -66,7 +66,7 @@ dependencies = [
 [[package]]
 org = "ballerina"
 name = "http"
-version = "2.10.0"
+version = "2.10.4"
 scope = "testOnly"
 dependencies = [
 	{org = "ballerina", name = "auth"},
@@ -105,6 +105,7 @@ dependencies = [
 org = "ballerina"
 name = "jballerina.java"
 version = "0.0.0"
+scope = "testOnly"
 modules = [
 	{org = "ballerina", packageName = "jballerina.java", moduleName = "jballerina.java"}
 ]
@@ -294,7 +295,7 @@ modules = [
 [[package]]
 org = "ballerina"
 name = "sql"
-version = "1.11.0"
+version = "1.11.1"
 dependencies = [
 	{org = "ballerina", name = "io"},
 	{org = "ballerina", name = "jballerina.java"},
@@ -332,6 +333,7 @@ modules = [
 org = "ballerina"
 name = "time"
 version = "2.4.0"
+scope = "testOnly"
 dependencies = [
 	{org = "ballerina", name = "jballerina.java"}
 ]
@@ -385,7 +387,7 @@ modules = [
 [[package]]
 org = "ballerinax"
 name = "mssql"
-version = "1.11.0"
+version = "1.11.1"
 scope = "testOnly"
 dependencies = [
 	{org = "ballerina", name = "crypto"},
@@ -446,9 +448,36 @@ dependencies = [
 	{org = "ballerinax", name = "mssql"},
 	{org = "ballerinax", name = "mssql.driver"},
 	{org = "ballerinax", name = "mysql"},
-	{org = "ballerinax", name = "mysql.driver"}
+	{org = "ballerinax", name = "mysql.driver"},
+	{org = "ballerinax", name = "postgresql"},
+	{org = "ballerinax", name = "postgresql.driver"}
 ]
 modules = [
 	{org = "ballerinax", packageName = "persist.sql", moduleName = "persist.sql"}
+]
+
+[[package]]
+org = "ballerinax"
+name = "postgresql"
+version = "1.11.0"
+scope = "testOnly"
+dependencies = [
+	{org = "ballerina", name = "crypto"},
+	{org = "ballerina", name = "io"},
+	{org = "ballerina", name = "jballerina.java"},
+	{org = "ballerina", name = "sql"},
+	{org = "ballerina", name = "time"}
+]
+modules = [
+	{org = "ballerinax", packageName = "postgresql", moduleName = "postgresql"}
+]
+
+[[package]]
+org = "ballerinax"
+name = "postgresql.driver"
+version = "1.5.0"
+scope = "testOnly"
+modules = [
+	{org = "ballerinax", packageName = "postgresql.driver", moduleName = "postgresql.driver"}
 ]
 

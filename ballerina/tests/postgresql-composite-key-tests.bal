@@ -44,7 +44,7 @@ function postgresqlCompositeKeyCreateTestNegative() returns error? {
 
     [string, string][]|error ids = rainierClient->/orderitems.post([orderItem1]);
     if ids is persist:AlreadyExistsError {
-        test:assertEquals(ids.message(), "A record with the key '(orderid, itemid)=(order-1, item-1)' already exists for the entity 'OrderItem'.");
+        test:assertEquals(ids.message(), "A record with the key '(\"orderId\", \"itemId\")=(order-1, item-1)' already exists for the entity 'OrderItem'.");
     } else {
         test:assertFail("persist:AlreadyExistsError expected");
     }

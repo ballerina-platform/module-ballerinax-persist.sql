@@ -224,19 +224,19 @@ function initTests() returns error? {
 
     // PostgreSQL
     postgresql:Client postgresqlDbClient = check new (host = postgresql.host, username = postgresql.user, password = postgresql.password, database = postgresql.database, port = postgresql.port);
-    _ = check postgresqlDbClient->execute(`TRUNCATE Employee CASCADE`);
-    _ = check postgresqlDbClient->execute(`TRUNCATE Workspace CASCADE`);
-    _ = check postgresqlDbClient->execute(`TRUNCATE Building CASCADE`);
-    _ = check postgresqlDbClient->execute(`TRUNCATE Department CASCADE`);
-    _ = check postgresqlDbClient->execute(`TRUNCATE OrderItem CASCADE`);
-    _ = check postgresqlDbClient->execute(`TRUNCATE AllTypes CASCADE`);
-    _ = check postgresqlDbClient->execute(`TRUNCATE FloatIdRecord CASCADE`);
-    _ = check postgresqlDbClient->execute(`TRUNCATE StringIdRecord CASCADE`);
-    _ = check postgresqlDbClient->execute(`TRUNCATE DecimalIdRecord CASCADE`);
-    _ = check postgresqlDbClient->execute(`TRUNCATE BooleanIdRecord CASCADE`);
-    _ = check postgresqlDbClient->execute(`TRUNCATE IntIdRecord CASCADE`);
-    _ = check postgresqlDbClient->execute(`TRUNCATE AllTypesIdRecord CASCADE`);
-    _ = check postgresqlDbClient->execute(`TRUNCATE CompositeAssociationRecord CASCADE`);
+    _ = check postgresqlDbClient->execute(`TRUNCATE "Employee" CASCADE`);
+    _ = check postgresqlDbClient->execute(`TRUNCATE "Workspace" CASCADE`);
+    _ = check postgresqlDbClient->execute(`TRUNCATE "Building" CASCADE`);
+    _ = check postgresqlDbClient->execute(`TRUNCATE "Department" CASCADE`);
+    _ = check postgresqlDbClient->execute(`TRUNCATE "OrderItem" CASCADE`);
+    _ = check postgresqlDbClient->execute(`TRUNCATE "AllTypes" CASCADE`);
+    _ = check postgresqlDbClient->execute(`TRUNCATE "FloatIdRecord" CASCADE`);
+    _ = check postgresqlDbClient->execute(`TRUNCATE "StringIdRecord" CASCADE`);
+    _ = check postgresqlDbClient->execute(`TRUNCATE "DecimalIdRecord" CASCADE`);
+    _ = check postgresqlDbClient->execute(`TRUNCATE "BooleanIdRecord" CASCADE`);
+    _ = check postgresqlDbClient->execute(`TRUNCATE "IntIdRecord" CASCADE`);
+    _ = check postgresqlDbClient->execute(`TRUNCATE "AllTypesIdRecord" CASCADE`);
+    _ = check postgresqlDbClient->execute(`TRUNCATE "CompositeAssociationRecord" CASCADE`);
     check postgresqlDbClient.close();
 }
 

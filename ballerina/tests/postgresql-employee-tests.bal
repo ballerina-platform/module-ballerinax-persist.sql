@@ -217,7 +217,7 @@ function postgresqlEmployeeUpdateTestNegative3() returns error? {
     });
 
     if employee is persist:ConstraintViolationError {
-        test:assertTrue(employee.message().includes("Detail: Key (workspaceworkspaceid)=(invalid-workspaceWorkspaceId) is not present in table \"workspace\".."));
+        test:assertTrue(employee.message().includes("Detail: Key (workspaceWorkspaceId)=(invalid-workspaceWorkspaceId) is not present in table \"Workspace\"."));
     } else {
         test:assertFail("persist:ConstraintViolationError expected.");
     }

@@ -214,7 +214,7 @@ public isolated client class SQLClient {
 
             query = sql:queryConcat(
                 ` SELECT `, self.getManyRelationColumnNames(joinMetadata.fieldName, fields),
-                ` FROM `, stringToParameterizedQuery(joinMetadata.refTable),
+                ` FROM `, stringToParameterizedQuery(self.escape(joinMetadata.refTable)),
                 ` WHERE`, check self.getWhereClauses(whereFilter, true)
             );
             logQuery("SQL select query : ", query);
@@ -370,7 +370,7 @@ public isolated client class SQLClient {
             if i > 0 {
                 query = sql:queryConcat(query, ` AND `);
             }
-            sql:ParameterizedQuery filterQuery = stringToParameterizedQuery(self.escape(joinKey) + "." + self.escape(refFields[i]) + " = " + self.entityName + "." + joinColumns[i]);
+            sql:ParameterizedQuery filterQuery = stringToParameterizedQuery(self.escape(joinKey) + "." + self.escape(refFields[i]) + " = " + self.escape(self.entityName) + "." + self.escape(joinColumns[i]));
             query = sql:queryConcat(query, filterQuery);
         }
         return query;

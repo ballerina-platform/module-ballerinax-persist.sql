@@ -31,3 +31,12 @@ public final DataSourceSpecifics & readonly MSSQL_SPECIFICS = {
     duplicateKeyStartIndicator: "The duplicate key value is (",
     duplicateKeyEndIndicator: ").."
 };
+
+public final DataSourceSpecifics & readonly POSTGRESQL_SPECIFICS = {
+    quoteOpen: "\"",
+    quoteClose: "\"",
+    constraintViolationErrorMessage: "violates foreign key constraint",
+    duplicateEntryErrorMessage: "duplicate key value violates unique constraint",
+    duplicateKeyStartIndicator: "Detail: Key ",
+    duplicateKeyEndIndicator: " already exists."
+};

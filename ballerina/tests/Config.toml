@@ -15,3 +15,10 @@ password="Test123#"
 host="localhost"
 port=1433
 database="test"
+
+[postgresql]
+user="postgres"
+password="postgres"
+host="localhost"
+port=5432
+database="test"

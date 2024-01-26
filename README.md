@@ -55,14 +55,6 @@ Execute the commands below to build from source.
 
         ./gradlew clean build -Pgroups=<Comma separated groups/test cases>
 
-   **Tip:** The following groups of test cases are available.
-
-|     Groups      |          Test cases           |
-|:---------------:|:-----------------------------:|
-|      basic      |             basic             |
-|  associations   | associations <br> one-to-many |
-| composite-keys  |        composite-keys         |
-
 5. To disable some specific test groups:
 
         ./gradlew clean build -Pdisable-groups=<Comma separated groups/test cases>

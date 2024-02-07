@@ -61,3 +61,8 @@ public type RelationConfig record {|
 |};
 
 public annotation RelationConfig Relation on record field;
+
+public type GeneratedConfig record {|
+|};
+
+public annotation GeneratedConfig Generated on record field;

@@ -22,19 +22,18 @@ public type MapConfig record {|
     string name;
 |};
 
-public annotation MapConfig DatabaseMapping on type, record field;
+public annotation MapConfig Mapping on type, record field;
 
 # Description.
-#
-# + unique - true if the index is a unique index  
-# + indexName - name of the index in the database
+# This annotation is used to define an Index on a database column.
+# + name - name of the index in the database
 public type SQLIndex record {|
-    boolean unique = false;
-    # The DB table/column name
-    string indexName;
+    string name;
 |};
 
-public annotation SQLIndex DatabaseIndex on record field;
+public annotation SQLIndex Index on record field;
+
+public annotation SQLIndex UniqueIndex on record field;
 
 # Description.
 # This annotation is used to define a custom max length to a VARCHAR or CHAR column.
@@ -45,6 +44,7 @@ public type VarCharConfig record {|
 |};
 
 public annotation VarCharConfig VarChar on record field;
+
 public annotation VarCharConfig Char on record field;
 
 # Description.
@@ -56,9 +56,8 @@ public type DecimalConfig record {|
 
 public annotation DecimalConfig Decimal on record field;
 
-
 public type RelationConfig record {|
     string[] refs;
 |};
 
-public annotation RelationConfig DatabaseRelation on record field;
+public annotation RelationConfig Relation on record field;

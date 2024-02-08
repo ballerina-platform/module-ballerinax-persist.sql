@@ -142,7 +142,7 @@ static def checkExecResult(executionResult, failText, standardOutput) {
 task createMySQLTestDockerImage(type: Exec) {
     if (!Os.isFamily(Os.FAMILY_WINDOWS)) {
         def standardOutput = new ByteArrayOutputStream()
-        commandLine 'sh', '-c', "docker build --platform linux/x86_64/v8 -f $project.projectDir/tests/resources/mysql/Dockerfile -t ballerina-persist-mysql" +
+        commandLine 'sh', '-c', "docker build --platform linux/amd64 -f $project.projectDir/tests/resources/mysql/Dockerfile -t ballerina-persist-mysql" +
                 " -q $project.projectDir/tests/resources/mysql/"
         doLast {
             checkExecResult(executionResult, 'Error', standardOutput)

@@ -1,4 +1,4 @@
-// Copyright (c) 2023 WSO2 LLC. (http://www.wso2.org) All Rights Reserved.
+// Copyright (c) 2024 WSO2 LLC. (http://www.wso2.org) All Rights Reserved.
 //
 // WSO2 LLC. licenses this file to you under the Apache License,
 // Version 2.0 (the "License"); you may not use this file except
@@ -154,7 +154,7 @@ public isolated client class H2TestEntitiesClient {
     };
 
     public isolated function init() returns persist:Error? {
-        jdbc:Client|error dbClient = new (url = h2Url, user = h2User, password = h2Password);
+        jdbc:Client|error dbClient = new (url = h2.url, user = h2.user, password = h2.password);
         if dbClient is error {
             return <persist:Error>error(dbClient.message());
         }

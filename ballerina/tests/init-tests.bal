@@ -24,15 +24,11 @@ import ballerinax/mysql.driver as _;
 import ballerinax/postgresql;
 import ballerinax/postgresql.driver as _;
 
-configurable string h2Url = ?;
-configurable string h2User = ?;
-configurable string h2Password = ?;
-
 configurable record {|
     string url;
     string user;
     string password;
-|} h2 = ?;
+|} & readonly h2 = ?;
 
 configurable record {|
     int port;

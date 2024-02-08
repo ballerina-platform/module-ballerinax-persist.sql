@@ -64,7 +64,7 @@ configurable record {|
 @test:BeforeSuite
 function initSuite() returns error? {
     check initMySQLTest();
-    //check initMSSQLTest();
+    check initMSSQLTest();
     check initPostgreSQLTest();
     check initH2Test();
 }

@@ -2,14 +2,15 @@
 
 This module provides relation database support for the `bal persist` feature, which provides functionality to store and query data from a relational database conveniently through a data model instead of using SQL query language.
 
-Currently, this package supports MySQL, MSSQL, PostgreSQL as the relational database. However, we are also planning to add support for other relational databases such as Oracle.
+Currently, this package supports MySQL, MSSQL, PostgreSQL, H2 as the relational database. However, we are also planning to add support for other relational databases such as Oracle.
 
-The MySQL, MSSQL, PostgreSQL data stores are relational database management systems that stores data in tables. None of these data stores is the default data store for the `bal persist` feature. Therefore, you need to explicitly specify the data store when initializing `bal persist` in your application. as follows,
+The MySQL, MSSQL, PostgreSQL, H2 data stores are relational database management systems that stores data in tables. None of these data stores is the default data store for the `bal persist` feature. Therefore, you need to explicitly specify the data store when initializing `bal persist` in your application. as follows,
 
 ```
 $ bal persist init --datastore mysql
 $ bal persist init --datastore mssql
 $ bal persist init --datastore postgresql
+$ bal persist init --datastore h2
 ```
 
 ## Supported Ballerina Types

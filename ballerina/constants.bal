@@ -40,3 +40,12 @@ public final DataSourceSpecifics & readonly POSTGRESQL_SPECIFICS = {
     duplicateKeyStartIndicator: "Detail: Key ",
     duplicateKeyEndIndicator: " already exists."
 };
+
+public final DataSourceSpecifics & readonly H2_SPECIFICS = {
+    quoteOpen: "\"",
+    quoteClose: "\"",
+    constraintViolationErrorMessage: "Referential integrity constraint violation",
+    duplicateEntryErrorMessage: "Unique index or primary key violation",
+    duplicateKeyStartIndicator: "Unique index or primary key violation: \"",
+    duplicateKeyEndIndicator: " ON "
+};

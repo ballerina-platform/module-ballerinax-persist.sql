@@ -22,3 +22,8 @@ password="postgres"
 host="localhost"
 port=5432
 database="test"
+
+[h2]
+url="jdbc:h2:./build/test"
+user="sa"
+password=""

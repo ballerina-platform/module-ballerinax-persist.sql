@@ -36,16 +36,24 @@ public annotation SQLIndex Index on record field;
 public annotation SQLIndex UniqueIndex on record field;
 
 # Description.
-# This annotation is used to define a custom max length to a VARCHAR or CHAR column.
-# + length - max length of the VARCHAR or length of the CHAR column
+# This annotation is used to define a custom max length to a VARCHAR column.
+# + length - max length of the VARCHAR column
 public type VarCharConfig record {|
     # Used to set the max length of the certain fields
     int length = 191;
 |};
 
+# Description.
+# This annotation is used to define a custom max length to a   CHAR column.
+# + length - length of the CHAR column
+public type CharConfig record {|
+    # Used to set the max length of the certain fields
+    int length = 10;
+|};
+
 public annotation VarCharConfig VarChar on record field;
 
-public annotation VarCharConfig Char on record field;
+public annotation CharConfig Char on record field;
 
 # Description.
 # This annotation is used to define a custom precision to a DECIMAL column.
@@ -56,12 +64,17 @@ public type DecimalConfig record {|
 
 public annotation DecimalConfig Decimal on record field;
 
+# Description.
+# To specify your own foreign key column in the entity record.
+# + refs - array of key fields in the entity
 public type RelationConfig record {|
     string[] refs;
 |};
 
 public annotation RelationConfig Relation on record field;
 
+# Description.
+# This annotation is used to denote an entity is auto_increment.
 public type GeneratedConfig record {|
 |};
 

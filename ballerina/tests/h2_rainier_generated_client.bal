@@ -13,12 +13,11 @@
 // KIND, either express or implied.  See the License for the
 // specific language governing permissions and limitations
 // under the License.
-
 import ballerina/jballerina.java;
-import ballerinax/java.jdbc as jdbc;
-import ballerinax/h2.driver as _;
-import ballerina/sql;
 import ballerina/persist;
+import ballerina/sql;
+import ballerinax/h2.driver as _;
+import ballerinax/java.jdbc as jdbc;
 
 const EMPLOYEE = "employees";
 const WORKSPACE = "workspaces";
@@ -135,7 +134,7 @@ public isolated client class H2RainierClient {
     };
 
     public isolated function init() returns persist:Error? {
-        jdbc:Client|error dbClient = new (url = h2.url, user = h2.user, password = h2.password);
+        jdbc:Client|error dbClient = new (url = h2.url, user = h2.user, password = h2.password, options = {...h2.connectionOptions});
         if dbClient is error {
             return <persist:Error>error(dbClient.message());
         }

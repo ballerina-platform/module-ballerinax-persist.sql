@@ -1,3 +1,4 @@
+import ballerina/jballerina.java;
 // Copyright (c) 2024 WSO2 LLC. (http://www.wso2.org) All Rights Reserved.
 //
 // WSO2 LLC. licenses this file to you under the Apache License,
@@ -13,12 +14,10 @@
 // KIND, either express or implied.  See the License for the
 // specific language governing permissions and limitations
 // under the License.
-
 import ballerina/persist;
-import ballerina/jballerina.java;
-import ballerinax/java.jdbc as jdbc;
-import ballerinax/h2.driver as _;
 import ballerina/sql;
+import ballerinax/h2.driver as _;
+import ballerinax/java.jdbc as jdbc;
 
 const ALL_TYPES = "alltypes";
 const STRING_ID_RECORD = "stringidrecords";
@@ -154,7 +153,7 @@ public isolated client class H2TestEntitiesClient {
     };
 
     public isolated function init() returns persist:Error? {
-        jdbc:Client|error dbClient = new (url = h2.url, user = h2.user, password = h2.password);
+        jdbc:Client|error dbClient = new (url = h2.url, user = h2.user, password = h2.password, options = {...h2.connectionOptions});
         if dbClient is error {
             return <persist:Error>error(dbClient.message());
         }

@@ -28,7 +28,22 @@ configurable record {|
     string url;
     string user;
     string password;
+    Options connectionOptions = {};
 |} & readonly h2 = ?;
+
+
+public type Options record {|
+    string datasourceName?;
+    map<anydata> properties?;
+    Operations requestGeneratedKeys = ALL;
+|};
+
+public enum Operations {
+    NONE,
+    EXECUTE,
+    BATCH_EXECUTE,
+    ALL
+}
 
 configurable record {|
     int port;

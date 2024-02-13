@@ -13,10 +13,9 @@
 // KIND, either express or implied.  See the License for the
 // specific language governing permissions and limitations
 // under the License.
-
 import ballerina/log;
-import ballerina/sql;
 import ballerina/persist;
+import ballerina/sql;
 
 # The client used by the generated persist clients to abstract and 
 # execute SQL queries that are required to perform CRUD operations.
@@ -122,8 +121,8 @@ public isolated client class SQLClient {
     # + groupByClause - The `GROUP BY` clause of the query
     # + return - A stream of records in the `rowType` type or a `persist:Error` if the operation fails
     public isolated function runReadQuery(typedesc<record {}> rowType, string[] fields = [], string[] include = [],
-                        sql:ParameterizedQuery whereClause = ``, sql:ParameterizedQuery orderByClause = ``,
-                        sql:ParameterizedQuery limitClause = ``, sql:ParameterizedQuery groupByClause = ``)
+            sql:ParameterizedQuery whereClause = ``, sql:ParameterizedQuery orderByClause = ``,
+            sql:ParameterizedQuery limitClause = ``, sql:ParameterizedQuery groupByClause = ``)
                         returns stream<record {}, sql:Error?>|persist:Error|error {
         sql:ParameterizedQuery query;
         if self.getManyRelationFields(include).length() > 0 {
@@ -138,7 +137,7 @@ public isolated client class SQLClient {
             query = sql:queryConcat(query, ` WHERE `, whereClause);
         }
         if (groupByClause.strings.length() != 0) {
-            query = addClauseToQuery(query,  groupByClause, ` GROUP BY `);
+            query = addClauseToQuery(query, groupByClause, ` GROUP BY `);
         }
         if (orderByClause.strings.length() != 0) {
             query = addClauseToQuery(query, orderByClause, ` ORDER BY `);
@@ -420,11 +419,12 @@ public isolated client class SQLClient {
     }
 
     private isolated function getUpdateQuery(record {} updateRecord) returns sql:ParameterizedQuery|persist:Error {
-        return sql:queryConcat(`UPDATE `, stringToParameterizedQuery(self.escape(self.tableName)), ` SET `, check self.getSetClauses(updateRecord));
+        return sql:queryConcat(`UPDATE `, stringToParameterizedQuery(self.escape(self.tableName)), ` AS `, stringToParameterizedQuery(self.escape(self.entityName)), ` SET `, check self.getSetClauses(updateRecord));
+
     }
 
     private isolated function getDeleteQuery() returns sql:ParameterizedQuery {
-        return sql:queryConcat(`DELETE FROM `, stringToParameterizedQuery(self.escape(self.tableName)));
+        return sql:queryConcat(`DELETE FROM `, stringToParameterizedQuery(self.escape(self.tableName)), ` AS `, stringToParameterizedQuery(self.escape(self.entityName)));
     }
 
     private isolated function getJoinFields(string[] include) returns string[] {
@@ -505,7 +505,7 @@ isolated function addClauseToQuery(sql:ParameterizedQuery query, sql:Parameteriz
         string[] queryStrings = clauseQuery.strings;
         int i = 0;
         foreach sql:Value insertion in clauseQuery.insertions {
-            queryInString +=  queryStrings[i] + string `${insertion.toString()}`;
+            queryInString += queryStrings[i] + string `${insertion.toString()}`;
             i += 1;
         }
         queryInString += queryStrings[i];
@@ -525,7 +525,7 @@ isolated function logQuery(string msg, sql:ParameterizedQuery|sql:ParameterizedQ
     string stringValue = queries.strings.toBalString();
     foreach sql:Value insertion in queries.insertions {
         string:RegExp reg = re `","`;
-        stringValue = reg.replace(stringValue,  string `${insertion.toString()}`);
+        stringValue = reg.replace(stringValue, string `${insertion.toString()}`);
     }
     log:printDebug(msg + stringValue);
 }

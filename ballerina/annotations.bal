@@ -14,6 +14,8 @@
 // specific language governing permissions and limitations
 // under the License.
 
+// for testinf purposes
+
 # Description.
 # This annotation is used to map an entity/field name to a database table/column name.
 # + name - name of the table/column in the database

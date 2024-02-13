@@ -18,7 +18,6 @@
 # This annotation is used to map an entity/field name to a database table/column name.
 # + name - name of the table/column in the database
 public type MapConfig record {|
-    # The DB table/column name
     string name;
 |};
 
@@ -39,15 +38,13 @@ public annotation SQLIndex UniqueIndex on record field;
 # This annotation is used to define a custom max length to a VARCHAR column.
 # + length - max length of the VARCHAR column
 public type VarCharConfig record {|
-    # Used to set the max length of the certain fields
     int length = 191;
 |};
 
 # Description.
-# This annotation is used to define a custom max length to a   CHAR column.
+# This annotation is used to define a custom max length to a CHAR column.
 # + length - length of the CHAR column
 public type CharConfig record {|
-    # Used to set the max length of the certain fields
     int length = 10;
 |};
 

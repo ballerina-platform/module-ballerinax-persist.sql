@@ -27,15 +27,15 @@ public annotation MapConfig Mapping on type, record field;
 # Marks the entity field as an index field.
 #
 # + names - array of index names associated with the database column
-public type SQLIndex record {|
+public type IndexConfig record {|
     string[]? names = ();
 |};
 
 # The Annotation used to specify the index name associated with a database column.
-public annotation SQLIndex Index on record field;
+public annotation IndexConfig Index on record field;
 
 # The Annotation used to specify the unique index name associated with a database column.
-public annotation SQLIndex UniqueIndex on record field;
+public annotation IndexConfig UniqueIndex on record field;
 
 # Defines a string field as a VARCHAR column and defines its max length.
 #

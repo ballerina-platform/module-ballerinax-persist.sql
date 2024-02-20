@@ -42,7 +42,7 @@ public type VarCharConfig record {|
 |};
 
 # Description.
-# This annotation is used to define a custom max length to a   CHAR column.
+# This annotation is used to define a custom max length to a CHAR column.
 # + length - length of the CHAR column
 public type CharConfig record {|
     int length = 10;

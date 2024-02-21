@@ -40,7 +40,7 @@ public enum DiagnosticsCodes {
     PERSIST_SQL_206("PERSIST_206",  "the ''{0}'' clause cannot be defined by the array field " +
             "of the entity",
             ERROR);
-
+            
     private final String code;
     private final String message;
     private final DiagnosticSeverity severity;

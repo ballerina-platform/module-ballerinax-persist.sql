@@ -56,7 +56,7 @@ public class CodeModifierTest {
         return project.currentPackage();
     }
 
-    @Test
+    @Test(enabled = true)
     public void testCodeModifier() {
 
         Package newPackage = getModifiedPackage("project_1");
@@ -130,7 +130,7 @@ public class CodeModifierTest {
         }
     }
 
-    @Test
+    @Test(enabled = true)
     public void testCodeModifierWithRelationTables() {
 
         Package newPackage = getModifiedPackage("project_3");
@@ -155,7 +155,7 @@ public class CodeModifierTest {
         }
     }
 
-    @Test
+    @Test(enabled = true)
     public void testCodeModifierWhenNameHasEscapeCharacter() {
 
         Package newPackage = getModifiedPackage("project_4");
@@ -200,7 +200,7 @@ public class CodeModifierTest {
     }
 
 
-    @Test
+    @Test(enabled = true)
     public void testCodeModifierWhenFieldIsInTypeDescriptor() {
 
         Package newPackage = getModifiedPackage("project_5");
@@ -241,7 +241,7 @@ public class CodeModifierTest {
         }
     }
 
-    @Test
+    @Test(enabled = true)
     public void testCodeModifierWithDiagnostic() {
         Package currentPackage = loadPackage("project_2");
         DiagnosticResult diagnosticResult = currentPackage.getCompilation().diagnosticResult();

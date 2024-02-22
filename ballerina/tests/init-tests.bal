@@ -53,26 +53,37 @@ configurable record {|
 @test:BeforeSuite
 function initTests() returns error? {
     // MySQL
-    mysql:Client mysqlDbClient = check new (host = mysql.host, user = mysql.user, password = mysql.password, database = mysql.database, port = mysql.port);
-    _ = check mysqlDbClient->execute(`SET FOREIGN_KEY_CHECKS = 0`);
-    _ = check mysqlDbClient->execute(`TRUNCATE Employee`);
-    _ = check mysqlDbClient->execute(`TRUNCATE Workspace`);
-    _ = check mysqlDbClient->execute(`TRUNCATE Building`);
-    _ = check mysqlDbClient->execute(`TRUNCATE Department`);
-    _ = check mysqlDbClient->execute(`TRUNCATE OrderItem`);
-    _ = check mysqlDbClient->execute(`TRUNCATE AllTypes`);
-    _ = check mysqlDbClient->execute(`TRUNCATE FloatIdRecord`);
-    _ = check mysqlDbClient->execute(`TRUNCATE StringIdRecord`);
-    _ = check mysqlDbClient->execute(`TRUNCATE DecimalIdRecord`);
-    _ = check mysqlDbClient->execute(`TRUNCATE BooleanIdRecord`);
-    _ = check mysqlDbClient->execute(`TRUNCATE IntIdRecord`);
-    _ = check mysqlDbClient->execute(`TRUNCATE AllTypesIdRecord`);
-    _ = check mysqlDbClient->execute(`TRUNCATE CompositeAssociationRecord`);
-    _ = check mysqlDbClient->execute(`SET FOREIGN_KEY_CHECKS = 1`);
-    check mysqlDbClient.close();
+    check MySQLTests();
 
     //MSSQL
-    mssql:Client mssqlDbClient = check new (host = mssql.host, user = mssql.user, password = mssql.password, port = mssql.port);
+    check MSSQLTests();
+
+    // PostgreSQL
+    check PostgreSQLTests();
+}
+
+function MySQLTests() returns error? {
+  mysql:Client mysqlDbClient = check new (host = mysql.host, user = mysql.user, password = mysql.password, database = mysql.database, port = mysql.port);
+      _ = check mysqlDbClient->execute(`SET FOREIGN_KEY_CHECKS = 0`);
+      _ = check mysqlDbClient->execute(`TRUNCATE Employee`);
+      _ = check mysqlDbClient->execute(`TRUNCATE Workspace`);
+      _ = check mysqlDbClient->execute(`TRUNCATE Building`);
+      _ = check mysqlDbClient->execute(`TRUNCATE Department`);
+      _ = check mysqlDbClient->execute(`TRUNCATE OrderItem`);
+      _ = check mysqlDbClient->execute(`TRUNCATE AllTypes`);
+      _ = check mysqlDbClient->execute(`TRUNCATE FloatIdRecord`);
+      _ = check mysqlDbClient->execute(`TRUNCATE StringIdRecord`);
+      _ = check mysqlDbClient->execute(`TRUNCATE DecimalIdRecord`);
+      _ = check mysqlDbClient->execute(`TRUNCATE BooleanIdRecord`);
+      _ = check mysqlDbClient->execute(`TRUNCATE IntIdRecord`);
+      _ = check mysqlDbClient->execute(`TRUNCATE AllTypesIdRecord`);
+      _ = check mysqlDbClient->execute(`TRUNCATE CompositeAssociationRecord`);
+      _ = check mysqlDbClient->execute(`SET FOREIGN_KEY_CHECKS = 1`);
+      check mysqlDbClient.close();
+}
+
+function MSSQLTests() returns error? {
+  mssql:Client mssqlDbClient = check new (host = mssql.host, user = mssql.user, password = mssql.password, port = mssql.port);
     _ = check mssqlDbClient->execute(`DROP DATABASE IF EXISTS test;`);
     _ = check mssqlDbClient->execute(`CREATE DATABASE test`);
     check mssqlDbClient.close();
@@ -221,9 +232,10 @@ function initTests() returns error? {
             PRIMARY KEY(id)
         );
     `);
+}
 
-    // PostgreSQL
-    postgresql:Client postgresqlDbClient = check new (host = postgresql.host, username = postgresql.user, password = postgresql.password, database = postgresql.database, port = postgresql.port);
+function PostgreSQLTests() returns error? {
+  postgresql:Client postgresqlDbClient = check new (host = postgresql.host, username = postgresql.user, password = postgresql.password, database = postgresql.database, port = postgresql.port);
     _ = check postgresqlDbClient->execute(`TRUNCATE "Employee" CASCADE`);
     _ = check postgresqlDbClient->execute(`TRUNCATE "Workspace" CASCADE`);
     _ = check postgresqlDbClient->execute(`TRUNCATE "Building" CASCADE`);

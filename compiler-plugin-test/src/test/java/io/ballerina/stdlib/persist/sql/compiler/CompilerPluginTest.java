@@ -1,7 +1,7 @@
 /*
- * Copyright (c) 2022, WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
+ * Copyright (c) 2024 WSO2 LLC. (http://www.wso2.com) All Rights Reserved.
  *
- * WSO2 Inc. licenses this file to you under the Apache License,
+ * WSO2 LLC. licenses this file to you under the Apache License,
  * Version 2.0 (the "License"); you may not use this file except
  * in compliance with the License.
  * You may obtain a copy of the License at
@@ -48,6 +48,12 @@ import static io.ballerina.stdlib.persist.compiler.DiagnosticsCodes.PERSIST_607;
 import static io.ballerina.stdlib.persist.compiler.DiagnosticsCodes.PERSIST_608;
 import static io.ballerina.stdlib.persist.compiler.DiagnosticsCodes.PERSIST_609;
 import static io.ballerina.stdlib.persist.compiler.DiagnosticsCodes.PERSIST_610;
+import static io.ballerina.stdlib.persist.compiler.DiagnosticsCodes.PERSIST_611;
+import static io.ballerina.stdlib.persist.compiler.DiagnosticsCodes.PERSIST_612;
+import static io.ballerina.stdlib.persist.compiler.DiagnosticsCodes.PERSIST_613;
+import static io.ballerina.stdlib.persist.compiler.DiagnosticsCodes.PERSIST_614;
+import static io.ballerina.stdlib.persist.compiler.DiagnosticsCodes.PERSIST_615;
+import static io.ballerina.stdlib.persist.compiler.DiagnosticsCodes.PERSIST_616;
 import static io.ballerina.stdlib.persist.sql.compiler.TestUtils.getEnvironmentBuilder;
 
 /**
@@ -309,8 +315,85 @@ public class CompilerPluginTest {
                 }
         );
     }
+    @Test(enabled = true)
+    public void validateIndexAnnotation() {
+        List<Diagnostic> diagnostics = getErrorDiagnostics("project_1",
+                "index.bal", 4);
+        testDiagnostic(
+                diagnostics,
+                new String[]{
+                        PERSIST_611.getCode(),
+                        PERSIST_613.getCode(),
+                        PERSIST_615.getCode(),
+                        PERSIST_615.getCode(),
+                },
+                new String[]{
+                        "invalid use of Index annotation. Index annotation cannot be used for relation fields.",
+                        "invalid use of Index annotation. duplicate index names.",
+                        "invalid use of Index annotation. there cannot be empty index names.",
+                        "invalid use of Index annotation. there cannot be empty index names."
+                },
+                new String[]{
+                        "(6:4,7:20)",
+                        "(12:4,13:17)",
+                        "(14:4,15:18)",
+                        "(16:4,17:15)"
+                }
+        );
+    }
+    @Test(enabled = true)
+    public void validateUniqueIndexAnnotation() {
+        List<Diagnostic> diagnostics = getErrorDiagnostics("project_1",
+                "unique_index.bal", 4);
+        testDiagnostic(
+                diagnostics,
+                new String[]{
+                        PERSIST_612.getCode(),
+                        PERSIST_614.getCode(),
+                        PERSIST_616.getCode(),
+                        PERSIST_616.getCode(),
+                },
+                new String[]{
+                        "invalid use of UniqueIndex annotation. UniqueIndex annotation cannot be used " +
+                                "for relation fields.",
+                        "invalid use of UniqueIndex annotation. duplicate index names.",
+                        "invalid use of UniqueIndex annotation. there cannot be empty index names.",
+                        "invalid use of UniqueIndex annotation. there cannot be empty index names."
+                },
+                new String[]{
+                        "(6:4,7:20)",
+                        "(12:4,13:17)",
+                        "(14:4,15:18)",
+                        "(16:4,17:15)"
+                }
+        );
+    }
 
-
+    //enable this test case once persist library is merged.
+    @Test(enabled = false)
+    public void validateGeneratedAnnotation() {
+        List<Diagnostic> diagnostics = getErrorDiagnostics("project_1",
+                "generated.bal", 3);
+        testDiagnostic(
+                diagnostics,
+                new String[]{
+                        PERSIST_600.getCode(),
+                        PERSIST_610.getCode(),
+                        PERSIST_601.getCode()
+                },
+                new String[]{
+                        "invalid use of Generated annotation. " +
+                                "generated annotation can only be used for readonly fields.",
+                        "invalid use of Generated annotation. partial key fields cannot be auto-generated.",
+                        "invalid use of Generated annotation. a generated field can only be an integer data type."
+                },
+                new String[]{
+                        "(20:4,21:29)",
+                        "(32:4,33:24)",
+                        "(43:4,44:23)"
+                }
+        );
+    }
     private List<Diagnostic> getErrorDiagnostics(String modelDirectory, String modelFileName, int count) {
         DiagnosticResult diagnosticResult = loadPersistModelFile(modelDirectory, modelFileName).getCompilation()
                 .diagnosticResult();
@@ -321,8 +404,6 @@ public class CompilerPluginTest {
         Assert.assertEquals(errorDiagnosticsList.size(), count);
         return errorDiagnosticsList;
     }
-
-
     private void testDiagnostic(List<Diagnostic> errorDiagnosticsList, String[] codes, String[] messages,
                                 String[] locations) {
         for (int index = 0; index < errorDiagnosticsList.size(); index++) {

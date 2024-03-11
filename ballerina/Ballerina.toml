@@ -22,7 +22,7 @@ path = "../native/build/libs/persist.sql-native-1.2.2-SNAPSHOT.jar"
 groupId = "io.ballerina.stdlib"
 artifactId = "persist-native"
 version = "1.2.1"
-path = "./lib/persist-native-1.2.1-20240222-125000-4a9d764.jar"
+path = "./lib/persist-native-1.2.1-20231130-100000-cca5690.jar"
 
 [[platform.java17.dependency]]
 groupId = "io.ballerina.stdlib"

@@ -6,4 +6,4 @@ class = "io.ballerina.stdlib.persist.sql.compiler.PersistSqlCompilerPlugin"
 path = "../compiler-plugin/build/libs/persist.sql-compiler-plugin-1.2.2-SNAPSHOT.jar"
 
 [[dependency]]
-path = "./lib/persist-native-1.2.1-20231130-100000-cca5690.jar"
+path = "./lib/persist-native-1.3.0-20240311-170600-561b857.jar"

@@ -101,8 +101,7 @@ public class CompilerPluginTest {
 
     @Test(enabled = true)
     public void validateVarCharAnnotations() {
-        List<Diagnostic> diagnostics = getErrorDiagnostics("modelvalidator",
-                "varchar.bal", 3);
+        List<Diagnostic> diagnostics = getErrorDiagnostics("modelvalidator", "varchar.bal", 3);
         testDiagnostic(
                 diagnostics,
                 new String[]{
@@ -127,8 +126,7 @@ public class CompilerPluginTest {
 
     @Test(enabled = true)
     public void validateDecimalAnnotations() {
-        List<Diagnostic> diagnostics = getErrorDiagnostics("modelvalidator",
-                "decimal.bal", 3);
+        List<Diagnostic> diagnostics = getErrorDiagnostics("modelvalidator", "decimal.bal", 3);
         testDiagnostic(
                 diagnostics,
                 new String[]{
@@ -152,8 +150,7 @@ public class CompilerPluginTest {
 
     @Test(enabled = true)
     public void validateEntityNameMappingAnnotations() {
-        List<Diagnostic> diagnostics = getErrorDiagnostics("modelvalidator",
-                "entity_name_mapping.bal", 4);
+        List<Diagnostic> diagnostics = getErrorDiagnostics("modelvalidator", "entity_name_mapping.bal", 4);
         testDiagnostic(
                 diagnostics,
                 new String[]{
@@ -180,8 +177,7 @@ public class CompilerPluginTest {
 
     @Test(enabled = true)
     public void validateFieldNameMappingAnnotations() {
-        List<Diagnostic> diagnostics = getErrorDiagnostics("modelvalidator",
-                "table_name_mapping.bal", 4);
+        List<Diagnostic> diagnostics = getErrorDiagnostics("modelvalidator", "table_name_mapping.bal", 4);
         testDiagnostic(
                 diagnostics,
                 new String[]{
@@ -205,19 +201,17 @@ public class CompilerPluginTest {
         );
     }
 
-    //check after persist library is merged
-    @Test(enabled = false)
+    @Test(enabled = true)
     public void validateRelationAnnotations1() {
-        List<Diagnostic> diagnostics = getErrorDiagnostics("modelvalidator",
-                "relation1.bal", 2);
+        List<Diagnostic> diagnostics = getErrorDiagnostics("modelvalidator", "relation1.bal", 1);
         testDiagnostic(
                 diagnostics,
                 new String[]{
                         PERSIST_SQL_423.getCode()
                 },
                 new String[]{
-                        "invalid use of the `Relation` annotation. mismatched number of reference keys for " +
-                                "relation 'Person' in entity 'Car'. expected 2 but found 1."
+                        "invalid use of the `Relation` annotation. mismatched number of reference keys for relation " +
+                                "'Person' in entity 'Car'. expected 2 but found 1."
                 },
                 new String[]{
                         "(35:4,36:17)"
@@ -225,11 +219,9 @@ public class CompilerPluginTest {
         );
     }
 
-    //check after persist library is merged
-    @Test(enabled = false)
+    @Test(enabled = true)
     public void validateRelationAnnotations2() {
-        List<Diagnostic> diagnostics = getErrorDiagnostics("modelvalidator",
-                "relation2.bal", 2);
+        List<Diagnostic> diagnostics = getErrorDiagnostics("modelvalidator", "relation2.bal", 1);
         testDiagnostic(
                 diagnostics,
                 new String[]{
@@ -247,8 +239,7 @@ public class CompilerPluginTest {
 
     @Test(enabled = true)
     public void validateRelationAnnotations3() {
-        List<Diagnostic> diagnostics = getErrorDiagnostics("modelvalidator",
-                "relation3.bal", 1);
+        List<Diagnostic> diagnostics = getErrorDiagnostics("modelvalidator", "relation3.bal", 1);
         testDiagnostic(
                 diagnostics,
                 new String[]{
@@ -266,8 +257,7 @@ public class CompilerPluginTest {
 
     @Test(enabled = true)
     public void validateRelationAnnotations4() {
-        List<Diagnostic> diagnostics = getErrorDiagnostics("modelvalidator",
-                "relation4.bal", 1);
+        List<Diagnostic> diagnostics = getErrorDiagnostics("modelvalidator", "relation4.bal", 1);
         testDiagnostic(
                 diagnostics,
                 new String[]{
@@ -285,8 +275,7 @@ public class CompilerPluginTest {
 
     @Test(enabled = true)
     public void validateRelationAnnotations5() {
-        List<Diagnostic> diagnostics = getErrorDiagnostics("modelvalidator",
-                "relation5.bal", 1);
+        List<Diagnostic> diagnostics = getErrorDiagnostics("modelvalidator", "relation5.bal", 1);
         testDiagnostic(
                 diagnostics,
                 new String[]{
@@ -302,11 +291,9 @@ public class CompilerPluginTest {
         );
     }
 
-    //check after persist library is merged
-    @Test(enabled = false)
+    @Test(enabled = true)
     public void validateRelationAnnotations6() {
-        List<Diagnostic> diagnostics = getErrorDiagnostics("modelvalidator",
-                "relation6.bal", 2);
+        List<Diagnostic> diagnostics = getErrorDiagnostics("modelvalidator", "relation6.bal", 1);
         testDiagnostic(
                 diagnostics,
                 new String[]{
@@ -321,11 +308,9 @@ public class CompilerPluginTest {
         );
     }
 
-    //check after persist library is merged
-    @Test(enabled = false)
+    @Test(enabled = true)
     public void validateRelationAnnotations7() {
-        List<Diagnostic> diagnostics = getErrorDiagnostics("modelvalidator",
-                "relation7.bal", 2);
+        List<Diagnostic> diagnostics = getErrorDiagnostics("modelvalidator", "relation7.bal", 1);
         testDiagnostic(
                 diagnostics,
                 new String[]{
@@ -342,8 +327,7 @@ public class CompilerPluginTest {
 
     @Test(enabled = true)
     public void validateIndexAnnotation() {
-        List<Diagnostic> diagnostics = getErrorDiagnostics("modelvalidator",
-                "index.bal", 4);
+        List<Diagnostic> diagnostics = getErrorDiagnostics("modelvalidator", "index.bal", 4);
         testDiagnostic(
                 diagnostics,
                 new String[]{
@@ -370,8 +354,7 @@ public class CompilerPluginTest {
 
     @Test(enabled = true)
     public void validateUniqueIndexAnnotation() {
-        List<Diagnostic> diagnostics = getErrorDiagnostics("modelvalidator",
-                "unique_index.bal", 4);
+        List<Diagnostic> diagnostics = getErrorDiagnostics("modelvalidator", "unique_index.bal", 4);
         testDiagnostic(
                 diagnostics,
                 new String[]{
@@ -398,8 +381,7 @@ public class CompilerPluginTest {
 
     @Test(enabled = true)
     public void validateGeneratedAnnotation() {
-        List<Diagnostic> diagnostics = getErrorDiagnostics("modelvalidator",
-                "generated.bal", 3);
+        List<Diagnostic> diagnostics = getErrorDiagnostics("modelvalidator", "generated.bal", 3);
         testDiagnostic(
                 diagnostics,
                 new String[]{

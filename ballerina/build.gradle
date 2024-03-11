@@ -70,6 +70,9 @@ dependencies {
     externalJars(group: 'io.ballerina.stdlib', name: 'persist-native', version: "${stdlibPersistVersion}") {
         transitive = false
     }
+    externalJars(group: 'io.ballerina.stdlib', name: 'persist-compiler-plugin', version: "${stdlibPersistVersion}") {
+        transitive = false
+    }
     externalJars(group: 'io.ballerina.stdlib', name: 'sql-native', version: "${stdlibSqlVersion}") {
         transitive = false
     }

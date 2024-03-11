@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2023, WSO2 LLC. (http://www.wso2.org) All Rights Reserved.
+ * Copyright (c) 2024, WSO2 LLC. (http://www.wso2.org) All Rights Reserved.
  *
  * WSO2 LLC. licenses this file to you under the Apache License,
  * Version 2.0 (the "License"); you may not use this file except
@@ -21,7 +21,6 @@ package io.ballerina.stdlib.persist.sql.compiler;
 import io.ballerina.compiler.syntax.tree.AnnotationNode;
 import io.ballerina.compiler.syntax.tree.ArrayTypeDescriptorNode;
 import io.ballerina.compiler.syntax.tree.BuiltinSimpleNameReferenceNode;
-import io.ballerina.compiler.syntax.tree.EnumDeclarationNode;
 import io.ballerina.compiler.syntax.tree.ImportPrefixNode;
 import io.ballerina.compiler.syntax.tree.ModuleMemberDeclarationNode;
 import io.ballerina.compiler.syntax.tree.ModulePartNode;
@@ -38,10 +37,10 @@ import io.ballerina.projects.ProjectKind;
 import io.ballerina.projects.plugins.AnalysisTask;
 import io.ballerina.projects.plugins.SyntaxNodeAnalysisContext;
 import io.ballerina.projects.util.ProjectConstants;
-import io.ballerina.stdlib.persist.sql.compiler.model.Entity;
-import io.ballerina.stdlib.persist.sql.compiler.model.IdentityField;
-import io.ballerina.stdlib.persist.sql.compiler.model.RelationField;
-import io.ballerina.stdlib.persist.sql.compiler.model.SimpleTypeField;
+import io.ballerina.stdlib.persist.compiler.model.Entity;
+import io.ballerina.stdlib.persist.compiler.model.IdentityField;
+import io.ballerina.stdlib.persist.compiler.model.RelationField;
+import io.ballerina.stdlib.persist.compiler.model.SimpleTypeField;
 
 import java.io.File;
 import java.nio.file.Path;
@@ -112,7 +111,6 @@ import static io.ballerina.stdlib.persist.sql.compiler.utils.Utils.stripEscapeCh
 public class PersistSqlModelDefinitionValidator implements AnalysisTask<SyntaxNodeAnalysisContext> {
     private final Map<String, Entity> entities = new HashMap<>();
     private final List<String> entityNames = new ArrayList<>();
-    private final List<String> enumTypes = new ArrayList<>();
 
     @Override
     public void perform(SyntaxNodeAnalysisContext ctx) {
@@ -139,9 +137,6 @@ public class PersistSqlModelDefinitionValidator implements AnalysisTask<SyntaxNo
                     entityNames.add(entityName.toLowerCase(Locale.ROOT));
                     this.entityNames.add(entityName);
                 }
-            } else if (member instanceof EnumDeclarationNode) {
-                String enumTypeName = stripEscapeCharacter(((EnumDeclarationNode) member).identifier().text().trim());
-                enumTypes.add(enumTypeName);
             }
         }
 

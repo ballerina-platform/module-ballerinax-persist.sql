@@ -16,12 +16,13 @@
  * under the License.
  */
 
-module io.ballerina.stdlib.persist.sql.codemodifier {
+module io.ballerina.stdlib.persist.sql.compiler {
     requires io.ballerina.lang;
     requires io.ballerina.parser;
     requires io.ballerina.tools.api;
     requires io.ballerina.toml;
     requires io.ballerina.formatter.core;
     requires io.ballerina.stdlib.persist;
+    requires io.ballerina.stdlib.persist.plugin;
     exports io.ballerina.stdlib.persist.sql.compiler;
 }

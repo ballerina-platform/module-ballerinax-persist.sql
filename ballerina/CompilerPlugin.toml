@@ -7,3 +7,6 @@ path = "../compiler-plugin/build/libs/persist.sql-compiler-plugin-1.2.2-SNAPSHOT
 
 [[dependency]]
 path = "./lib/persist-native-1.3.0-20240311-170600-561b857.jar"
+
+[[dependency]]
+path = "./lib/persist-compiler-plugin-1.3.0-20240311-170600-561b857.jar"

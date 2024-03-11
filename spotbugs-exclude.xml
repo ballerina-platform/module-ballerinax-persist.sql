@@ -36,4 +36,12 @@
         <Class name="io.ballerina.stdlib.persist.sql.compiler.codemodifier.QueryCodeModifierTask"/>
         <Bug pattern="EI_EXPOSE_REP2"/>
     </Match>
+    <Match>
+        <Class name="io.ballerina.stdlib.persist.sql.compiler.model.Entity"/>
+        <Bug pattern="EI_EXPOSE_REP, EI_EXPOSE_REP2"/>
+    </Match>
+    <Match>
+        <Class name="io.ballerina.stdlib.persist.sql.compiler.model.GroupedRelationField"/>
+        <Bug pattern="EI_EXPOSE_REP"/>
+    </Match>
 </FindBugsFilter>

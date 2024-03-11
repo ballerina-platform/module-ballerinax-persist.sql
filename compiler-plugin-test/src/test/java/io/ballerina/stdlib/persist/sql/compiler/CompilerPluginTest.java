@@ -32,34 +32,40 @@ import java.nio.file.Paths;
 import java.util.List;
 import java.util.stream.Collectors;
 
-import static io.ballerina.stdlib.persist.compiler.DiagnosticsCodes.PERSIST_423;
-import static io.ballerina.stdlib.persist.compiler.DiagnosticsCodes.PERSIST_424;
-import static io.ballerina.stdlib.persist.compiler.DiagnosticsCodes.PERSIST_426;
-import static io.ballerina.stdlib.persist.compiler.DiagnosticsCodes.PERSIST_427;
-import static io.ballerina.stdlib.persist.compiler.DiagnosticsCodes.PERSIST_428;
-import static io.ballerina.stdlib.persist.compiler.DiagnosticsCodes.PERSIST_429;
-import static io.ballerina.stdlib.persist.compiler.DiagnosticsCodes.PERSIST_430;
-import static io.ballerina.stdlib.persist.compiler.DiagnosticsCodes.PERSIST_600;
-import static io.ballerina.stdlib.persist.compiler.DiagnosticsCodes.PERSIST_601;
-import static io.ballerina.stdlib.persist.compiler.DiagnosticsCodes.PERSIST_604;
-import static io.ballerina.stdlib.persist.compiler.DiagnosticsCodes.PERSIST_605;
-import static io.ballerina.stdlib.persist.compiler.DiagnosticsCodes.PERSIST_606;
-import static io.ballerina.stdlib.persist.compiler.DiagnosticsCodes.PERSIST_607;
-import static io.ballerina.stdlib.persist.compiler.DiagnosticsCodes.PERSIST_608;
-import static io.ballerina.stdlib.persist.compiler.DiagnosticsCodes.PERSIST_609;
-import static io.ballerina.stdlib.persist.compiler.DiagnosticsCodes.PERSIST_610;
-import static io.ballerina.stdlib.persist.compiler.DiagnosticsCodes.PERSIST_611;
-import static io.ballerina.stdlib.persist.compiler.DiagnosticsCodes.PERSIST_612;
-import static io.ballerina.stdlib.persist.compiler.DiagnosticsCodes.PERSIST_613;
-import static io.ballerina.stdlib.persist.compiler.DiagnosticsCodes.PERSIST_614;
-import static io.ballerina.stdlib.persist.compiler.DiagnosticsCodes.PERSIST_615;
-import static io.ballerina.stdlib.persist.compiler.DiagnosticsCodes.PERSIST_616;
+import static io.ballerina.stdlib.persist.sql.compiler.DiagnosticsCodes.PERSIST_SQL_423;
+import static io.ballerina.stdlib.persist.sql.compiler.DiagnosticsCodes.PERSIST_SQL_424;
+import static io.ballerina.stdlib.persist.sql.compiler.DiagnosticsCodes.PERSIST_SQL_426;
+import static io.ballerina.stdlib.persist.sql.compiler.DiagnosticsCodes.PERSIST_SQL_427;
+import static io.ballerina.stdlib.persist.sql.compiler.DiagnosticsCodes.PERSIST_SQL_428;
+import static io.ballerina.stdlib.persist.sql.compiler.DiagnosticsCodes.PERSIST_SQL_429;
+import static io.ballerina.stdlib.persist.sql.compiler.DiagnosticsCodes.PERSIST_SQL_430;
+import static io.ballerina.stdlib.persist.sql.compiler.DiagnosticsCodes.PERSIST_SQL_600;
+import static io.ballerina.stdlib.persist.sql.compiler.DiagnosticsCodes.PERSIST_SQL_601;
+import static io.ballerina.stdlib.persist.sql.compiler.DiagnosticsCodes.PERSIST_SQL_604;
+import static io.ballerina.stdlib.persist.sql.compiler.DiagnosticsCodes.PERSIST_SQL_605;
+import static io.ballerina.stdlib.persist.sql.compiler.DiagnosticsCodes.PERSIST_SQL_606;
+import static io.ballerina.stdlib.persist.sql.compiler.DiagnosticsCodes.PERSIST_SQL_607;
+import static io.ballerina.stdlib.persist.sql.compiler.DiagnosticsCodes.PERSIST_SQL_608;
+import static io.ballerina.stdlib.persist.sql.compiler.DiagnosticsCodes.PERSIST_SQL_609;
+import static io.ballerina.stdlib.persist.sql.compiler.DiagnosticsCodes.PERSIST_SQL_610;
+import static io.ballerina.stdlib.persist.sql.compiler.DiagnosticsCodes.PERSIST_SQL_611;
+import static io.ballerina.stdlib.persist.sql.compiler.DiagnosticsCodes.PERSIST_SQL_612;
+import static io.ballerina.stdlib.persist.sql.compiler.DiagnosticsCodes.PERSIST_SQL_613;
+import static io.ballerina.stdlib.persist.sql.compiler.DiagnosticsCodes.PERSIST_SQL_614;
+import static io.ballerina.stdlib.persist.sql.compiler.DiagnosticsCodes.PERSIST_SQL_615;
+import static io.ballerina.stdlib.persist.sql.compiler.DiagnosticsCodes.PERSIST_SQL_616;
+import static io.ballerina.stdlib.persist.sql.compiler.DiagnosticsCodes.PERSIST_SQL_617;
+import static io.ballerina.stdlib.persist.sql.compiler.DiagnosticsCodes.PERSIST_SQL_618;
+import static io.ballerina.stdlib.persist.sql.compiler.DiagnosticsCodes.PERSIST_SQL_619;
+import static io.ballerina.stdlib.persist.sql.compiler.DiagnosticsCodes.PERSIST_SQL_620;
+import static io.ballerina.stdlib.persist.sql.compiler.DiagnosticsCodes.PERSIST_SQL_621;
 import static io.ballerina.stdlib.persist.sql.compiler.TestUtils.getEnvironmentBuilder;
 
 /**
  * Tests persist compiler plugin.
  */
 public class CompilerPluginTest {
+
 
     private Package loadPersistModelFile(String directory, String name) {
         Path projectDirPath = Paths.get("src", "test", "resources", directory, "persist").
@@ -70,333 +76,347 @@ public class CompilerPluginTest {
 
     @Test(enabled = true)
     public void validateCharAnnotations() {
-        List<Diagnostic> diagnostics = getErrorDiagnostics("project_1", "char.bal", 3);
+        List<Diagnostic> diagnostics = getErrorDiagnostics("modelvalidator", "char.bal", 3);
         testDiagnostic(
                 diagnostics,
                 new String[]{
-                        PERSIST_605.getCode(),
-                        PERSIST_607.getCode(),
-                        PERSIST_604.getCode()
+                        PERSIST_SQL_605.getCode(),
+                        PERSIST_SQL_607.getCode(),
+                        PERSIST_SQL_604.getCode()
                 },
                 new String[]{
-                        "invalid use of VarChar and Char annotations. " +
-                                "only one of either Char or Varchar annotations can be used at a time.",
-                        "invalid use of 'Char' annotation. length cannot be 0.",
-                        "invalid use of 'Char' annotation. 'Char' annotation can only be used for string data type."
+                        "invalid use of `VarChar` and `Char` annotations. only one of either `VarChar` or `Char` " +
+                                "annotations can be used at a time.",
+                        "invalid use of the `'Char'` annotation. length cannot be 0.",
+                        "invalid use of the `'Char'` annotation. the `'Char'` annotation can only be used for " +
+                                "'string' type."
                 },
                 new String[]{
-                        "(17:4,19:18)",
-                        "(28:4,29:16)",
-                        "(30:4,31:12)"
+                        "(33:4,35:18)",
+                        "(44:4,45:16)",
+                        "(46:4,47:12)"
                 }
         );
     }
 
     @Test(enabled = true)
     public void validateVarCharAnnotations() {
-        List<Diagnostic> diagnostics = getErrorDiagnostics("project_1",
+        List<Diagnostic> diagnostics = getErrorDiagnostics("modelvalidator",
                 "varchar.bal", 3);
         testDiagnostic(
                 diagnostics,
                 new String[]{
-                        PERSIST_605.getCode(),
-                        PERSIST_607.getCode(),
-                        PERSIST_604.getCode()
+                        PERSIST_SQL_605.getCode(),
+                        PERSIST_SQL_607.getCode(),
+                        PERSIST_SQL_604.getCode()
                 },
                 new String[]{
-                        "invalid use of VarChar and Char annotations. " +
-                                "only one of either Char or Varchar annotations can be used at a time.",
-                        "invalid use of 'VarChar' annotation. length cannot be 0.",
-                        "invalid use of 'VarChar' annotation. 'VarChar' annotation can only be " +
-                                "used for string data type."
+                        "invalid use of `VarChar` and `Char` annotations. only one of either `VarChar` or `Char` " +
+                                "annotations can be used at a time.",
+                        "invalid use of the `'VarChar'` annotation. length cannot be 0.",
+                        "invalid use of the `'VarChar'` annotation. the `'VarChar'` annotation can only be used for " +
+                                "'string' type."
                 },
                 new String[]{
-                        "(17:4,19:18)",
-                        "(28:4,29:16)",
-                        "(30:4,31:12)"
+                        "(33:4,35:18)",
+                        "(44:4,45:16)",
+                        "(46:4,47:12)"
                 }
         );
     }
 
     @Test(enabled = true)
     public void validateDecimalAnnotations() {
-        List<Diagnostic> diagnostics = getErrorDiagnostics("project_1",
+        List<Diagnostic> diagnostics = getErrorDiagnostics("modelvalidator",
                 "decimal.bal", 3);
         testDiagnostic(
                 diagnostics,
                 new String[]{
-                        PERSIST_606.getCode(),
-                        PERSIST_608.getCode(),
-                        PERSIST_609.getCode()
+                        PERSIST_SQL_606.getCode(),
+                        PERSIST_SQL_608.getCode(),
+                        PERSIST_SQL_609.getCode()
                 },
                 new String[]{
-                        "invalid use of Decimal annotation. Decimal annotation can only be used for decimal data type.",
-                        "invalid use of Decimal annotation. precision cannot be 0.",
-                        "invalid use of Decimal annotation. precision cannot be less than scale."
+                        "invalid use of the `Decimal` annotation. the `Decimal` annotation can only be used for " +
+                                "''decimal'' type.",
+                        "invalid use of the `Decimal` annotation. precision cannot be 0.",
+                        "invalid use of the `Decimal` annotation. precision cannot be less than scale."
                 },
                 new String[]{
-                        "(6:4,7:12)",
-                        "(8:4,9:19)",
-                        "(8:4,9:19)"
+                        "(22:4,23:12)",
+                        "(24:4,25:19)",
+                        "(24:4,25:19)"
                 }
         );
     }
 
     @Test(enabled = true)
     public void validateEntityNameMappingAnnotations() {
-        List<Diagnostic> diagnostics = getErrorDiagnostics("project_1",
-                "entity_name_mapping.bal", 3);
+        List<Diagnostic> diagnostics = getErrorDiagnostics("modelvalidator",
+                "entity_name_mapping.bal", 4);
         testDiagnostic(
                 diagnostics,
                 new String[]{
-                        PERSIST_600.getCode(),
-                        PERSIST_601.getCode(),
-                        PERSIST_610.getCode()
+                        PERSIST_SQL_600.getCode(),
+                        PERSIST_SQL_601.getCode(),
+                        PERSIST_SQL_610.getCode(),
+                        PERSIST_SQL_620.getCode()
                 },
                 new String[]{
-                        "invalid use of Mapping annotation. mapping name cannot be empty.",
-                        "mapping name is same as model definition.",
-                        "invalid use of Mapping annotation. duplicate mapping name found."
+                        "invalid use of the `Mapping` annotation. mapping name cannot be empty.",
+                        "redundant use of the `Mapping` annotation. mapping name is same as model definition.",
+                        "invalid use of the `Mapping` annotation. duplicate mapping name found.",
+                        "invalid use of the `Mapping` annotation. a mapping name should not conflict with an " +
+                                "Entity name"
                 },
                 new String[]{
-                        "(16:12,16:23)",
-                        "(26:12,26:19)",
-                        "(44:12,44:17)"
+                        "(32:12,32:23)",
+                        "(42:12,42:19)",
+                        "(60:12,60:17)",
+                        "(74:12,74:25)"
                 }
         );
     }
 
     @Test(enabled = true)
     public void validateFieldNameMappingAnnotations() {
-        List<Diagnostic> diagnostics = getErrorDiagnostics("project_1",
-                "table_name_mapping.bal", 3);
+        List<Diagnostic> diagnostics = getErrorDiagnostics("modelvalidator",
+                "table_name_mapping.bal", 4);
         testDiagnostic(
                 diagnostics,
                 new String[]{
-                        PERSIST_600.getCode(),
-                        PERSIST_610.getCode(),
-                        PERSIST_601.getCode()
+                        PERSIST_SQL_600.getCode(),
+                        PERSIST_SQL_610.getCode(),
+                        PERSIST_SQL_601.getCode(),
+                        PERSIST_SQL_621.getCode()
                 },
                 new String[]{
-                        "invalid use of Mapping annotation. mapping name cannot be empty.",
-                        "invalid use of Mapping annotation. duplicate mapping name found.",
-                        "mapping name is same as model definition."
+                        "invalid use of the `Mapping` annotation. mapping name cannot be empty.",
+                        "invalid use of the `Mapping` annotation. duplicate mapping name found.",
+                        "redundant use of the `Mapping` annotation. mapping name is same as model definition.",
+                        "invalid use of the `Mapping` annotation. a mapping name should not conflict with a field name"
                 },
                 new String[]{
-                        "(20:4,21:29)",
-                        "(32:4,33:24)",
-                        "(43:4,44:23)"
+                        "(36:4,37:29)",
+                        "(48:4,49:24)",
+                        "(59:4,60:23)",
+                        "(70:4,71:18)"
                 }
         );
     }
 
-    @Test(enabled = true)
+    //check after persist library is merged
+    @Test(enabled = false)
     public void validateRelationAnnotations1() {
-        List<Diagnostic> diagnostics = getErrorDiagnostics("project_1",
-                "relation1.bal", 1);
+        List<Diagnostic> diagnostics = getErrorDiagnostics("modelvalidator",
+                "relation1.bal", 2);
         testDiagnostic(
                 diagnostics,
                 new String[]{
-                        PERSIST_423.getCode()
+                        PERSIST_SQL_423.getCode()
                 },
                 new String[]{
-                        "invalid use of Relation annotation. mismatched number of reference " +
-                                "keys for entity 'Car' for relation 'Person'. expected 2 but found 1."
+                        "invalid use of the `Relation` annotation. mismatched number of reference keys for " +
+                                "relation 'Person' in entity 'Car'. expected 2 but found 1."
                 },
                 new String[]{
-                        "(19:4,20:17)"
+                        "(35:4,36:17)"
                 }
         );
     }
 
-    @Test(enabled = true)
+    //check after persist library is merged
+    @Test(enabled = false)
     public void validateRelationAnnotations2() {
-        List<Diagnostic> diagnostics = getErrorDiagnostics("project_1",
-                "relation2.bal", 1);
+        List<Diagnostic> diagnostics = getErrorDiagnostics("modelvalidator",
+                "relation2.bal", 2);
         testDiagnostic(
                 diagnostics,
                 new String[]{
-                        PERSIST_424.getCode()
+                        PERSIST_SQL_424.getCode()
                 },
                 new String[]{
-                        "invalid use of Relation annotation. mismatched key types for entity " +
-                                "'Person' for its relationship."
+                        "invalid use of the `Relation` annotation. mismatched key types for the related " +
+                                "entity 'Person'."
                 },
                 new String[]{
-                        "(18:4,19:17)"
+                        "(34:4,35:17)"
                 }
         );
     }
 
     @Test(enabled = true)
     public void validateRelationAnnotations3() {
-        List<Diagnostic> diagnostics = getErrorDiagnostics("project_1",
+        List<Diagnostic> diagnostics = getErrorDiagnostics("modelvalidator",
                 "relation3.bal", 1);
         testDiagnostic(
                 diagnostics,
                 new String[]{
-                        PERSIST_426.getCode()
+                        PERSIST_SQL_426.getCode()
                 },
                 new String[]{
-                        "invalid use of Relation annotation. the field 'cars' is an array type in a 1-n " +
+                        "invalid use of the `Relation` annotation. the field 'cars' is an array type in a 1-n " +
                                 "relationship. therefore, it cannot have foreign keys."
                 },
                 new String[]{
-                        "(9:4,10:15)"
+                        "(25:4,26:15)"
                 }
         );
     }
 
     @Test(enabled = true)
     public void validateRelationAnnotations4() {
-        List<Diagnostic> diagnostics = getErrorDiagnostics("project_1",
+        List<Diagnostic> diagnostics = getErrorDiagnostics("modelvalidator",
                 "relation4.bal", 1);
         testDiagnostic(
                 diagnostics,
                 new String[]{
-                        PERSIST_427.getCode()
+                        PERSIST_SQL_427.getCode()
                 },
                 new String[]{
-                        "invalid use of Relation annotation. the field 'car' is an optional type in a 1-1 " +
+                        "invalid use of the `Relation` annotation. the field 'car' is an optional type in a 1-1 " +
                                 "relationship. therefore, it cannot have foreign keys."
                 },
                 new String[]{
-                        "(9:4,10:13)"
+                        "(25:4,26:13)"
                 }
         );
     }
 
     @Test(enabled = true)
     public void validateRelationAnnotations5() {
-        List<Diagnostic> diagnostics = getErrorDiagnostics("project_1",
+        List<Diagnostic> diagnostics = getErrorDiagnostics("modelvalidator",
                 "relation5.bal", 1);
         testDiagnostic(
                 diagnostics,
                 new String[]{
-                        PERSIST_428.getCode()
+                        PERSIST_SQL_428.getCode()
                 },
                 new String[]{
-                        "invalid use of Relation annotation. the field 'ownerNic' is not found in the entity 'Car'."
+                        "invalid use of the `Relation` annotation. the field 'ownerNic' is not found in the entity " +
+                                "'Car'."
                 },
                 new String[]{
-                        "(18:4,19:17)"
+                        "(34:4,35:17)"
                 }
         );
     }
 
-    @Test(enabled = true)
+    //check after persist library is merged
+    @Test(enabled = false)
     public void validateRelationAnnotations6() {
-        List<Diagnostic> diagnostics = getErrorDiagnostics("project_1",
-                "relation6.bal", 1);
+        List<Diagnostic> diagnostics = getErrorDiagnostics("modelvalidator",
+                "relation6.bal", 2);
         testDiagnostic(
                 diagnostics,
                 new String[]{
-                        PERSIST_429.getCode()
+                        PERSIST_SQL_429.getCode()
                 },
                 new String[]{
-                        "invalid use of Relation annotation. refs cannot contain duplicates."
+                        "invalid use of the `Relation` annotation. refs cannot contain duplicates."
                 },
                 new String[]{
-                        "(19:4,20:17)"
+                        "(35:4,36:17)"
                 }
         );
     }
 
-    @Test(enabled = true)
+    //check after persist library is merged
+    @Test(enabled = false)
     public void validateRelationAnnotations7() {
-        List<Diagnostic> diagnostics = getErrorDiagnostics("project_1",
-                "relation7.bal", 1);
+        List<Diagnostic> diagnostics = getErrorDiagnostics("modelvalidator",
+                "relation7.bal", 2);
         testDiagnostic(
                 diagnostics,
                 new String[]{
-                        PERSIST_430.getCode()
+                        PERSIST_SQL_430.getCode()
                 },
                 new String[]{
-                        "invalid use of Relation annotation. duplicated reference field."
+                        "invalid use of the `Relation` annotation. duplicated reference field."
                 },
                 new String[]{
-                        "(21:4,22:20)"
+                        "(37:4,38:20)"
                 }
         );
     }
 
     @Test(enabled = true)
     public void validateIndexAnnotation() {
-        List<Diagnostic> diagnostics = getErrorDiagnostics("project_1",
+        List<Diagnostic> diagnostics = getErrorDiagnostics("modelvalidator",
                 "index.bal", 4);
         testDiagnostic(
                 diagnostics,
                 new String[]{
-                        PERSIST_611.getCode(),
-                        PERSIST_613.getCode(),
-                        PERSIST_615.getCode(),
-                        PERSIST_615.getCode(),
+                        PERSIST_SQL_611.getCode(),
+                        PERSIST_SQL_613.getCode(),
+                        PERSIST_SQL_615.getCode(),
+                        PERSIST_SQL_615.getCode(),
                 },
                 new String[]{
-                        "invalid use of Index annotation. Index annotation cannot be used for relation fields.",
-                        "invalid use of Index annotation. duplicate index names.",
-                        "invalid use of Index annotation. there cannot be empty index names.",
-                        "invalid use of Index annotation. there cannot be empty index names."
+                        "invalid use of the `Index` annotation. the `Index` annotation cannot be used for relation " +
+                                "fields.",
+                        "invalid use of the `Index` annotation. duplicate index names.",
+                        "invalid use of the `Index` annotation. there cannot be empty index names.",
+                        "invalid use of the `Index` annotation. there cannot be empty index names."
                 },
                 new String[]{
-                        "(6:4,7:20)",
-                        "(12:4,13:17)",
-                        "(14:4,15:18)",
-                        "(16:4,17:15)"
+                        "(22:4,23:20)",
+                        "(28:4,29:17)",
+                        "(30:4,31:18)",
+                        "(32:4,33:15)"
                 }
         );
     }
 
     @Test(enabled = true)
     public void validateUniqueIndexAnnotation() {
-        List<Diagnostic> diagnostics = getErrorDiagnostics("project_1",
+        List<Diagnostic> diagnostics = getErrorDiagnostics("modelvalidator",
                 "unique_index.bal", 4);
         testDiagnostic(
                 diagnostics,
                 new String[]{
-                        PERSIST_612.getCode(),
-                        PERSIST_614.getCode(),
-                        PERSIST_616.getCode(),
-                        PERSIST_616.getCode(),
+                        PERSIST_SQL_612.getCode(),
+                        PERSIST_SQL_614.getCode(),
+                        PERSIST_SQL_616.getCode(),
+                        PERSIST_SQL_616.getCode(),
                 },
                 new String[]{
-                        "invalid use of UniqueIndex annotation. UniqueIndex annotation cannot be used " +
+                        "invalid use of the `UniqueIndex` annotation. the `UniqueIndex` annotation cannot be used " +
                                 "for relation fields.",
-                        "invalid use of UniqueIndex annotation. duplicate index names.",
-                        "invalid use of UniqueIndex annotation. there cannot be empty index names.",
-                        "invalid use of UniqueIndex annotation. there cannot be empty index names."
+                        "invalid use of the `UniqueIndex` annotation. duplicate index names.",
+                        "invalid use of the `UniqueIndex` annotation. there cannot be empty index names.",
+                        "invalid use of the `UniqueIndex` annotation. there cannot be empty index names."
                 },
                 new String[]{
-                        "(6:4,7:20)",
-                        "(12:4,13:17)",
-                        "(14:4,15:18)",
-                        "(16:4,17:15)"
+                        "(22:4,23:20)",
+                        "(28:4,29:17)",
+                        "(30:4,31:18)",
+                        "(32:4,33:15)"
                 }
         );
     }
 
-    //enable this test case once persist library is merged. add test cases for mapping annotations as well
-    @Test(enabled = false)
+    @Test(enabled = true)
     public void validateGeneratedAnnotation() {
-        List<Diagnostic> diagnostics = getErrorDiagnostics("project_1",
+        List<Diagnostic> diagnostics = getErrorDiagnostics("modelvalidator",
                 "generated.bal", 3);
         testDiagnostic(
                 diagnostics,
                 new String[]{
-                        PERSIST_600.getCode(),
-                        PERSIST_610.getCode(),
-                        PERSIST_601.getCode()
+                        PERSIST_SQL_617.getCode(),
+                        PERSIST_SQL_619.getCode(),
+                        PERSIST_SQL_618.getCode()
                 },
                 new String[]{
-                        "invalid use of Generated annotation. " +
-                                "generated annotation can only be used for readonly fields.",
-                        "invalid use of Generated annotation. partial key fields cannot be auto-generated.",
-                        "invalid use of Generated annotation. a generated field can only be an integer data type."
+                        "invalid use of the `Generated` annotation. the `Generated` annotation can only be used for " +
+                                "''readonly'' fields.",
+                        "invalid use of the `Generated` annotation. a generated field can only be an ''int'' type.",
+                        "invalid use of the `Generated` annotation. partial key fields cannot be auto-generated."
                 },
                 new String[]{
-                        "(20:4,21:29)",
-                        "(32:4,33:24)",
-                        "(43:4,44:23)"
+                        "(21:4,22:12)",
+                        "(36:4,37:24)",
+                        "(27:4,28:20)"
                 }
         );
     }

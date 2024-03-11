@@ -8,3 +8,7 @@ id = "generate-db-client"
 targetModule = "project_1.test"
 options.datastore = "mysql"
 filePath = "persist/model.bal"
+
+[persist]
+datastore = "mysql"
+module = "Demo.db"

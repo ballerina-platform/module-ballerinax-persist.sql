@@ -42,8 +42,6 @@ dependencies {
     implementation group: 'org.testng', name: 'testng', version: "${testngVersion}"
     testImplementation 'org.testng:testng'
     testImplementation group: 'com.google.code.gson', name: 'gson', version: "${gsonVersion}"
-    implementation group: 'io.ballerina.stdlib', name: 'persist-native', version: "${stdlibPersistVersion}"
-    implementation group: 'io.ballerina.stdlib', name: 'persist-compiler-plugin', version: "${stdlibPersistVersion}"
 }
 
 tasks.withType(JavaCompile) {

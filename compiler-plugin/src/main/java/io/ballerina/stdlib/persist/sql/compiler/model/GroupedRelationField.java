@@ -16,20 +16,31 @@
  * under the License.
  */
 
-package io.ballerina.stdlib.persist.sql.compiler;
+package io.ballerina.stdlib.persist.sql.compiler.model;
 
-import io.ballerina.projects.plugins.CompilerPlugin;
-import io.ballerina.projects.plugins.CompilerPluginContext;
-import io.ballerina.stdlib.persist.sql.compiler.codemodifier.PersistCodeModifier;
+import java.util.ArrayList;
+import java.util.List;
 
 /**
- * Persist SQL compiler plugin.
+ * Model class to hold grouped relation field details per type.
  */
-public class PersistSqlCompilerPlugin extends CompilerPlugin {
+public class GroupedRelationField {
+    private final String containingEntity;
+    private final List<RelationField> fields = new ArrayList<>();
 
-    @Override
-    public void init(CompilerPluginContext compilerPluginContext) {
-        compilerPluginContext.addCodeAnalyzer(new PersistSqlCodeAnalyzer());
-        compilerPluginContext.addCodeModifier(new PersistCodeModifier());
+    public GroupedRelationField(String containingEntity) {
+        this.containingEntity = containingEntity;
+    }
+
+    public void addRelationField(RelationField field) {
+        fields.add(field);
+    }
+
+    public String getContainingEntity() {
+        return containingEntity;
+    }
+
+    public List<RelationField> getRelationFields() {
+        return fields;
     }
 }

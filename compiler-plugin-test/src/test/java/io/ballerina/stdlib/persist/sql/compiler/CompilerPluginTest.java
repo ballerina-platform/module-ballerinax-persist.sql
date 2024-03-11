@@ -61,13 +61,13 @@ import static io.ballerina.stdlib.persist.sql.compiler.TestUtils.getEnvironmentB
  */
 public class CompilerPluginTest {
 
-
     private Package loadPersistModelFile(String directory, String name) {
         Path projectDirPath = Paths.get("src", "test", "resources", directory, "persist").
                 toAbsolutePath().resolve(name);
         SingleFileProject project = SingleFileProject.load(getEnvironmentBuilder(), projectDirPath);
         return project.currentPackage();
     }
+
     @Test(enabled = true)
     public void validateCharAnnotations() {
         List<Diagnostic> diagnostics = getErrorDiagnostics("project_1", "char.bal", 3);
@@ -246,6 +246,7 @@ public class CompilerPluginTest {
                 }
         );
     }
+
     @Test(enabled = true)
     public void validateRelationAnnotations4() {
         List<Diagnostic> diagnostics = getErrorDiagnostics("project_1",
@@ -264,6 +265,7 @@ public class CompilerPluginTest {
                 }
         );
     }
+
     @Test(enabled = true)
     public void validateRelationAnnotations5() {
         List<Diagnostic> diagnostics = getErrorDiagnostics("project_1",
@@ -281,6 +283,7 @@ public class CompilerPluginTest {
                 }
         );
     }
+
     @Test(enabled = true)
     public void validateRelationAnnotations6() {
         List<Diagnostic> diagnostics = getErrorDiagnostics("project_1",
@@ -298,6 +301,7 @@ public class CompilerPluginTest {
                 }
         );
     }
+
     @Test(enabled = true)
     public void validateRelationAnnotations7() {
         List<Diagnostic> diagnostics = getErrorDiagnostics("project_1",
@@ -315,6 +319,7 @@ public class CompilerPluginTest {
                 }
         );
     }
+
     @Test(enabled = true)
     public void validateIndexAnnotation() {
         List<Diagnostic> diagnostics = getErrorDiagnostics("project_1",
@@ -341,6 +346,7 @@ public class CompilerPluginTest {
                 }
         );
     }
+
     @Test(enabled = true)
     public void validateUniqueIndexAnnotation() {
         List<Diagnostic> diagnostics = getErrorDiagnostics("project_1",
@@ -369,7 +375,7 @@ public class CompilerPluginTest {
         );
     }
 
-    //enable this test case once persist library is merged.
+    //enable this test case once persist library is merged. add test cases for mapping annotations as well
     @Test(enabled = false)
     public void validateGeneratedAnnotation() {
         List<Diagnostic> diagnostics = getErrorDiagnostics("project_1",
@@ -394,6 +400,7 @@ public class CompilerPluginTest {
                 }
         );
     }
+
     private List<Diagnostic> getErrorDiagnostics(String modelDirectory, String modelFileName, int count) {
         DiagnosticResult diagnosticResult = loadPersistModelFile(modelDirectory, modelFileName).getCompilation()
                 .diagnosticResult();
@@ -404,6 +411,7 @@ public class CompilerPluginTest {
         Assert.assertEquals(errorDiagnosticsList.size(), count);
         return errorDiagnosticsList;
     }
+
     private void testDiagnostic(List<Diagnostic> errorDiagnosticsList, String[] codes, String[] messages,
                                 String[] locations) {
         for (int index = 0; index < errorDiagnosticsList.size(); index++) {

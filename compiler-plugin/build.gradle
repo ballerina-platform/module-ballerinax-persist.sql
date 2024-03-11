@@ -33,8 +33,8 @@ dependencies {
     implementation group: 'org.ballerinalang', name: 'ballerina-parser', version: "${ballerinaLangVersion}"
     implementation group: 'org.ballerinalang', name: 'toml-parser', version: "${ballerinaLangVersion}"
     implementation group: 'org.ballerinalang', name: 'formatter-core', version: "${ballerinaLangVersion}"
-    implementation group: 'io.ballerina.stdlib', name: 'persist-native', version: "1.2.1-20240222-125000-4a9d764"
-    implementation group: 'io.ballerina.stdlib', name: 'persist-compiler-plugin', version: "1.2.1-20240222-125000-4a9d764"
+    implementation group: 'io.ballerina.stdlib', name: 'persist-native', version: "${stdlibPersistVersion}"
+    implementation group: 'io.ballerina.stdlib', name: 'persist-compiler-plugin', version: "${stdlibPersistVersion}"
 }
 
 def excludePattern = '**/module-info.java'

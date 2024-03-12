@@ -1,7 +1,7 @@
 [package]
 org = "ballerinax"
 name = "persist.sql"
-version = "1.2.2"
+version = "1.3.0"
 authors = ["Ballerina"]
 keywords = ["persist", "sql", "mysql", "mssql", "sql-server"]
 repository = "https://github.com/ballerina-platform/module-ballerinax-persist.sql"
@@ -15,14 +15,14 @@ graalvmCompatible = true
 [[platform.java17.dependency]]
 groupId = "io.ballerina.stdlib"
 artifactId = "persist.sql-native"
-version = "1.2.2"
-path = "../native/build/libs/persist.sql-native-1.2.2-SNAPSHOT.jar"
+version = "1.3.0"
+path = "../native/build/libs/persist.sql-native-1.3.0-SNAPSHOT.jar"
 
 [[platform.java17.dependency]]
 groupId = "io.ballerina.stdlib"
 artifactId = "persist-native"
-version = "1.2.1"
-path = "./lib/persist-native-1.2.1-20231129-200000-11c71ca.jar"
+version = "1.3.0"
+path = "./lib/persist-native-1.3.0-20240311-220000-f31520a.jar"
 
 [[platform.java17.dependency]]
 groupId = "io.ballerina.stdlib"

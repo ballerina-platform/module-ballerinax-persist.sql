@@ -22,7 +22,6 @@ import io.ballerina.compiler.syntax.tree.AnnotationNode;
 import io.ballerina.compiler.syntax.tree.ExpressionNode;
 import io.ballerina.compiler.syntax.tree.MappingConstructorExpressionNode;
 import io.ballerina.compiler.syntax.tree.MappingFieldNode;
-import io.ballerina.compiler.syntax.tree.Node;
 import io.ballerina.compiler.syntax.tree.SpecificFieldNode;
 import io.ballerina.projects.plugins.SyntaxNodeAnalysisContext;
 import io.ballerina.tools.diagnostics.Diagnostic;
@@ -52,14 +51,6 @@ public final class Utils {
 
     public static String stripEscapeCharacter(String name) {
         return name.startsWith("'") ? name.substring(1) : name;
-    }
-
-    public static String getTypeName(Node processedTypeNode) {
-        String typeName = processedTypeNode.kind().stringValue();
-        if (typeName.isBlank()) {
-            typeName = processedTypeNode.kind().name();
-        }
-        return typeName;
     }
 
     public static String readStringValueFromAnnotation

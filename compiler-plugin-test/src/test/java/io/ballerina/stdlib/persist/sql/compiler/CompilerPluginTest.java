@@ -76,6 +76,12 @@ public class CompilerPluginTest {
     }
 
     @Test(enabled = true)
+    public void testHasCompilationErrors() {
+        List<Diagnostic> diagnostics = getErrorDiagnostics("modelvalidator", "compilationerror.bal", 1);
+        Assert.assertTrue(diagnostics.size() == 1);
+    }
+
+    @Test(enabled = true)
     public void validateCharAnnotations() {
         List<Diagnostic> diagnostics = getErrorDiagnostics("modelvalidator", "char.bal", 3);
         testDiagnostic(

@@ -98,7 +98,6 @@ import static io.ballerina.stdlib.persist.sql.compiler.DiagnosticsCodes.PERSIST_
 import static io.ballerina.stdlib.persist.sql.compiler.DiagnosticsCodes.PERSIST_SQL_619;
 import static io.ballerina.stdlib.persist.sql.compiler.DiagnosticsCodes.PERSIST_SQL_620;
 import static io.ballerina.stdlib.persist.sql.compiler.DiagnosticsCodes.PERSIST_SQL_621;
-import static io.ballerina.stdlib.persist.sql.compiler.utils.Utils.getTypeName;
 import static io.ballerina.stdlib.persist.sql.compiler.utils.Utils.hasCompilationErrors;
 import static io.ballerina.stdlib.persist.sql.compiler.utils.Utils.isAnnotationPresent;
 import static io.ballerina.stdlib.persist.sql.compiler.utils.Utils.readStringArrayValueFromAnnotation;
@@ -405,7 +404,9 @@ public class PersistSqlModelDefinitionValidator implements AnalysisTask<SyntaxNo
                     isSimpleType = true;
                 }
             } else {
-                fieldType = getTypeName(processedTypeNode);
+                // types like rest, anydata, any etc are not supported fields. hence ignored as they will be picked up
+                // by persist compiler
+                continue;
             }
 
             if (isIdentityField) {

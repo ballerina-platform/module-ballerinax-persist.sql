@@ -53,16 +53,16 @@ configurable record {|
 @test:BeforeSuite
 function initTests() returns error? {
     // MySQL
-    check mySqlTests();
+    check initMySqlTests();
 
     //MSSQL
-    check msSqlTests();
+    check initMsSqlTests();
 
     // PostgreSQL
-    check postgreSqlTests();
+    check initPostgreSqlTests();
 }
 
-function mySqlTests() returns error? {
+function initMySqlTests() returns error? {
   mysql:Client mysqlDbClient = check new (host = mysql.host, user = mysql.user, password = mysql.password, database = mysql.database, port = mysql.port);
       _ = check mysqlDbClient->execute(`SET FOREIGN_KEY_CHECKS = 0`);
       _ = check mysqlDbClient->execute(`TRUNCATE Employee`);
@@ -82,7 +82,7 @@ function mySqlTests() returns error? {
       check mysqlDbClient.close();
 }
 
-function msSqlTests() returns error? {
+function initMsSqlTests() returns error? {
   mssql:Client mssqlDbClient = check new (host = mssql.host, user = mssql.user, password = mssql.password, port = mssql.port);
     _ = check mssqlDbClient->execute(`DROP DATABASE IF EXISTS test;`);
     _ = check mssqlDbClient->execute(`CREATE DATABASE test`);
@@ -234,7 +234,7 @@ function msSqlTests() returns error? {
     `);
 }
 
-function postgreSqlTests() returns error? {
+function initPostgreSqlTests() returns error? {
   postgresql:Client postgresqlDbClient = check new (host = postgresql.host, username = postgresql.user, password = postgresql.password, database = postgresql.database, port = postgresql.port);
     _ = check postgresqlDbClient->execute(`TRUNCATE "Employee" CASCADE`);
     _ = check postgresqlDbClient->execute(`TRUNCATE "Workspace" CASCADE`);

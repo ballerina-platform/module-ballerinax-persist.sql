@@ -56,56 +56,8 @@ public final class Utils {
 
     public static String getTypeName(Node processedTypeNode) {
         String typeName = processedTypeNode.kind().stringValue();
-        switch (processedTypeNode.kind()) {
-            case HANDLE_TYPE_DESC:
-            case ANY_TYPE_DESC:
-            case ANYDATA_TYPE_DESC:
-            case NEVER_TYPE_DESC:
-                // here typename is not empty
-                break;
-            case UNION_TYPE_DESC:
-                typeName = "union";
-                break;
-            case NIL_TYPE_DESC:
-                typeName = "()";
-                break;
-            case MAP_TYPE_DESC:
-                typeName = "map";
-                break;
-            case ERROR_TYPE_DESC:
-                typeName = "error";
-                break;
-            case STREAM_TYPE_DESC:
-                typeName = "stream";
-                break;
-            case FUNCTION_TYPE_DESC:
-                typeName = "function";
-                break;
-            case TUPLE_TYPE_DESC:
-                typeName = "tuple";
-                break;
-            case TABLE_TYPE_DESC:
-                typeName = "table";
-                break;
-            case DISTINCT_TYPE_DESC:
-                typeName = "distinct";
-                break;
-            case INTERSECTION_TYPE_DESC:
-                typeName = "intersection";
-                break;
-            case FUTURE_TYPE_DESC:
-                typeName = "future";
-                break;
-            case RECORD_TYPE_DESC:
-                typeName = "in-line record";
-                break;
-            case OBJECT_TYPE_DESC:
-                typeName = "object";
-                break;
-            default:
-                if (typeName.isBlank()) {
-                    typeName = processedTypeNode.kind().name();
-                }
+        if (typeName.isBlank()) {
+            typeName = processedTypeNode.kind().name();
         }
         return typeName;
     }

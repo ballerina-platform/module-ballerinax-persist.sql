@@ -41,6 +41,7 @@ import static io.ballerina.stdlib.persist.sql.compiler.DiagnosticsCodes.PERSIST_
 import static io.ballerina.stdlib.persist.sql.compiler.DiagnosticsCodes.PERSIST_SQL_430;
 import static io.ballerina.stdlib.persist.sql.compiler.DiagnosticsCodes.PERSIST_SQL_600;
 import static io.ballerina.stdlib.persist.sql.compiler.DiagnosticsCodes.PERSIST_SQL_601;
+import static io.ballerina.stdlib.persist.sql.compiler.DiagnosticsCodes.PERSIST_SQL_602;
 import static io.ballerina.stdlib.persist.sql.compiler.DiagnosticsCodes.PERSIST_SQL_604;
 import static io.ballerina.stdlib.persist.sql.compiler.DiagnosticsCodes.PERSIST_SQL_605;
 import static io.ballerina.stdlib.persist.sql.compiler.DiagnosticsCodes.PERSIST_SQL_606;
@@ -321,6 +322,28 @@ public class CompilerPluginTest {
                 },
                 new String[]{
                         "(37:4,38:20)"
+                }
+        );
+    }
+
+    @Test(enabled = true)
+    public void validateRelationAnnotations8() {
+        List<Diagnostic> diagnostics = getErrorDiagnostics("modelvalidator", "relation8.bal", 2);
+        testDiagnostic(
+                diagnostics,
+                new String[]{
+                        PERSIST_SQL_602.getCode(),
+                        PERSIST_SQL_617.getCode()
+                },
+                new String[]{
+                        "invalid use of the `Mapping` annotation. the `Mapping` annotation cannot be used for " +
+                                "relation fields.",
+                        "invalid use of the `Generated` annotation. the `Generated` annotation can only be used " +
+                                "for ''readonly'' fields."
+                },
+                new String[]{
+                        "(38:4,39:20)",
+                        "(25:4,26:16)"
                 }
         );
     }

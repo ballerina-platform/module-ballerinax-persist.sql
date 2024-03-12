@@ -15,39 +15,27 @@
 // under the License.
 
 import ballerina/persist as _;
-import ballerina/time;
 import ballerinax/persist.sql;
 
-public enum AppointmentStatus {
-    SCHEDULED,
-    STARTED,
-    ENDED
-}
-
-public enum PatientGender {
-    MALE,
-    FEMALE
-}
-
-public type Appointment record {|
-    readonly int id;
-    @sql:Char {length: 100}
-    @sql:VarChar {length: 20}
-    string reason;
-    time:Civil appointmentTime;
-    AppointmentStatus status;
-    int _patientId;
-    int doctorId;
+public type Person record {|
+    readonly int nic;
+    string name;
+    int age;
+    string city;
+    Car? car;
+    @sql:Generated
+    Car? driver;
 |};
 
-public type Patient record {|
-    readonly int id;
-    @sql:Char {length: 0}
-    string name;
-    @sql:Char {length: 10}
-    int age;
-    string address;
-    string phoneNumber;
-    string 'type;
-    PatientGender gender;
+public type Car record {|
+    readonly string plateNo;
+    string make;
+    string model;
+    int year;
+    string color;
+    int ownerNic;
+    @sql:Relation {refs: ["ownerNic"]}
+    Person owner;
+    @sql:Mapping {name: "driven_by"}
+    Person drivenBy;
 |};

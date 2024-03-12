@@ -5,7 +5,7 @@
 
 [ballerina]
 dependencies-toml-version = "2"
-distribution-version = "2201.9.0-20240208-103300-0823dc95"
+distribution-version = "2201.9.0-20240229-103900-a949e6d4"
 
 [[package]]
 org = "ballerina"
@@ -35,7 +35,7 @@ dependencies = [
 [[package]]
 org = "ballerina"
 name = "constraint"
-version = "1.5.0"
+version = "1.4.0"
 scope = "testOnly"
 dependencies = [
 	{org = "ballerina", name = "jballerina.java"}
@@ -44,7 +44,7 @@ dependencies = [
 [[package]]
 org = "ballerina"
 name = "crypto"
-version = "2.6.2"
+version = "2.5.0"
 scope = "testOnly"
 dependencies = [
 	{org = "ballerina", name = "jballerina.java"},
@@ -294,7 +294,7 @@ modules = [
 [[package]]
 org = "ballerina"
 name = "sql"
-version = "1.12.0"
+version = "1.11.1"
 dependencies = [
 	{org = "ballerina", name = "io"},
 	{org = "ballerina", name = "jballerina.java"},
@@ -322,6 +322,7 @@ version = "0.0.0"
 scope = "testOnly"
 dependencies = [
 	{org = "ballerina", name = "jballerina.java"},
+	{org = "ballerina", name = "lang.array"},
 	{org = "ballerina", name = "lang.error"}
 ]
 modules = [
@@ -400,7 +401,7 @@ modules = [
 [[package]]
 org = "ballerinax"
 name = "mssql.driver"
-version = "1.6.1"
+version = "1.6.0"
 scope = "testOnly"
 modules = [
 	{org = "ballerinax", packageName = "mssql.driver", moduleName = "mssql.driver"}
@@ -425,7 +426,7 @@ modules = [
 [[package]]
 org = "ballerinax"
 name = "mysql.driver"
-version = "1.6.1"
+version = "1.6.0"
 scope = "testOnly"
 modules = [
 	{org = "ballerinax", packageName = "mysql.driver", moduleName = "mysql.driver"}

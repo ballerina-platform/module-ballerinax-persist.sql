@@ -400,7 +400,7 @@ modules = [
 [[package]]
 org = "ballerinax"
 name = "mssql.driver"
-version = "1.6.0"
+version = "1.6.1"
 scope = "testOnly"
 modules = [
 	{org = "ballerinax", packageName = "mssql.driver", moduleName = "mssql.driver"}
@@ -425,7 +425,7 @@ modules = [
 [[package]]
 org = "ballerinax"
 name = "mysql.driver"
-version = "1.6.0"
+version = "1.6.1"
 scope = "testOnly"
 modules = [
 	{org = "ballerinax", packageName = "mysql.driver", moduleName = "mysql.driver"}

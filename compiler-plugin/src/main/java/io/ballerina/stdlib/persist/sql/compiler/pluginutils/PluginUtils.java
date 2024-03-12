@@ -16,7 +16,7 @@
  * under the License.
  */
 
-package io.ballerina.stdlib.persist.sql.compiler.utils;
+package io.ballerina.stdlib.persist.sql.compiler.pluginutils;
 
 import io.ballerina.compiler.syntax.tree.AnnotationNode;
 import io.ballerina.compiler.syntax.tree.ExpressionNode;
@@ -35,9 +35,9 @@ import java.util.stream.Stream;
 /**
  * Class containing util functions.
  */
-public final class Utils {
+public final class PluginUtils {
 
-    private Utils() {
+    private PluginUtils() {
     }
 
     public static boolean hasCompilationErrors(SyntaxNodeAnalysisContext context) {

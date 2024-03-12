@@ -98,11 +98,11 @@ import static io.ballerina.stdlib.persist.sql.compiler.DiagnosticsCodes.PERSIST_
 import static io.ballerina.stdlib.persist.sql.compiler.DiagnosticsCodes.PERSIST_SQL_619;
 import static io.ballerina.stdlib.persist.sql.compiler.DiagnosticsCodes.PERSIST_SQL_620;
 import static io.ballerina.stdlib.persist.sql.compiler.DiagnosticsCodes.PERSIST_SQL_621;
-import static io.ballerina.stdlib.persist.sql.compiler.utils.Utils.hasCompilationErrors;
-import static io.ballerina.stdlib.persist.sql.compiler.utils.Utils.isAnnotationPresent;
-import static io.ballerina.stdlib.persist.sql.compiler.utils.Utils.readStringArrayValueFromAnnotation;
-import static io.ballerina.stdlib.persist.sql.compiler.utils.Utils.readStringValueFromAnnotation;
-import static io.ballerina.stdlib.persist.sql.compiler.utils.Utils.stripEscapeCharacter;
+import static io.ballerina.stdlib.persist.sql.compiler.pluginutils.PluginUtils.hasCompilationErrors;
+import static io.ballerina.stdlib.persist.sql.compiler.pluginutils.PluginUtils.isAnnotationPresent;
+import static io.ballerina.stdlib.persist.sql.compiler.pluginutils.PluginUtils.readStringArrayValueFromAnnotation;
+import static io.ballerina.stdlib.persist.sql.compiler.pluginutils.PluginUtils.readStringValueFromAnnotation;
+import static io.ballerina.stdlib.persist.sql.compiler.pluginutils.PluginUtils.stripEscapeCharacter;
 
 /**
  * Persist model definition validator.

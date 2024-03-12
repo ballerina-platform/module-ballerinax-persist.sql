@@ -21,5 +21,5 @@ public type Person record {|
     string name;
     int age;
     string city;
-    any 'type;
+    any 'type
 |};

@@ -20,20 +20,27 @@ import ballerinax/persist.sql;
 public type Person record {|
     readonly int id;
     string name;
-    @sql:Index {names: ["address"]}
+    @sql:Index {name: ["address"]}
     Address address;
-    @sql:Index {names: ["favs"]}
+    @sql:Index {name: ["favs"]}
     string favColor;
-    @sql:Index {names: ["favs"]}
+    @sql:Index {name: ["favs"]}
     string favCar;
-    @sql:Index {names: ["email", "email"]}
+    @sql:Index {name: ["email", "email"]}
     string email;
-    @sql:Index {names: ["gender_idx", " "]}
+    @sql:Index {name: ["gender_idx", " "]}
     string gender;
-    @sql:Index {names: [""]}
+    @sql:Index {name: [""]}
     string nic;
     int numOfChildren;
-
+    @sql:Index {name: "dob_idx"}
+    string dob;
+    @sql:Index {name: ""}
+    string dob2;
+    @sql:Index {name: [ ]}
+    string dob3;
+    @sql:Index {name: []}
+    string dob4;
 |};
 
 public type Address record {|

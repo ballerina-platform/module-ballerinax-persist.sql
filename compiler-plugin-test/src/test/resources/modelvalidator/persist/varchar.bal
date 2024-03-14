@@ -31,7 +31,7 @@ public enum PatientGender {
 
 public type Appointment record {|
     readonly int id;
-    @sql:VarChar {length: 20}
+    @sql:Varchar {length: 20}
     @sql:Char {length: 100}
     string reason;
     time:Civil appointmentTime;
@@ -42,9 +42,9 @@ public type Appointment record {|
 
 public type Patient record {|
     readonly int id;
-    @sql:VarChar {length: 0}
+    @sql:Varchar {length: 0}
     string name;
-    @sql:VarChar {length: 10}
+    @sql:Varchar {length: 10}
     int age;
     string address;
     string phoneNumber;

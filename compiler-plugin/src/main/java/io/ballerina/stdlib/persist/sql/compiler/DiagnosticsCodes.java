@@ -48,20 +48,20 @@ public enum DiagnosticsCodes {
             "optional type in a 1-1 relationship. therefore, it cannot have foreign keys.", ERROR),
     PERSIST_SQL_428("PERSIST_428", "invalid use of the `Relation` annotation. the field ''{0}'' is not " +
             "found in the entity ''{1}''.", ERROR),
-    PERSIST_SQL_429("PERSIST_429", "invalid use of the `Relation` annotation. refs cannot contain " +
+    PERSIST_SQL_429("PERSIST_429", "invalid use of the `Relation` annotation. keys cannot contain " +
             "duplicates.", ERROR),
-    PERSIST_SQL_430("PERSIST_430", "invalid use of the `Relation` annotation. duplicated reference field.",
+    PERSIST_SQL_430("PERSIST_430", "invalid use of the `Relation` annotation. duplicated key field.",
                 ERROR),
-    PERSIST_SQL_600("PERSIST_600", "invalid use of the `Mapping` annotation. mapping name cannot be " +
+    PERSIST_SQL_600("PERSIST_600", "invalid use of the `Name` annotation. mapping value cannot be " +
             "empty.", ERROR),
-    PERSIST_SQL_601("PERSIST_601", "redundant use of the `Mapping` annotation. mapping name is same as " +
+    PERSIST_SQL_601("PERSIST_601", "redundant use of the `Name` annotation. mapping value is same as " +
             "model definition.", WARNING),
-    PERSIST_SQL_602("PERSIST_602", "invalid use of the `Mapping` annotation. the `Mapping` annotation " +
+    PERSIST_SQL_602("PERSIST_602", "invalid use of the `Name` annotation. the `Name` annotation " +
             "cannot be used for relation fields.", ERROR),
     PERSIST_SQL_604("PERSIST_604", "invalid use of the `''{0}''` annotation. the `''{0}''` annotation " +
             "can only be used for ''string'' type.", ERROR),
-    PERSIST_SQL_605("PERSIST_605", "invalid use of `VarChar` and `Char` annotations. only one of " +
-            "either `VarChar` or `Char` annotations can be used at a time.", ERROR),
+    PERSIST_SQL_605("PERSIST_605", "invalid use of `Varchar` and `Char` annotations. only one of " +
+            "either `Varchar` or `Char` annotations can be used at a time.", ERROR),
     PERSIST_SQL_606("PERSIST_606", "invalid use of the `Decimal` annotation. the `Decimal` annotation " +
             "can only be used for ''decimal'' type.", ERROR),
     PERSIST_SQL_607("PERSIST_607", "invalid use of the `''{0}''` annotation. length cannot be 0.", ERROR),
@@ -69,7 +69,7 @@ public enum DiagnosticsCodes {
             ERROR),
     PERSIST_SQL_609("PERSIST_609", "invalid use of the `Decimal` annotation. precision cannot be less " +
             "than scale.", ERROR),
-    PERSIST_SQL_610("PERSIST_610", "invalid use of the `Mapping` annotation. duplicate mapping name " +
+    PERSIST_SQL_610("PERSIST_610", "invalid use of the `Name` annotation. duplicate mapping value " +
             "found.", ERROR),
     PERSIST_SQL_611("PERSIST_611", "invalid use of the `Index` annotation. the `Index` annotation " +
             "cannot be used for relation fields.", ERROR),
@@ -88,10 +88,18 @@ public enum DiagnosticsCodes {
             "cannot be auto-generated.", ERROR),
     PERSIST_SQL_619("PERSIST_619", "invalid use of the `Generated` annotation. a generated field can " +
             "only be an ''int'' type.", ERROR),
-    PERSIST_SQL_620("PERSIST_620", "invalid use of the `Mapping` annotation. a mapping name should not " +
-            "conflict with an Entity name", ERROR),
-    PERSIST_SQL_621("PERSIST_621", "invalid use of the `Mapping` annotation. a mapping name should not " +
-            "conflict with a field name", ERROR),
+    PERSIST_SQL_620("PERSIST_620", "invalid use of the `Name` annotation. a mapping value should not " +
+            "conflict with an Entity name.", ERROR),
+    PERSIST_SQL_621("PERSIST_621", "invalid use of the `Name` annotation. a mapping value should not " +
+            "conflict with a field name.", ERROR),
+    PERSIST_SQL_622("PERSIST_622", "invalid use of the `Index` annotation. index name cannot be empty.",
+            ERROR),
+    PERSIST_SQL_623("PERSIST_623", "invalid use of the `UniqueIndex` annotation. unique index name " +
+            "cannot be empty.", ERROR),
+    PERSIST_SQL_624("PERSIST_624", "invalid use of the `Index` annotation. name array should have at " +
+            "least one index name.", ERROR),
+    PERSIST_SQL_625("PERSIST_625", "invalid use of the `UniqueIndex` annotation. name array should " +
+            "have at least one index name.", ERROR),
     ;
             
     private final String code;

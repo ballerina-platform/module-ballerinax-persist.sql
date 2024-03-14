@@ -16,19 +16,19 @@
 
 # Maps an entity/field name to a database table/column name.
 #
-# + name - name of the table/column in the database
-public type MapConfig record {|
-    string name;
+# + value - name of the table/column in the database
+public type NameConfig record {|
+    string value;
 |};
 
 # The Annotation used to specify the mapping of an entity/field to a database table/column.
-public annotation MapConfig Mapping on type, record field;
+public annotation NameConfig Name on type, record field;
 
 # Marks the entity field as an index field.
 #
-# + names - array of index names associated with the database column
+# + name - specify a single index name or an array of index names
 public type IndexConfig record {|
-    string[]? names = ();
+    string|string[]? name = ();
 |};
 
 # The Annotation used to specify the index name associated with a database column.
@@ -40,7 +40,7 @@ public annotation IndexConfig UniqueIndex on record field;
 # Defines a string field as a VARCHAR column and defines its max length.
 #
 # + length - max length of the VARCHAR column
-public type VarCharConfig record {|
+public type VarcharConfig record {|
     int length = 191;
 |};
 
@@ -52,7 +52,7 @@ public type CharConfig record {|
 |};
 
 # The Annotation used to specify the max length of a VARCHAR column.
-public annotation VarCharConfig VarChar on record field;
+public annotation VarcharConfig Varchar on record field;
 
 # The Annotation used to specify the length of a CHAR column.
 public annotation CharConfig Char on record field;
@@ -69,9 +69,9 @@ public annotation DecimalConfig Decimal on record field;
 
 # Specifies your own foreign key column in the entity record.
 #
-# + refs - array of key fields in the entity
+# + keys - array of key fields in the entity
 public type RelationConfig record {|
-    string[] refs;
+    string[] keys;
 |};
 
 # The Annotation used to specify the foreign key column in the entity record.

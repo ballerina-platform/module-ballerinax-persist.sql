@@ -60,6 +60,10 @@ import static io.ballerina.stdlib.persist.sql.compiler.DiagnosticsCodes.PERSIST_
 import static io.ballerina.stdlib.persist.sql.compiler.DiagnosticsCodes.PERSIST_SQL_619;
 import static io.ballerina.stdlib.persist.sql.compiler.DiagnosticsCodes.PERSIST_SQL_620;
 import static io.ballerina.stdlib.persist.sql.compiler.DiagnosticsCodes.PERSIST_SQL_621;
+import static io.ballerina.stdlib.persist.sql.compiler.DiagnosticsCodes.PERSIST_SQL_622;
+import static io.ballerina.stdlib.persist.sql.compiler.DiagnosticsCodes.PERSIST_SQL_623;
+import static io.ballerina.stdlib.persist.sql.compiler.DiagnosticsCodes.PERSIST_SQL_624;
+import static io.ballerina.stdlib.persist.sql.compiler.DiagnosticsCodes.PERSIST_SQL_625;
 import static io.ballerina.stdlib.persist.sql.compiler.TestUtils.getEnvironmentBuilder;
 
 /**
@@ -92,7 +96,7 @@ public class CompilerPluginTest {
                         PERSIST_SQL_604.getCode()
                 },
                 new String[]{
-                        "invalid use of `VarChar` and `Char` annotations. only one of either `VarChar` or `Char` " +
+                        "invalid use of `Varchar` and `Char` annotations. only one of either `Varchar` or `Char` " +
                                 "annotations can be used at a time.",
                         "invalid use of the `'Char'` annotation. length cannot be 0.",
                         "invalid use of the `'Char'` annotation. the `'Char'` annotation can only be used for " +
@@ -107,7 +111,7 @@ public class CompilerPluginTest {
     }
 
     @Test(enabled = true)
-    public void validateVarCharAnnotations() {
+    public void validateVarcharAnnotations() {
         List<Diagnostic> diagnostics = getErrorDiagnostics("modelvalidator", "varchar.bal", 3);
         testDiagnostic(
                 diagnostics,
@@ -117,10 +121,10 @@ public class CompilerPluginTest {
                         PERSIST_SQL_604.getCode()
                 },
                 new String[]{
-                        "invalid use of `VarChar` and `Char` annotations. only one of either `VarChar` or `Char` " +
+                        "invalid use of `Varchar` and `Char` annotations. only one of either `Varchar` or `Char` " +
                                 "annotations can be used at a time.",
-                        "invalid use of the `'VarChar'` annotation. length cannot be 0.",
-                        "invalid use of the `'VarChar'` annotation. the `'VarChar'` annotation can only be used for " +
+                        "invalid use of the `'Varchar'` annotation. length cannot be 0.",
+                        "invalid use of the `'Varchar'` annotation. the `'Varchar'` annotation can only be used for " +
                                 "'string' type."
                 },
                 new String[]{
@@ -167,11 +171,11 @@ public class CompilerPluginTest {
                         PERSIST_SQL_620.getCode()
                 },
                 new String[]{
-                        "invalid use of the `Mapping` annotation. mapping name cannot be empty.",
-                        "redundant use of the `Mapping` annotation. mapping name is same as model definition.",
-                        "invalid use of the `Mapping` annotation. duplicate mapping name found.",
-                        "invalid use of the `Mapping` annotation. a mapping name should not conflict with an " +
-                                "Entity name"
+                        "invalid use of the `Name` annotation. mapping value cannot be empty.",
+                        "redundant use of the `Name` annotation. mapping value is same as model definition.",
+                        "invalid use of the `Name` annotation. duplicate mapping value found.",
+                        "invalid use of the `Name` annotation. a mapping value should not conflict with an " +
+                                "Entity name."
                 },
                 new String[]{
                         "(32:12,32:23)",
@@ -194,10 +198,10 @@ public class CompilerPluginTest {
                         PERSIST_SQL_621.getCode()
                 },
                 new String[]{
-                        "invalid use of the `Mapping` annotation. mapping name cannot be empty.",
-                        "invalid use of the `Mapping` annotation. duplicate mapping name found.",
-                        "redundant use of the `Mapping` annotation. mapping name is same as model definition.",
-                        "invalid use of the `Mapping` annotation. a mapping name should not conflict with a field name"
+                        "invalid use of the `Name` annotation. mapping value cannot be empty.",
+                        "invalid use of the `Name` annotation. duplicate mapping value found.",
+                        "redundant use of the `Name` annotation. mapping value is same as model definition.",
+                        "invalid use of the `Name` annotation. a mapping value should not conflict with a field name."
                 },
                 new String[]{
                         "(36:4,37:29)",
@@ -307,7 +311,7 @@ public class CompilerPluginTest {
                         PERSIST_SQL_429.getCode()
                 },
                 new String[]{
-                        "invalid use of the `Relation` annotation. refs cannot contain duplicates."
+                        "invalid use of the `Relation` annotation. keys cannot contain duplicates."
                 },
                 new String[]{
                         "(35:4,36:17)"
@@ -324,7 +328,7 @@ public class CompilerPluginTest {
                         PERSIST_SQL_430.getCode()
                 },
                 new String[]{
-                        "invalid use of the `Relation` annotation. duplicated reference field."
+                        "invalid use of the `Relation` annotation. duplicated key field."
                 },
                 new String[]{
                         "(37:4,38:20)"
@@ -342,7 +346,7 @@ public class CompilerPluginTest {
                         PERSIST_SQL_617.getCode()
                 },
                 new String[]{
-                        "invalid use of the `Mapping` annotation. the `Mapping` annotation cannot be used for " +
+                        "invalid use of the `Name` annotation. the `Name` annotation cannot be used for " +
                                 "relation fields.",
                         "invalid use of the `Generated` annotation. the `Generated` annotation can only be used " +
                                 "for ''readonly'' fields."
@@ -356,7 +360,7 @@ public class CompilerPluginTest {
 
     @Test(enabled = true)
     public void validateIndexAnnotation() {
-        List<Diagnostic> diagnostics = getErrorDiagnostics("modelvalidator", "index.bal", 4);
+        List<Diagnostic> diagnostics = getErrorDiagnostics("modelvalidator", "index.bal", 7);
         testDiagnostic(
                 diagnostics,
                 new String[]{
@@ -364,26 +368,35 @@ public class CompilerPluginTest {
                         PERSIST_SQL_613.getCode(),
                         PERSIST_SQL_615.getCode(),
                         PERSIST_SQL_615.getCode(),
+                        PERSIST_SQL_622.getCode(),
+                        PERSIST_SQL_624.getCode(),
+                        PERSIST_SQL_624.getCode()
                 },
                 new String[]{
                         "invalid use of the `Index` annotation. the `Index` annotation cannot be used for relation " +
                                 "fields.",
                         "invalid use of the `Index` annotation. duplicate index names.",
                         "invalid use of the `Index` annotation. there cannot be empty index names.",
-                        "invalid use of the `Index` annotation. there cannot be empty index names."
+                        "invalid use of the `Index` annotation. there cannot be empty index names.",
+                        "invalid use of the `Index` annotation. index name cannot be empty.",
+                        "invalid use of the `Index` annotation. name array should have at least one index name.",
+                        "invalid use of the `Index` annotation. name array should have at least one index name."
                 },
                 new String[]{
                         "(22:4,23:20)",
                         "(28:4,29:17)",
                         "(30:4,31:18)",
-                        "(32:4,33:15)"
+                        "(32:4,33:15)",
+                        "(37:4,38:16)",
+                        "(39:4,40:16)",
+                        "(41:4,42:16)"
                 }
         );
     }
 
     @Test(enabled = true)
     public void validateUniqueIndexAnnotation() {
-        List<Diagnostic> diagnostics = getErrorDiagnostics("modelvalidator", "unique_index.bal", 4);
+        List<Diagnostic> diagnostics = getErrorDiagnostics("modelvalidator", "unique_index.bal", 7);
         testDiagnostic(
                 diagnostics,
                 new String[]{
@@ -391,19 +404,28 @@ public class CompilerPluginTest {
                         PERSIST_SQL_614.getCode(),
                         PERSIST_SQL_616.getCode(),
                         PERSIST_SQL_616.getCode(),
+                        PERSIST_SQL_623.getCode(),
+                        PERSIST_SQL_625.getCode(),
+                        PERSIST_SQL_625.getCode()
                 },
                 new String[]{
                         "invalid use of the `UniqueIndex` annotation. the `UniqueIndex` annotation cannot be used " +
                                 "for relation fields.",
                         "invalid use of the `UniqueIndex` annotation. duplicate index names.",
                         "invalid use of the `UniqueIndex` annotation. there cannot be empty index names.",
-                        "invalid use of the `UniqueIndex` annotation. there cannot be empty index names."
+                        "invalid use of the `UniqueIndex` annotation. there cannot be empty index names.",
+                        "invalid use of the `UniqueIndex` annotation. unique index name cannot be empty.",
+                        "invalid use of the `UniqueIndex` annotation. name array should have at least one index name.",
+                        "invalid use of the `UniqueIndex` annotation. name array should have at least one index name."
                 },
                 new String[]{
                         "(22:4,23:20)",
                         "(28:4,29:17)",
                         "(30:4,31:18)",
-                        "(32:4,33:15)"
+                        "(32:4,33:15)",
+                        "(37:4,38:16)",
+                        "(39:4,40:16)",
+                        "(41:4,42:16)"
                 }
         );
     }

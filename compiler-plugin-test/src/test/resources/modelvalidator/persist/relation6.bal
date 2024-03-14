@@ -33,6 +33,6 @@ public type Car record {|
     int year;
     string color;
     int ownerNic;
-    @sql:Relation {refs: ["ownerNic", "ownerNic"]}
+    @sql:Relation {keys: ["ownerNic", "ownerNic"]}
     Person owner;
 |};

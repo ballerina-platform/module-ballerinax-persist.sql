@@ -31,10 +31,10 @@ public enum PatientGender {
 
 public type Appointment record {|
     readonly int id;
-    @sql:Mapping {name: "REASON"}
+    @sql:Name {value: "REASON"}
     string reason;
     time:Civil appointmentTime;
-    @sql:Mapping {name: ""}
+    @sql:Name {value: ""}
     AppointmentStatus status;
 |};
 
@@ -42,11 +42,11 @@ public type Patient record {|
     readonly int id;
     string name;
     int age;
-    @sql:Mapping {name: "Address"}
+    @sql:Name {value: "Address"}
     string address;
-    @sql:Mapping {name: "phoneNumber1"}
+    @sql:Name {value: "phoneNumber1"}
     string phoneNumber;
-    @sql:Mapping {name: "phoneNumber1"}
+    @sql:Name {value: "phoneNumber1"}
     string phoneNumber2;
     PatientGender gender;
 |};
@@ -55,9 +55,9 @@ public type Doctor record {|
     readonly int id;
     string name;
     string specialty;
-    @sql:Mapping {name: "Address"}
+    @sql:Name {value: "Address"}
     string address;
-    @sql:Mapping {name: "phoneNumber"}
+    @sql:Name {value: "phoneNumber"}
     string phoneNumber;
 |};
 
@@ -65,9 +65,9 @@ public type Nurse record {|
     readonly int id;
     string name;
     string specialty;
-    @sql:Mapping {name: "Address"}
+    @sql:Name {value: "Address"}
     string address;
     string phoneNumber;
-    @sql:Mapping {name: "phoneNumber"}
+    @sql:Name {value: "phoneNumber"}
     string number;
 |};

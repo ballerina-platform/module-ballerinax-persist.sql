@@ -23,7 +23,7 @@ public type Person record {|
     int age;
     string city;
     string carPlateNo;
-    @sql:Relation {refs: ["carPlateNo"]}
+    @sql:Relation {keys: ["carPlateNo"]}
     Car[] cars;
 |};
 

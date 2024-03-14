@@ -32,7 +32,7 @@ public enum PatientGender {
 public type Appointment record {|
     readonly int id;
     @sql:Char {length: 100}
-    @sql:VarChar {length: 20}
+    @sql:Varchar {length: 20}
     string reason;
     time:Civil appointmentTime;
     AppointmentStatus status;

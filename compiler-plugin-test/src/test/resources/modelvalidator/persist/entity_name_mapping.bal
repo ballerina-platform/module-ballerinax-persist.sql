@@ -29,7 +29,7 @@ public enum PatientGender {
     FEMALE
 }
 
-@sql:Mapping {name: ""}
+@sql:Name {value: ""}
 public type Appointment record {|
     readonly int id;
     string reason;
@@ -39,7 +39,7 @@ public type Appointment record {|
     int doctorId;
 |};
 
-@sql:Mapping {name: "Patient"}
+@sql:Name {value: "Patient"}
 public type Patient record {|
     readonly int id;
     string name;
@@ -49,7 +49,7 @@ public type Patient record {|
     PatientGender gender;
 |};
 
-@sql:Mapping {name: "staff"}
+@sql:Name {value: "staff"}
 public type Doctor record {|
     readonly int id;
     string name;
@@ -57,21 +57,21 @@ public type Doctor record {|
     string phoneNumber;
 |};
 
-@sql:Mapping {name: "staff"}
+@sql:Name {value: "staff"}
 public type Nurse record {|
     readonly int id;
     string name;
     string phoneNumber;
 |};
 
-@sql:Mapping {name: "receptioninst"}
+@sql:Name {value: "receptioninst"}
 public type Receptionist record {|
     readonly int id;
     string name;
     string phoneNumber;
 |};
 
-@sql:Mapping {name: "Receptionist"}
+@sql:Name {value: "Receptionist"}
 public type Receptionist1 record {|
     readonly int id;
     string name;

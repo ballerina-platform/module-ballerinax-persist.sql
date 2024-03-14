@@ -87,6 +87,57 @@ public final class PluginUtils {
         }
         return false;
     }
+
+    public static boolean isAnnotationFieldStringType
+            (List<AnnotationNode> annotationNodes, String annotation, String field) {
+        for (AnnotationNode annotationNode : annotationNodes) {
+            String annotationName = annotationNode.annotReference().toSourceCode().trim();
+            if (annotationName.equals(annotation)) {
+                Optional<MappingConstructorExpressionNode> annotationFieldNode = annotationNode.annotValue();
+                if (annotationFieldNode.isPresent()) {
+                    for (MappingFieldNode mappingFieldNode : annotationFieldNode.get().fields()) {
+                        SpecificFieldNode specificFieldNode = (SpecificFieldNode) mappingFieldNode;
+                        String fieldName = specificFieldNode.fieldName().toSourceCode().trim();
+                        if (!fieldName.equals(field)) {
+                            return false;
+                        }
+                        Optional<ExpressionNode> valueExpr = specificFieldNode.valueExpr();
+                        if (valueExpr.isPresent()) {
+                            return valueExpr.get().toSourceCode().trim().startsWith("\"") &&
+                                    valueExpr.get().toSourceCode().trim().endsWith("\"");
+                        }
+                    }
+                }
+            }
+        }
+        return false;
+    }
+
+    public static boolean isAnnotationFieldArrayType
+            (List<AnnotationNode> annotationNodes, String annotation, String field) {
+        for (AnnotationNode annotationNode : annotationNodes) {
+            String annotationName = annotationNode.annotReference().toSourceCode().trim();
+            if (annotationName.equals(annotation)) {
+                Optional<MappingConstructorExpressionNode> annotationFieldNode = annotationNode.annotValue();
+                if (annotationFieldNode.isPresent()) {
+                    for (MappingFieldNode mappingFieldNode : annotationFieldNode.get().fields()) {
+                        SpecificFieldNode specificFieldNode = (SpecificFieldNode) mappingFieldNode;
+                        String fieldName = specificFieldNode.fieldName().toSourceCode().trim();
+                        if (!fieldName.equals(field)) {
+                            return false;
+                        }
+                        Optional<ExpressionNode> valueExpr = specificFieldNode.valueExpr();
+                        if (valueExpr.isPresent()) {
+                            return valueExpr.get().toSourceCode().trim().startsWith("[") &&
+                                    valueExpr.get().toSourceCode().trim().endsWith("]");
+                        }
+                    }
+                }
+            }
+        }
+        return false;
+    }
+
     public static List<String> readStringArrayValueFromAnnotation(List<AnnotationNode> annotationNodes,
                                                                   String annotation, String field) {
         for (AnnotationNode annotationNode : annotationNodes) {
@@ -102,9 +153,14 @@ public final class PluginUtils {
                         }
                         Optional<ExpressionNode> valueExpr = specificFieldNode.valueExpr();
                         if (valueExpr.isPresent()) {
-                            return Stream.of(valueExpr.get().toSourceCode().trim().replace("\"", "")
+                            String strings = valueExpr.get().toSourceCode().trim()
                                     .replace("[", "")
-                                    .replace("]", "").split(",")).map(String::trim).toList();
+                                    .replace("]", "");
+                            if (strings.trim().isEmpty()) {
+                                return Collections.emptyList();
+                            }
+                            return Stream.of(strings.replace("\"", "").split(","))
+                                    .map(String::trim).toList();
                         }
                     }
                 }

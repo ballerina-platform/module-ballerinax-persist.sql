@@ -162,3 +162,24 @@ public type Car7 record {|
     @sql:Relation {keys: ["ownerNic"]}
     Person7 owner;
 |};
+
+public type Person8 record {|
+    @sql:Varchar {length: 10}
+    readonly string nic;
+    string name;
+    int age;
+    string city;
+    Car8? car;
+|};
+
+public type Car8 record {|
+    readonly string plateNo;
+    string make;
+    string model;
+    int year;
+    string color;
+    @sql:Varchar {length:5}
+    string ownerNic;
+    @sql:Relation {keys: ["ownerNic"]}
+    Person8 owner;
+|};

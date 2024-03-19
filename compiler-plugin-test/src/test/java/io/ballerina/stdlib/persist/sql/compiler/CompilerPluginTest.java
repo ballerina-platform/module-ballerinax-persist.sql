@@ -360,7 +360,7 @@ public class CompilerPluginTest {
 
     @Test(enabled = true)
     public void validateRelationAnnotations9() {
-        List<Diagnostic> diagnostics = getErrorDiagnostics("modelvalidator", "relation9.bal", 5);
+        List<Diagnostic> diagnostics = getErrorDiagnostics("modelvalidator", "relation9.bal", 6);
         testDiagnostic(
                 diagnostics,
                 new String[]{
@@ -368,13 +368,16 @@ public class CompilerPluginTest {
                         PERSIST_SQL_424.getCode(),
                         PERSIST_SQL_424.getCode(),
                         PERSIST_SQL_424.getCode(),
-                        PERSIST_SQL_424.getCode()
+                        PERSIST_SQL_424.getCode(),
+                        PERSIST_SQL_424.getCode(),
                 },
                 new String[]{
                         "invalid use of the `Relation` annotation. mismatched key types for the related entity " +
                                 "'Person3'.",
                         "invalid use of the `Relation` annotation. mismatched key types for the related entity " +
                                 "'Person2'.",
+                        "invalid use of the `Relation` annotation. mismatched key types for the related entity " +
+                                "'Person8'.",
                         "invalid use of the `Relation` annotation. mismatched key types for the related entity " +
                                 "'Person7'.",
                         "invalid use of the `Relation` annotation. mismatched key types for the related entity " +
@@ -385,6 +388,7 @@ public class CompilerPluginTest {
                 new String[]{
                         "(77:4,78:18)",
                         "(56:4,57:18)",
+                        "(182:4,183:18)",
                         "(161:4,162:18)",
                         "(119:4,120:18)",
                         "(98:4,99:18)"

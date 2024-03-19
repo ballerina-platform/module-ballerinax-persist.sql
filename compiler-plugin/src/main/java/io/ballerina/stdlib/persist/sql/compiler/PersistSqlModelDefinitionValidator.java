@@ -550,12 +550,12 @@ public class PersistSqlModelDefinitionValidator implements AnalysisTask<SyntaxNo
                     return;
                 }
                 if (ownerCharPresent) {
-                    if (validateTypeLengthParam(relationField, ownerEntity, referredEntity, ownerField,
+                    if (!validateTypeLengthParam(relationField, ownerEntity, referredEntity, ownerField,
                             referredIdFields, finalI, SQL_CHAR_MAPPING_ANNOTATION_NAME)) {
                         return;
                     }
                 } else if (ownerVarcharPresent) {
-                    if (validateTypeLengthParam(relationField, ownerEntity, referredEntity, ownerField,
+                    if (!validateTypeLengthParam(relationField, ownerEntity, referredEntity, ownerField,
                             referredIdFields, finalI, SQL_VARCHAR_MAPPING_ANNOTATION_NAME)) {
                         return;
                     }
@@ -595,9 +595,9 @@ public class PersistSqlModelDefinitionValidator implements AnalysisTask<SyntaxNo
             ownerEntity.reportDiagnostic(PERSIST_SQL_424.getCode(),
                     MessageFormat.format(PERSIST_SQL_424.getMessage(), referredEntity.getEntityName()),
                     PERSIST_SQL_424.getSeverity(), relationField.getLocation());
-            return true;
+            return false;
         }
-        return false;
+        return true;
     }
 
     private boolean isPersistModelDefinitionDocument(SyntaxNodeAnalysisContext ctx) {

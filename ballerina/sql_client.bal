@@ -480,7 +480,7 @@ public isolated client class SQLClient {
     private isolated function getInsertableFields() returns string[] {
         return from string key in self.fieldMetadata.keys()
             let FieldMetadata metadataField = self.fieldMetadata.get(key)
-            where metadataField is SimpleFieldMetadata && metadataField.dbGenerated != true
+            where metadataField is SimpleFieldMetadata && !metadataField.dbGenerated
             select key;
     }
 

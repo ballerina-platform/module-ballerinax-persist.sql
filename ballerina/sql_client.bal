@@ -294,7 +294,8 @@ public isolated client class SQLClient {
                 columnNames.push(self.escape(self.entityName) + "." + self.escape(fieldMetadata.columnName) + " AS " + self.escape(key));
             } else {
                 // column is in another entity's table
-                columnNames.push(self.escape(fieldName) + "." + self.escape(fieldMetadata.relation.refField) + " AS " + self.escape(fieldName + "." + fieldMetadata.relation.refField));
+                columnNames.push(self.escape(fieldName) + "." + self.escape(fieldMetadata.relation.refColumn ?: fieldMetadata.relation.refField) + " AS " + self.escape(fieldName + "." + fieldMetadata.relation.refField));
+                
             }
 
         }
@@ -313,7 +314,7 @@ public isolated client class SQLClient {
                 continue;
             }
 
-            string columnName = fieldMetadata.relation.refField;
+            string columnName = fieldMetadata.relation.refColumn ?: fieldMetadata.relation.refField;
             columnNames.push(self.escape(columnName));
         }
         return arrayToParameterizedQuery(columnNames);
@@ -478,7 +479,8 @@ public isolated client class SQLClient {
 
     private isolated function getInsertableFields() returns string[] {
         return from string key in self.fieldMetadata.keys()
-            where self.fieldMetadata.get(key) is SimpleFieldMetadata
+            let FieldMetadata metadataField = self.fieldMetadata.get(key)
+            where metadataField is SimpleFieldMetadata && !metadataField.dbGenerated
             select key;
     }
 

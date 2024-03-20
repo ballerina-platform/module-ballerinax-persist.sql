@@ -40,6 +40,14 @@ public final class PluginUtils {
     private PluginUtils() {
     }
 
+    public record AnnotationUtilRecord(List<AnnotationNode> annotationNodes, String annotation, String field) {
+        public AnnotationUtilRecord (List<AnnotationNode> annotationNodes, String annotation, String field) {
+            this.annotationNodes = Collections.unmodifiableList(annotationNodes);
+            this.annotation = annotation;
+            this.field = field;
+        }
+    }
+
     public static boolean hasCompilationErrors(SyntaxNodeAnalysisContext context) {
         for (Diagnostic diagnostic : context.compilation().diagnosticResult().diagnostics()) {
             if (diagnostic.diagnosticInfo().severity() == DiagnosticSeverity.ERROR) {
@@ -53,18 +61,16 @@ public final class PluginUtils {
         return name.startsWith("'") ? name.substring(1) : name;
     }
 
-    public static String readStringValueFromAnnotation
-            (List<AnnotationNode> annotationNodes, String annotation,
-             String field) {
-        for (AnnotationNode annotationNode : annotationNodes) {
+    public static String readStringValueFromAnnotation(AnnotationUtilRecord annotationMethodRecord) {
+        for (AnnotationNode annotationNode : annotationMethodRecord.annotationNodes) {
             String annotationName = annotationNode.annotReference().toSourceCode().trim();
-            if (annotationName.equals(annotation)) {
+            if (annotationName.equals(annotationMethodRecord.annotation)) {
                 Optional<MappingConstructorExpressionNode> annotationFieldNode = annotationNode.annotValue();
                 if (annotationFieldNode.isPresent()) {
                     for (MappingFieldNode mappingFieldNode : annotationFieldNode.get().fields()) {
                         SpecificFieldNode specificFieldNode = (SpecificFieldNode) mappingFieldNode;
                         String fieldName = specificFieldNode.fieldName().toSourceCode().trim();
-                        if (!fieldName.equals(field)) {
+                        if (!fieldName.equals(annotationMethodRecord.field)) {
                             return "";
                         }
                         Optional<ExpressionNode> valueExpr = specificFieldNode.valueExpr();
@@ -88,17 +94,16 @@ public final class PluginUtils {
         return false;
     }
 
-    public static boolean isAnnotationFieldStringType
-            (List<AnnotationNode> annotationNodes, String annotation, String field) {
-        for (AnnotationNode annotationNode : annotationNodes) {
+    public static boolean isAnnotationFieldStringType(AnnotationUtilRecord annotationMethodRecord) {
+        for (AnnotationNode annotationNode : annotationMethodRecord.annotationNodes) {
             String annotationName = annotationNode.annotReference().toSourceCode().trim();
-            if (annotationName.equals(annotation)) {
+            if (annotationName.equals(annotationMethodRecord.annotation)) {
                 Optional<MappingConstructorExpressionNode> annotationFieldNode = annotationNode.annotValue();
                 if (annotationFieldNode.isPresent()) {
                     for (MappingFieldNode mappingFieldNode : annotationFieldNode.get().fields()) {
                         SpecificFieldNode specificFieldNode = (SpecificFieldNode) mappingFieldNode;
                         String fieldName = specificFieldNode.fieldName().toSourceCode().trim();
-                        if (!fieldName.equals(field)) {
+                        if (!fieldName.equals(annotationMethodRecord.field)) {
                             return false;
                         }
                         Optional<ExpressionNode> valueExpr = specificFieldNode.valueExpr();
@@ -113,17 +118,16 @@ public final class PluginUtils {
         return false;
     }
 
-    public static boolean isAnnotationFieldArrayType
-            (List<AnnotationNode> annotationNodes, String annotation, String field) {
-        for (AnnotationNode annotationNode : annotationNodes) {
+    public static boolean isAnnotationFieldArrayType(AnnotationUtilRecord annotationMethodRecord) {
+        for (AnnotationNode annotationNode : annotationMethodRecord.annotationNodes) {
             String annotationName = annotationNode.annotReference().toSourceCode().trim();
-            if (annotationName.equals(annotation)) {
+            if (annotationName.equals(annotationMethodRecord.annotation)) {
                 Optional<MappingConstructorExpressionNode> annotationFieldNode = annotationNode.annotValue();
                 if (annotationFieldNode.isPresent()) {
                     for (MappingFieldNode mappingFieldNode : annotationFieldNode.get().fields()) {
                         SpecificFieldNode specificFieldNode = (SpecificFieldNode) mappingFieldNode;
                         String fieldName = specificFieldNode.fieldName().toSourceCode().trim();
-                        if (!fieldName.equals(field)) {
+                        if (!fieldName.equals(annotationMethodRecord.field)) {
                             return false;
                         }
                         Optional<ExpressionNode> valueExpr = specificFieldNode.valueExpr();
@@ -138,17 +142,16 @@ public final class PluginUtils {
         return false;
     }
 
-    public static List<String> readStringArrayValueFromAnnotation(List<AnnotationNode> annotationNodes,
-                                                                  String annotation, String field) {
-        for (AnnotationNode annotationNode : annotationNodes) {
+    public static List<String> readStringArrayValueFromAnnotation(AnnotationUtilRecord annotationUtilRecord) {
+        for (AnnotationNode annotationNode : annotationUtilRecord.annotationNodes) {
             String annotationName = annotationNode.annotReference().toSourceCode().trim();
-            if (annotationName.equals(annotation)) {
+            if (annotationName.equals(annotationUtilRecord.annotation)) {
                 Optional<MappingConstructorExpressionNode> annotationFieldNode = annotationNode.annotValue();
                 if (annotationFieldNode.isPresent()) {
                     for (MappingFieldNode mappingFieldNode : annotationFieldNode.get().fields()) {
                         SpecificFieldNode specificFieldNode = (SpecificFieldNode) mappingFieldNode;
                         String fieldName = specificFieldNode.fieldName().toSourceCode().trim();
-                        if (!fieldName.equals(field)) {
+                        if (!fieldName.equals(annotationUtilRecord.field)) {
                             return Collections.emptyList();
                         }
                         Optional<ExpressionNode> valueExpr = specificFieldNode.valueExpr();

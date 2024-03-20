@@ -41,6 +41,7 @@ import io.ballerina.stdlib.persist.compiler.model.Entity;
 import io.ballerina.stdlib.persist.compiler.model.IdentityField;
 import io.ballerina.stdlib.persist.compiler.model.RelationField;
 import io.ballerina.stdlib.persist.compiler.model.SimpleTypeField;
+import io.ballerina.stdlib.persist.sql.compiler.pluginutils.PluginUtils;
 
 import java.io.File;
 import java.nio.file.Path;
@@ -170,8 +171,8 @@ public class PersistSqlModelDefinitionValidator implements AnalysisTask<SyntaxNo
                             .forEach(field -> validateRelationField(entity, field, refs)));
             //table mapping annotations
             if (isAnnotationPresent(entity.getAnnotations(), SQL_DB_NAME_ANNOTATION_NAME)) {
-                String tableName = readStringValueFromAnnotation
-                        (entity.getAnnotations(), SQL_DB_NAME_ANNOTATION_NAME, ANNOTATION_VALUE_FIELD);
+                String tableName = readStringValueFromAnnotation(new PluginUtils.AnnotationUtilRecord(
+                        entity.getAnnotations(), SQL_DB_NAME_ANNOTATION_NAME, ANNOTATION_VALUE_FIELD));
                 if (tableName.isEmpty()) {
                     entity.reportDiagnostic(PERSIST_SQL_600.getCode(), PERSIST_SQL_600.getMessage(),
                             PERSIST_SQL_600.getSeverity(), entity.getEntityNameLocation());
@@ -194,8 +195,8 @@ public class PersistSqlModelDefinitionValidator implements AnalysisTask<SyntaxNo
             List<String> columnMappings = new ArrayList<>();
             for (SimpleTypeField field : entity.getNonRelationFields()) {
                 if (isAnnotationPresent(field.getAnnotations(), SQL_DB_NAME_ANNOTATION_NAME)) {
-                    String mappingName = readStringValueFromAnnotation(field.getAnnotations(),
-                            SQL_DB_NAME_ANNOTATION_NAME, ANNOTATION_VALUE_FIELD);
+                    String mappingName = readStringValueFromAnnotation(new PluginUtils.AnnotationUtilRecord(
+                            field.getAnnotations(), SQL_DB_NAME_ANNOTATION_NAME, ANNOTATION_VALUE_FIELD));
                     if (mappingName.isEmpty()) {
                         entity.reportDiagnostic(PERSIST_SQL_600.getCode(), PERSIST_SQL_600.getMessage(),
                                 PERSIST_SQL_600.getSeverity(), field.getNodeLocation());
@@ -227,16 +228,16 @@ public class PersistSqlModelDefinitionValidator implements AnalysisTask<SyntaxNo
                         entity.reportDiagnostic(PERSIST_SQL_605.getCode(), PERSIST_SQL_605.getMessage(),
                                 PERSIST_SQL_605.getSeverity(), field.getNodeLocation());
                     } else if (isCharPresent) {
-                        String length = readStringValueFromAnnotation(field.getAnnotations(),
-                                SQL_CHAR_MAPPING_ANNOTATION_NAME, ANNOTATION_LENGTH_FIELD);
+                        String length = readStringValueFromAnnotation(new PluginUtils.AnnotationUtilRecord(
+                                field.getAnnotations(), SQL_CHAR_MAPPING_ANNOTATION_NAME, ANNOTATION_LENGTH_FIELD));
                         if (length.equals("0")) {
                             entity.reportDiagnostic(PERSIST_SQL_607.getCode(),
                                     MessageFormat.format(PERSIST_SQL_607.getMessage(), CHAR_ANNOTATION),
                                     PERSIST_SQL_607.getSeverity(), field.getNodeLocation());
                         }
                     } else if (isVarCharPresent) {
-                        String length = readStringValueFromAnnotation(field.getAnnotations(),
-                                SQL_VARCHAR_MAPPING_ANNOTATION_NAME, ANNOTATION_LENGTH_FIELD);
+                        String length = readStringValueFromAnnotation(new PluginUtils.AnnotationUtilRecord(
+                                field.getAnnotations(), SQL_VARCHAR_MAPPING_ANNOTATION_NAME, ANNOTATION_LENGTH_FIELD));
                         if (length.equals("0")) {
                             entity.reportDiagnostic(PERSIST_SQL_607.getCode(),
                                     MessageFormat.format(PERSIST_SQL_607.getMessage(), VARCHAR_ANNOTATION),
@@ -256,8 +257,9 @@ public class PersistSqlModelDefinitionValidator implements AnalysisTask<SyntaxNo
                 }
                 if (isDecimalPresent) {
                     if (field.getType().equals(DECIMAL)) {
-                        List<Integer> decimal = readStringArrayValueFromAnnotation(field.getAnnotations(),
-                                SQL_DECIMAL_MAPPING_ANNOTATION_NAME, ANNOTATION_PRECISION_FIELD)
+                        List<Integer> decimal = readStringArrayValueFromAnnotation(
+                                new PluginUtils.AnnotationUtilRecord(field.getAnnotations(),
+                                        SQL_DECIMAL_MAPPING_ANNOTATION_NAME, ANNOTATION_PRECISION_FIELD))
                                 .stream().map(Integer::parseInt).toList();
                         if (decimal.get(0) == 0) {
                             entity.reportDiagnostic(PERSIST_SQL_608.getCode(),
@@ -275,18 +277,16 @@ public class PersistSqlModelDefinitionValidator implements AnalysisTask<SyntaxNo
                     }
                 }
                 if (isAnnotationPresent(field.getAnnotations(), SQL_INDEX_MAPPING_ANNOTATION_NAME)) {
-                    if (isAnnotationFieldStringType(field.getAnnotations(), SQL_INDEX_MAPPING_ANNOTATION_NAME,
-                            ANNOTATION_NAME_FIELD)) {
-                        String indexName = readStringValueFromAnnotation(field.getAnnotations(),
-                                SQL_INDEX_MAPPING_ANNOTATION_NAME, ANNOTATION_NAME_FIELD);
+                    PluginUtils.AnnotationUtilRecord annotationUtilRecord = new PluginUtils.AnnotationUtilRecord(
+                            field.getAnnotations(), SQL_INDEX_MAPPING_ANNOTATION_NAME, ANNOTATION_NAME_FIELD);
+                    if (isAnnotationFieldStringType(annotationUtilRecord)) {
+                        String indexName = readStringValueFromAnnotation(annotationUtilRecord);
                         if (indexName.isEmpty()) {
                             entity.reportDiagnostic(PERSIST_SQL_622.getCode(), PERSIST_SQL_622.getMessage(),
                                     PERSIST_SQL_622.getSeverity(), field.getNodeLocation());
                         }
-                    } else if (isAnnotationFieldArrayType(field.getAnnotations(), SQL_INDEX_MAPPING_ANNOTATION_NAME,
-                            ANNOTATION_NAME_FIELD)) {
-                        List<String> indexNames = readStringArrayValueFromAnnotation(field.getAnnotations(),
-                                SQL_INDEX_MAPPING_ANNOTATION_NAME, ANNOTATION_NAME_FIELD);
+                    } else if (isAnnotationFieldArrayType(annotationUtilRecord)) {
+                        List<String> indexNames = readStringArrayValueFromAnnotation(annotationUtilRecord);
                         if (indexNames.isEmpty()) {
                             entity.reportDiagnostic(PERSIST_SQL_624.getCode(), PERSIST_SQL_624.getMessage(),
                                     PERSIST_SQL_624.getSeverity(), field.getNodeLocation());
@@ -304,18 +304,16 @@ public class PersistSqlModelDefinitionValidator implements AnalysisTask<SyntaxNo
                     }
                 }
                 if (isAnnotationPresent(field.getAnnotations(), SQL_UNIQUE_INDEX_MAPPING_ANNOTATION_NAME)) {
-                    if (isAnnotationFieldStringType(field.getAnnotations(), SQL_UNIQUE_INDEX_MAPPING_ANNOTATION_NAME,
-                            ANNOTATION_NAME_FIELD)) {
-                        String indexName = readStringValueFromAnnotation(field.getAnnotations(),
-                                SQL_UNIQUE_INDEX_MAPPING_ANNOTATION_NAME, ANNOTATION_NAME_FIELD);
+                    PluginUtils.AnnotationUtilRecord annotationUtilRecord = new PluginUtils.AnnotationUtilRecord(
+                            field.getAnnotations(), SQL_UNIQUE_INDEX_MAPPING_ANNOTATION_NAME, ANNOTATION_NAME_FIELD);
+                    if (isAnnotationFieldStringType(annotationUtilRecord)) {
+                        String indexName = readStringValueFromAnnotation(annotationUtilRecord);
                         if (indexName.isEmpty()) {
                             entity.reportDiagnostic(PERSIST_SQL_623.getCode(), PERSIST_SQL_623.getMessage(),
                                     PERSIST_SQL_623.getSeverity(), field.getNodeLocation());
                         }
-                    } else if (isAnnotationFieldArrayType(field.getAnnotations(),
-                            SQL_UNIQUE_INDEX_MAPPING_ANNOTATION_NAME, ANNOTATION_NAME_FIELD)) {
-                        List<String> indexNames = readStringArrayValueFromAnnotation(field.getAnnotations(),
-                                SQL_UNIQUE_INDEX_MAPPING_ANNOTATION_NAME, ANNOTATION_NAME_FIELD);
+                    } else if (isAnnotationFieldArrayType(annotationUtilRecord)) {
+                        List<String> indexNames = readStringArrayValueFromAnnotation(annotationUtilRecord);
                         if (indexNames.isEmpty()) {
                             entity.reportDiagnostic(PERSIST_SQL_625.getCode(), PERSIST_SQL_625.getMessage(),
                                     PERSIST_SQL_625.getSeverity(), field.getNodeLocation());
@@ -489,10 +487,11 @@ public class PersistSqlModelDefinitionValidator implements AnalysisTask<SyntaxNo
             return;
         }
         //annotation present, relationField is the owner
-        List<String> referenceFields = readStringArrayValueFromAnnotation(relationField.getAnnotations(),
-                SQL_RELATION_MAPPING_ANNOTATION_NAME, ANNOTATION_KEYS_FIELD);
-        List<String> referredIdFieldTypes = referredEntity.getIdentityFields().stream()
-                .map(IdentityField::getType).toList();
+        List<String> referenceFields = readStringArrayValueFromAnnotation(new PluginUtils.AnnotationUtilRecord(
+                relationField.getAnnotations(), SQL_RELATION_MAPPING_ANNOTATION_NAME, ANNOTATION_KEYS_FIELD));
+        List<SimpleTypeField> referredIdFields = referredEntity.getIdentityFields().stream().map(idField ->
+                referredEntity.getNonRelationFields().stream().filter(field -> field.getName()
+                        .equals(idField.getName())).findFirst().orElse(null)).toList();
         List<String> distinctReferenceFields = referenceFields.stream()
                 .distinct()
                 .toList();
@@ -512,10 +511,10 @@ public class PersistSqlModelDefinitionValidator implements AnalysisTask<SyntaxNo
                 return;
             }
         }
-        if (referenceFields.size() != referredIdFieldTypes.size()) {
+        if (referenceFields.size() != referredIdFields.size()) {
             ownerEntity.reportDiagnostic(PERSIST_SQL_423.getCode(),
                     MessageFormat.format(PERSIST_SQL_423.getMessage(), relationField.getType(),
-                            ownerEntity.getEntityName(), referredIdFieldTypes.size(), referenceFields.size()),
+                            ownerEntity.getEntityName(), referredIdFields.size(), referenceFields.size()),
                     PERSIST_SQL_423.getSeverity(),
                     relationField.getLocation());
             return;
@@ -525,11 +524,54 @@ public class PersistSqlModelDefinitionValidator implements AnalysisTask<SyntaxNo
             SimpleTypeField ownerField = ownerEntity.getNonRelationFields().stream()
                     .filter(f -> f.getName().equals(referenceFields.get(finalI))).findFirst().orElse(null);
             if (ownerField != null) {
-                if (!ownerField.getType().equals(referredIdFieldTypes.get(finalI))) {
+                if (!ownerField.getType().equals(referredIdFields.get(finalI).getType())) {
                     ownerEntity.reportDiagnostic(PERSIST_SQL_424.getCode(),
                             MessageFormat.format(PERSIST_SQL_424.getMessage(), referredEntity.getEntityName()),
                             PERSIST_SQL_424.getSeverity(), relationField.getLocation());
                     return;
+                }
+                boolean ownerCharPresent = isAnnotationPresent(ownerField.getAnnotations(),
+                        SQL_CHAR_MAPPING_ANNOTATION_NAME);
+                boolean ownerVarcharPresent = isAnnotationPresent(ownerField.getAnnotations(),
+                        SQL_VARCHAR_MAPPING_ANNOTATION_NAME);
+                boolean ownerDecimalPresent = isAnnotationPresent(ownerField.getAnnotations(),
+                        SQL_DECIMAL_MAPPING_ANNOTATION_NAME);
+                boolean referredCharPresent = isAnnotationPresent(referredIdFields.get(finalI).getAnnotations(),
+                        SQL_CHAR_MAPPING_ANNOTATION_NAME);
+                boolean referredVarcharPresent = isAnnotationPresent(referredIdFields.get(finalI).getAnnotations(),
+                        SQL_VARCHAR_MAPPING_ANNOTATION_NAME);
+                boolean referredDecimalPresent = isAnnotationPresent(referredIdFields.get(finalI).getAnnotations(),
+                        SQL_DECIMAL_MAPPING_ANNOTATION_NAME);
+                if (ownerCharPresent != referredCharPresent || ownerVarcharPresent != referredVarcharPresent
+                        || ownerDecimalPresent != referredDecimalPresent) {
+                    ownerEntity.reportDiagnostic(PERSIST_SQL_424.getCode(),
+                            MessageFormat.format(PERSIST_SQL_424.getMessage(), referredEntity.getEntityName()),
+                            PERSIST_SQL_424.getSeverity(), relationField.getLocation());
+                    return;
+                }
+                if (ownerCharPresent) {
+                    if (!validateTypeLengthParam(relationField, ownerEntity, referredEntity, ownerField,
+                            referredIdFields, finalI, SQL_CHAR_MAPPING_ANNOTATION_NAME)) {
+                        return;
+                    }
+                } else if (ownerVarcharPresent) {
+                    if (!validateTypeLengthParam(relationField, ownerEntity, referredEntity, ownerField,
+                            referredIdFields, finalI, SQL_VARCHAR_MAPPING_ANNOTATION_NAME)) {
+                        return;
+                    }
+                } else if (ownerDecimalPresent) {
+                    List<String> ownerDecimal = readStringArrayValueFromAnnotation(
+                            new PluginUtils.AnnotationUtilRecord(ownerField.getAnnotations(),
+                                    SQL_DECIMAL_MAPPING_ANNOTATION_NAME, ANNOTATION_PRECISION_FIELD));
+                    List<String> referredDecimal = readStringArrayValueFromAnnotation(
+                            new PluginUtils.AnnotationUtilRecord(referredIdFields.get(finalI).getAnnotations(),
+                                    SQL_DECIMAL_MAPPING_ANNOTATION_NAME, ANNOTATION_PRECISION_FIELD));
+                    if (!ownerDecimal.equals(referredDecimal)) {
+                        ownerEntity.reportDiagnostic(PERSIST_SQL_424.getCode(),
+                                MessageFormat.format(PERSIST_SQL_424.getMessage(), referredEntity.getEntityName()),
+                                PERSIST_SQL_424.getSeverity(), relationField.getLocation());
+                        return;
+                    }
                 }
             }
         }
@@ -539,6 +581,23 @@ public class PersistSqlModelDefinitionValidator implements AnalysisTask<SyntaxNo
             return;
         }
         refs.addAll(referenceFields);
+    }
+
+    private static boolean validateTypeLengthParam(RelationField relationField, Entity ownerEntity,
+                                                   Entity referredEntity, SimpleTypeField ownerField,
+                                                   List<SimpleTypeField> referredIdFields, int finalI,
+                                                   String annotation) {
+        String ownerLength = readStringValueFromAnnotation(new PluginUtils.AnnotationUtilRecord(
+                ownerField.getAnnotations(), annotation, ANNOTATION_LENGTH_FIELD));
+        String referredLength = readStringValueFromAnnotation(new PluginUtils.AnnotationUtilRecord(
+                referredIdFields.get(finalI).getAnnotations(), annotation, ANNOTATION_LENGTH_FIELD));
+        if (!ownerLength.equals(referredLength)) {
+            ownerEntity.reportDiagnostic(PERSIST_SQL_424.getCode(),
+                    MessageFormat.format(PERSIST_SQL_424.getMessage(), referredEntity.getEntityName()),
+                    PERSIST_SQL_424.getSeverity(), relationField.getLocation());
+            return false;
+        }
+        return true;
     }
 
     private boolean isPersistModelDefinitionDocument(SyntaxNodeAnalysisContext ctx) {

@@ -1,12 +1,12 @@
 # Overview
 
-This module provides relational database support for the `bal persist` feature, which provides functionality to store and query data from a relational database through a data model instead of writing SQL.
+This package provides relational database support for the `bal persist` feature, which provides functionality to store and query data from a relational database through a data model instead of writing SQL.
 
 Currently, this package supports MySQL, MSSQL and PostgreSQL databases. However, we are also planning to add support for other relational databases such as Oracle.
 
 ## How to use with `bal persist`
 
-Since none of the relational databases is not the default datastore for `bal persist`, you need to explicitly specify the data store in your application in either of the following ways,
+By default, `bal persist` utilizes the in-memory data store. Therefore, you must explicitly specify an SQL data store as follows:
 
 ### Integrate to `bal build`
 

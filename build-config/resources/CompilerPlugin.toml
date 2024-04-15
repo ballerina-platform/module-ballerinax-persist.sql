@@ -7,3 +7,6 @@ path = "../compiler-plugin/build/libs/persist.sql-compiler-plugin-@project.versi
 
 [[dependency]]
 path = "./lib/persist-native-@persist.native.version@.jar"
+
+[[dependency]]
+path = "./lib/persist-compiler-plugin-@persist.native.version@.jar"

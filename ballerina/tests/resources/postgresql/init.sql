@@ -120,3 +120,34 @@ CREATE TABLE "CompositeAssociationRecord" (
     FOREIGN KEY ("alltypesidrecordBooleanType", "alltypesidrecordIntType", "alltypesidrecordFloatType", "alltypesidrecordDecimalType", "alltypesidrecordStringType") REFERENCES "AllTypesIdRecord"("booleanType", "intType", "floatType", "decimalType", "stringType"),
     PRIMARY KEY("id")
 );
+
+CREATE TABLE "Doctor" (
+	"id" INT NOT NULL,
+	"name" VARCHAR(191) NOT NULL,
+	"specialty" VARCHAR(191) NOT NULL,
+	"phone_number" VARCHAR(191) NOT NULL,
+	"salary" DECIMAL(10,2),
+	PRIMARY KEY("id")
+);
+
+CREATE TABLE "patients" (
+	"IDP"  SERIAL,
+	"name" VARCHAR(191) NOT NULL,
+	"age" INT NOT NULL,
+	"ADD_RESS" VARCHAR(191) NOT NULL,
+	"phoneNumber" CHAR(10) NOT NULL,
+	"gender" VARCHAR(6) CHECK ("gender" IN ('MALE', 'FEMALE')) NOT NULL,
+	PRIMARY KEY("IDP")
+);
+
+CREATE TABLE "appointment" (
+	"id" INT NOT NULL,
+	"reason" VARCHAR(191) NOT NULL,
+	"appointmentTime" TIMESTAMP NOT NULL,
+	"status" VARCHAR(9) CHECK ("status" IN ('SCHEDULED', 'STARTED', 'ENDED')) NOT NULL,
+	"patient_id" INT NOT NULL,
+	FOREIGN KEY("patient_id") REFERENCES "patients"("IDP"),
+	"doctorId" INT NOT NULL,
+	FOREIGN KEY("doctorId") REFERENCES "Doctor"("id"),
+	PRIMARY KEY("id")
+);

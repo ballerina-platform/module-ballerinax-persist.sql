@@ -8,10 +8,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 - [Added support for PostgreSQL as a datasource](https://github.com/ballerina-platform/ballerina-library/issues/5829)
-- [Added support for H2 DB as a datasource](https://github.com/ballerina-platform/ballerina-library/issues/5715)
+- [Added support for advanced SQL annotations](https://github.com/ballerina-platform/ballerina-library/issues/6013)
+- [Added compiler plugin validations for new advanced SQL database annotations](https://github.com/ballerina-platform/ballerina-library/issues/6068)
 
 ### Changed
 - [Fix class cast exception when executing query with non-global variable](https://github.com/ballerina-platform/persist-tools/issues/311)
+- [Updated update query and delete query to support alias table names](https://github.com/ballerina-platform/ballerina-library/issues/6013)
 
 ## [1.2.0] - 2023-09-18
 

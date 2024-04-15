@@ -49,6 +49,22 @@ public final class Constants {
     public static final String TARGET_TYPE = "targetType";
     public static final String WHERE = "where";
     public static final String ORDER_BY = "order by";
+    public static final String PERSIST_DIRECTORY = "persist";
+    public static final String CHAR_ANNOTATION = "Char";
+    public static final String VARCHAR_ANNOTATION = "Varchar";
+    public static final String SQL_DB_NAME_ANNOTATION_NAME = "sql:Name";
+    public static final String SQL_VARCHAR_MAPPING_ANNOTATION_NAME = "sql:" + VARCHAR_ANNOTATION;
+    public static final String SQL_CHAR_MAPPING_ANNOTATION_NAME = "sql:" + CHAR_ANNOTATION;
+    public static final String SQL_DECIMAL_MAPPING_ANNOTATION_NAME = "sql:Decimal";
+    public static final String SQL_RELATION_MAPPING_ANNOTATION_NAME = "sql:Relation";
+    public static final String SQL_INDEX_MAPPING_ANNOTATION_NAME = "sql:Index";
+    public static final String SQL_UNIQUE_INDEX_MAPPING_ANNOTATION_NAME = "sql:UniqueIndex";
+    public static final String SQL_GENERATED_ANNOTATION_NAME = "sql:Generated";
+    public static final String ANNOTATION_NAME_FIELD = "name";
+    public static final String ANNOTATION_VALUE_FIELD = "value";
+    public static final String ANNOTATION_PRECISION_FIELD = "precision";
+    public static final String ANNOTATION_KEYS_FIELD = "keys";
+    public static final String ANNOTATION_LENGTH_FIELD = "length";
 
     /**
      * SQL keywords used to construct the query.
@@ -93,5 +109,19 @@ public final class Constants {
         public static final Token CLOSE_PAREN_WITH_NEW_LINE_TOKEN = NodeFactory.createLiteralValueToken(
                 SyntaxKind.CLOSE_PAREN_TOKEN, CLOSE_BRACES_WITH_NEW_LINE, createEmptyMinutiaeList(),
                 createEmptyMinutiaeList());
+    }
+
+    public static final class BallerinaTypes {
+
+        public static final String INT = "int";
+        public static final String STRING = "string";
+        public static final String BOOLEAN = "boolean";
+        public static final String DECIMAL = "decimal";
+        public static final String FLOAT = "float";
+        public static final String BYTE = "byte";
+        public static final String ENUM = "enum";
+
+        private BallerinaTypes() {
+        }
     }
 }

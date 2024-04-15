@@ -13,37 +13,15 @@
 // KIND, either express or implied.  See the License for the
 // specific language governing permissions and limitations
 // under the License.
+
 import ballerina/test;
-import ballerina/time;
-import ballerinax/h2.driver as _;
-import ballerinax/java.jdbc;
-import ballerinax/mssql;
-import ballerinax/mssql.driver as _;
 import ballerinax/mysql;
 import ballerinax/mysql.driver as _;
+import ballerinax/mssql;
+import ballerinax/mssql.driver as _;
 import ballerinax/postgresql;
 import ballerinax/postgresql.driver as _;
-
-configurable record {|
-    string url;
-    string user;
-    string password;
-    Options connectionOptions = {};
-|} & readonly h2 = ?;
-
-
-public type Options record {|
-    string datasourceName?;
-    map<anydata> properties?;
-    Operations requestGeneratedKeys = ALL;
-|};
-
-public enum Operations {
-    NONE,
-    EXECUTE,
-    BATCH_EXECUTE,
-    ALL
-}
+import ballerina/time;
 
 configurable record {|
     int port;
@@ -73,37 +51,42 @@ configurable record {|
 |} postgresql = ?;
 
 @test:BeforeSuite
-function initSuite() returns error? {
-    check initMySQLTest();
-    check initMSSQLTest();
-    check initPostgreSQLTest();
-    check initH2Test();
-}
-
-function initMySQLTest() returns error? {
+function initTests() returns error? {
     // MySQL
-    mysql:Client mysqlDbClient = check new (host = mysql.host, user = mysql.user, password = mysql.password, database = mysql.database, port = mysql.port);
-    _ = check mysqlDbClient->execute(`SET FOREIGN_KEY_CHECKS = 0`);
-    _ = check mysqlDbClient->execute(`TRUNCATE Employee`);
-    _ = check mysqlDbClient->execute(`TRUNCATE Workspace`);
-    _ = check mysqlDbClient->execute(`TRUNCATE Building`);
-    _ = check mysqlDbClient->execute(`TRUNCATE Department`);
-    _ = check mysqlDbClient->execute(`TRUNCATE OrderItem`);
-    _ = check mysqlDbClient->execute(`TRUNCATE AllTypes`);
-    _ = check mysqlDbClient->execute(`TRUNCATE FloatIdRecord`);
-    _ = check mysqlDbClient->execute(`TRUNCATE StringIdRecord`);
-    _ = check mysqlDbClient->execute(`TRUNCATE DecimalIdRecord`);
-    _ = check mysqlDbClient->execute(`TRUNCATE BooleanIdRecord`);
-    _ = check mysqlDbClient->execute(`TRUNCATE IntIdRecord`);
-    _ = check mysqlDbClient->execute(`TRUNCATE AllTypesIdRecord`);
-    _ = check mysqlDbClient->execute(`TRUNCATE CompositeAssociationRecord`);
-    _ = check mysqlDbClient->execute(`SET FOREIGN_KEY_CHECKS = 1`);
-    check mysqlDbClient.close();
+    check initMySqlTests();
+
+    //MSSQL
+    check initMsSqlTests();
+
+    // PostgreSQL
+    check initPostgreSqlTests();
 }
 
-function initMSSQLTest() returns error? {
-    //MSSQL
-    mssql:Client mssqlDbClient = check new (host = mssql.host, user = mssql.user, password = mssql.password, port = mssql.port);
+function initMySqlTests() returns error? {
+  mysql:Client mysqlDbClient = check new (host = mysql.host, user = mysql.user, password = mysql.password, database = mysql.database, port = mysql.port);
+      _ = check mysqlDbClient->execute(`SET FOREIGN_KEY_CHECKS = 0`);
+      _ = check mysqlDbClient->execute(`TRUNCATE Employee`);
+      _ = check mysqlDbClient->execute(`TRUNCATE Workspace`);
+      _ = check mysqlDbClient->execute(`TRUNCATE Building`);
+      _ = check mysqlDbClient->execute(`TRUNCATE Department`);
+      _ = check mysqlDbClient->execute(`TRUNCATE OrderItem`);
+      _ = check mysqlDbClient->execute(`TRUNCATE AllTypes`);
+      _ = check mysqlDbClient->execute(`TRUNCATE FloatIdRecord`);
+      _ = check mysqlDbClient->execute(`TRUNCATE StringIdRecord`);
+      _ = check mysqlDbClient->execute(`TRUNCATE DecimalIdRecord`);
+      _ = check mysqlDbClient->execute(`TRUNCATE BooleanIdRecord`);
+      _ = check mysqlDbClient->execute(`TRUNCATE IntIdRecord`);
+      _ = check mysqlDbClient->execute(`TRUNCATE AllTypesIdRecord`);
+      _ = check mysqlDbClient->execute(`TRUNCATE CompositeAssociationRecord`);
+      _ = check mysqlDbClient->execute(`TRUNCATE Doctor`);
+      _ = check mysqlDbClient->execute(`TRUNCATE appointment`);
+      _ = check mysqlDbClient->execute(`TRUNCATE patients`);
+      _ = check mysqlDbClient->execute(`SET FOREIGN_KEY_CHECKS = 1`);
+      check mysqlDbClient.close();
+}
+
+function initMsSqlTests() returns error? {
+  mssql:Client mssqlDbClient = check new (host = mssql.host, user = mssql.user, password = mssql.password, port = mssql.port);
     _ = check mssqlDbClient->execute(`DROP DATABASE IF EXISTS test;`);
     _ = check mssqlDbClient->execute(`CREATE DATABASE test`);
     check mssqlDbClient.close();
@@ -252,11 +235,44 @@ function initMSSQLTest() returns error? {
             PRIMARY KEY(id)
         );
     `);
+    _ = check mssqlDbClient->execute(`
+        CREATE TABLE [Doctor] (
+          	[id] INT NOT NULL,
+	          [name] VARCHAR(191) NOT NULL,
+	          [specialty] VARCHAR(191) NOT NULL,
+	          [phone_number] VARCHAR(191) NOT NULL,
+	          [salary] DECIMAL(10,2),
+	          PRIMARY KEY([id])
+        );
+    `);
+    _ = check mssqlDbClient->execute(`
+        CREATE TABLE [patients] (
+	          [IDP] INT IDENTITY(1,1),
+	          [name] VARCHAR(191) NOT NULL,
+	          [age] INT NOT NULL,
+	          [ADD_RESS] VARCHAR(191) NOT NULL,
+	          [phoneNumber] CHAR(10) NOT NULL,
+	          [gender] VARCHAR(6) CHECK ([gender] IN ('MALE', 'FEMALE')) NOT NULL,
+	          PRIMARY KEY([IDP])
+        );
+    `);
+    _ = check mssqlDbClient->execute(`
+        CREATE TABLE [appointment] (
+	          [id] INT NOT NULL,
+	          [reason] VARCHAR(191) NOT NULL,
+	          [appointmentTime] DATETIME2 NOT NULL,
+	          [status] VARCHAR(9) CHECK ([status] IN ('SCHEDULED', 'STARTED', 'ENDED')) NOT NULL,
+	          [patient_id] INT NOT NULL,
+	          FOREIGN KEY([patient_id]) REFERENCES [patients]([IDP]),
+	          [doctorId] INT NOT NULL,
+	          FOREIGN KEY([doctorId]) REFERENCES [Doctor]([id]),
+	          PRIMARY KEY([id])
+        );
+    `);
 }
 
-function initPostgreSQLTest() returns error? {
-    // PostgreSQL
-    postgresql:Client postgresqlDbClient = check new (host = postgresql.host, username = postgresql.user, password = postgresql.password, database = postgresql.database, port = postgresql.port);
+function initPostgreSqlTests() returns error? {
+  postgresql:Client postgresqlDbClient = check new (host = postgresql.host, username = postgresql.user, password = postgresql.password, database = postgresql.database, port = postgresql.port);
     _ = check postgresqlDbClient->execute(`TRUNCATE "Employee" CASCADE`);
     _ = check postgresqlDbClient->execute(`TRUNCATE "Workspace" CASCADE`);
     _ = check postgresqlDbClient->execute(`TRUNCATE "Building" CASCADE`);
@@ -271,167 +287,6 @@ function initPostgreSQLTest() returns error? {
     _ = check postgresqlDbClient->execute(`TRUNCATE "AllTypesIdRecord" CASCADE`);
     _ = check postgresqlDbClient->execute(`TRUNCATE "CompositeAssociationRecord" CASCADE`);
     check postgresqlDbClient.close();
-}
-
-function initH2Test() returns error? {
-    jdbc:Client h2DbClient = check new (url = h2.url, user = h2.user, password = h2.password);
-    _ = check h2DbClient->execute(`DROP TABLE IF EXISTS "Building"`);
-    _ = check h2DbClient->execute(`
-        CREATE TABLE "Building" (
-            "buildingCode" VARCHAR(36) PRIMARY KEY,
-            "city" VARCHAR(50),
-            "state" VARCHAR(50),
-            "country" VARCHAR(50),
-            "postalCode" VARCHAR(50),
-            "type" VARCHAR(50)
-        )
-    `);
-
-    _ = check h2DbClient->execute(`DROP TABLE IF EXISTS "Workspace"`);
-    _ = check h2DbClient->execute(`
-        CREATE TABLE "Workspace" (
-            "workspaceId" VARCHAR(36) PRIMARY KEY,
-            "workspaceType" VARCHAR(10),
-            "locationBuildingCode" VARCHAR(36),
-            FOREIGN KEY ("locationBuildingCode") REFERENCES "Building"("buildingCode")
-        )
-    `);
-
-    _ = check h2DbClient->execute(`DROP TABLE IF EXISTS "Department"`);
-    _ = check h2DbClient->execute(`
-        CREATE TABLE "Department" (
-            "deptNo" VARCHAR(36) PRIMARY KEY,
-            "deptName" VARCHAR(30)
-        )
-    `);
-
-    _ = check h2DbClient->execute(`DROP TABLE IF EXISTS "Employee"`);
-    _ = check h2DbClient->execute(`
-        CREATE TABLE "Employee" (
-            "empNo" VARCHAR(36) PRIMARY KEY,
-            "firstName" VARCHAR(30),
-            "lastName" VARCHAR(30),
-            "birthDate" DATE,
-            "gender" VARCHAR(6) CHECK ("gender" IN ('MALE', 'FEMALE')) NOT NULL,
-            "hireDate" DATE,
-            "departmentDeptNo" VARCHAR(36),
-            "workspaceWorkspaceId" VARCHAR(36),
-            FOREIGN KEY ("departmentDeptNo") REFERENCES "Department"("deptNo"),
-            FOREIGN KEY ("workspaceWorkspaceId") REFERENCES "Workspace"("workspaceId")
-        )
-    `);
-
-    _ = check h2DbClient->execute(`DROP TABLE IF EXISTS "OrderItem"`);
-    _ = check h2DbClient->execute(`
-        CREATE TABLE "OrderItem" (
-            "orderId" VARCHAR(36),
-            "itemId" VARCHAR(30),
-            "quantity" INTEGER,
-            "notes" VARCHAR(255),
-            PRIMARY KEY("orderId", "itemId")
-        )
-    `);
-
-    _ = check h2DbClient->execute(`DROP TABLE IF EXISTS "AllTypes"`);
-    _ = check h2DbClient->execute(`
-        CREATE TABLE "AllTypes" (
-        	"id" INT NOT NULL,
-        	"booleanType" BOOLEAN NOT NULL,
-        	"intType" INT NOT NULL,
-        	"floatType" FLOAT NOT NULL,
-        	"decimalType" DECIMAL(10, 2) NOT NULL,
-        	"stringType" VARCHAR(191) NOT NULL,
-        	"byteArrayType" VARBINARY NOT NULL,
-        	"dateType" DATE NOT NULL,
-        	"timeOfDayType" TIME NOT NULL,
-        	"civilType" TIMESTAMP NOT NULL,
-        	"booleanTypeOptional" BOOLEAN,
-        	"intTypeOptional" INT,
-        	"floatTypeOptional" FLOAT,
-        	"decimalTypeOptional" DECIMAL(10, 2),
-        	"stringTypeOptional" VARCHAR(191),
-        	"dateTypeOptional" DATE,
-        	"timeOfDayTypeOptional" TIME,
-        	"civilTypeOptional" TIMESTAMP,
-        	"enumType" VARCHAR(6) CHECK ("enumType" IN ('TYPE_1', 'TYPE_2', 'TYPE_3', 'TYPE_4')) NOT NULL,
-        	"enumTypeOptional" VARCHAR(6) CHECK ("enumTypeOptional" IN ('TYPE_1', 'TYPE_2', 'TYPE_3', 'TYPE_4')),
-        	PRIMARY KEY("id")
-        );
-    `);
-
-    _ = check h2DbClient->execute(`DROP TABLE IF EXISTS "FloatIdRecord"`);
-    _ = check h2DbClient->execute(`
-        CREATE TABLE "FloatIdRecord" (
-            "id" FLOAT NOT NULL,
-            "randomField" VARCHAR(191) NOT NULL,
-            PRIMARY KEY("id")
-        );
-    `);
-
-    _ = check h2DbClient->execute(`DROP TABLE IF EXISTS "StringIdRecord"`);
-    _ = check h2DbClient->execute(`
-        CREATE TABLE "StringIdRecord" (
-            "id" VARCHAR(191) NOT NULL,
-            "randomField" VARCHAR(191) NOT NULL,
-            PRIMARY KEY("id")
-        );
-    `);
-
-    _ = check h2DbClient->execute(`DROP TABLE IF EXISTS "DecimalIdRecord"`);
-    _ = check h2DbClient->execute(`
-        CREATE TABLE "DecimalIdRecord" (
-            "id" DECIMAL(10, 2) NOT NULL,
-            "randomField" VARCHAR(191) NOT NULL,
-            PRIMARY KEY("id")
-        );
-    `);
-
-    _ = check h2DbClient->execute(`DROP TABLE IF EXISTS "BooleanIdRecord"`);
-    _ = check h2DbClient->execute(`
-        CREATE TABLE "BooleanIdRecord" (
-            "id" BOOLEAN NOT NULL,
-            "randomField" VARCHAR(191) NOT NULL,
-            PRIMARY KEY("id")
-        );
-    `);
-
-    _ = check h2DbClient->execute(`DROP TABLE IF EXISTS "IntIdRecord"`);
-    _ = check h2DbClient->execute(`
-        CREATE TABLE "IntIdRecord" (
-            "id" INT NOT NULL,
-            "randomField" VARCHAR(191) NOT NULL,
-            PRIMARY KEY("id")
-        );
-    `);
-
-    _ = check h2DbClient->execute(`DROP TABLE IF EXISTS "AllTypesIdRecord"`);
-    _ = check h2DbClient->execute(`
-        CREATE TABLE "AllTypesIdRecord" (
-            "booleanType" BOOLEAN NOT NULL,
-            "intType" INT NOT NULL,
-            "floatType" FLOAT NOT NULL,
-            "decimalType" DECIMAL(10, 2) NOT NULL,
-            "stringType" VARCHAR(191) NOT NULL,
-            "randomField" VARCHAR(191) NOT NULL,
-            PRIMARY KEY("booleanType","intType","floatType","decimalType","stringType")
-        );
-    `);
-
-    _ = check h2DbClient->execute(`DROP TABLE IF EXISTS "CompositeAssociationRecord"`);
-    _ = check h2DbClient->execute(`
-        CREATE TABLE "CompositeAssociationRecord" (
-            "id" VARCHAR(191) NOT NULL,
-            "randomField" VARCHAR(191) NOT NULL,
-            "alltypesidrecordBooleanType" BOOLEAN NOT NULL,
-            "alltypesidrecordIntType" INT NOT NULL,
-            "alltypesidrecordFloatType" FLOAT NOT NULL,
-            "alltypesidrecordDecimalType" DECIMAL(10, 2) NOT NULL,
-            "alltypesidrecordStringType" VARCHAR(191) NOT NULL,
-            CONSTRAINT FK_COMPOSITEASSOCIATIONRECORD_ALLTYPESIDRECORD FOREIGN KEY("alltypesidrecordBooleanType", "alltypesidrecordIntType", "alltypesidrecordFloatType", "alltypesidrecordDecimalType", "alltypesidrecordStringType") REFERENCES "AllTypesIdRecord"("booleanType", "intType", "floatType", "decimalType", "stringType"),
-            PRIMARY KEY("id")
-        );
-    `);
-    check h2DbClient.close();
 }
 
 AllTypes allTypes1 = {
@@ -496,8 +351,7 @@ AllTypes allTypes2 = {
     floatTypeOptional: 66.0,
     decimalTypeOptional: 233.44,
     stringTypeOptional: "test2",
-    // H2 database does not support very old dates(before 1582-10-15)
-    dateTypeOptional: {year: 1923, month: 11, day: 3},
+    dateTypeOptional: {year: 1293, month: 11, day: 3},
     timeOfDayTypeOptional: {hour: 19, minute: 32, second: 34},
     civilTypeOptional: {year: 1989, month: 11, day: 3, hour: 12, minute: 32, second: 34},
     enumType: "TYPE_1",

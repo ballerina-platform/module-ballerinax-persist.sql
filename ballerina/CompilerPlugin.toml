@@ -3,10 +3,10 @@ id = "persist.sql-compiler-plugin"
 class = "io.ballerina.stdlib.persist.sql.compiler.PersistSqlCompilerPlugin"
 
 [[dependency]]
-path = "../compiler-plugin/build/libs/persist.sql-compiler-plugin-1.3.0-SNAPSHOT.jar"
+path = "../compiler-plugin/build/libs/persist.sql-compiler-plugin-1.3.0.jar"
 
 [[dependency]]
-path = "./lib/persist-native-1.3.0-20240502-172400-b7ce80f.jar"
+path = "./lib/persist-native-1.3.0.jar"
 
 [[dependency]]
-path = "./lib/persist-compiler-plugin-1.3.0-20240502-172400-b7ce80f.jar"
+path = "./lib/persist-compiler-plugin-1.3.0.jar"

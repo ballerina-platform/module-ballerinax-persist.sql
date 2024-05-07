@@ -15,13 +15,36 @@
 // under the License.
 
 import ballerina/test;
-import ballerinax/mysql;
-import ballerinax/mysql.driver as _;
+import ballerina/time;
+import ballerinax/h2.driver as _;
+import ballerinax/java.jdbc;
 import ballerinax/mssql;
 import ballerinax/mssql.driver as _;
+import ballerinax/mysql;
+import ballerinax/mysql.driver as _;
 import ballerinax/postgresql;
 import ballerinax/postgresql.driver as _;
-import ballerina/time;
+
+configurable record {|
+    string url;
+    string user;
+    string password;
+    Options connectionOptions = {};
+|} & readonly h2 = ?;
+
+
+public type Options record {|
+    string datasourceName?;
+    map<anydata> properties?;
+    Operations requestGeneratedKeys = ALL;
+|};
+
+public enum Operations {
+    NONE,
+    EXECUTE,
+    BATCH_EXECUTE,
+    ALL
+}
 
 configurable record {|
     int port;
@@ -51,15 +74,11 @@ configurable record {|
 |} postgresql = ?;
 
 @test:BeforeSuite
-function initTests() returns error? {
-    // MySQL
-    check initMySqlTests();
-
-    //MSSQL
-    check initMsSqlTests();
-
-    // PostgreSQL
-    check initPostgreSqlTests();
+function initSuite() returns error? {
+    check initMySQLTest();
+    check initMSSQLTest();
+    check initPostgreSQLTest();
+    check initH2Test();
 }
 
 function initMySqlTests() returns error? {
@@ -235,6 +254,7 @@ function initMsSqlTests() returns error? {
             PRIMARY KEY(id)
         );
     `);
+
     _ = check mssqlDbClient->execute(`
         CREATE TABLE [Doctor] (
           	[id] INT NOT NULL,
@@ -287,6 +307,167 @@ function initPostgreSqlTests() returns error? {
     _ = check postgresqlDbClient->execute(`TRUNCATE "AllTypesIdRecord" CASCADE`);
     _ = check postgresqlDbClient->execute(`TRUNCATE "CompositeAssociationRecord" CASCADE`);
     check postgresqlDbClient.close();
+}
+
+function initH2Test() returns error? {
+    jdbc:Client h2DbClient = check new (url = h2.url, user = h2.user, password = h2.password);
+    _ = check h2DbClient->execute(`DROP TABLE IF EXISTS "Building"`);
+    _ = check h2DbClient->execute(`
+        CREATE TABLE "Building" (
+            "buildingCode" VARCHAR(36) PRIMARY KEY,
+            "city" VARCHAR(50),
+            "state" VARCHAR(50),
+            "country" VARCHAR(50),
+            "postalCode" VARCHAR(50),
+            "type" VARCHAR(50)
+        )
+    `);
+
+    _ = check h2DbClient->execute(`DROP TABLE IF EXISTS "Workspace"`);
+    _ = check h2DbClient->execute(`
+        CREATE TABLE "Workspace" (
+            "workspaceId" VARCHAR(36) PRIMARY KEY,
+            "workspaceType" VARCHAR(10),
+            "locationBuildingCode" VARCHAR(36),
+            FOREIGN KEY ("locationBuildingCode") REFERENCES "Building"("buildingCode")
+        )
+    `);
+
+    _ = check h2DbClient->execute(`DROP TABLE IF EXISTS "Department"`);
+    _ = check h2DbClient->execute(`
+        CREATE TABLE "Department" (
+            "deptNo" VARCHAR(36) PRIMARY KEY,
+            "deptName" VARCHAR(30)
+        )
+    `);
+
+    _ = check h2DbClient->execute(`DROP TABLE IF EXISTS "Employee"`);
+    _ = check h2DbClient->execute(`
+        CREATE TABLE "Employee" (
+            "empNo" VARCHAR(36) PRIMARY KEY,
+            "firstName" VARCHAR(30),
+            "lastName" VARCHAR(30),
+            "birthDate" DATE,
+            "gender" VARCHAR(6) CHECK ("gender" IN ('MALE', 'FEMALE')) NOT NULL,
+            "hireDate" DATE,
+            "departmentDeptNo" VARCHAR(36),
+            "workspaceWorkspaceId" VARCHAR(36),
+            FOREIGN KEY ("departmentDeptNo") REFERENCES "Department"("deptNo"),
+            FOREIGN KEY ("workspaceWorkspaceId") REFERENCES "Workspace"("workspaceId")
+        )
+    `);
+
+    _ = check h2DbClient->execute(`DROP TABLE IF EXISTS "OrderItem"`);
+    _ = check h2DbClient->execute(`
+        CREATE TABLE "OrderItem" (
+            "orderId" VARCHAR(36),
+            "itemId" VARCHAR(30),
+            "quantity" INTEGER,
+            "notes" VARCHAR(255),
+            PRIMARY KEY("orderId", "itemId")
+        )
+    `);
+
+    _ = check h2DbClient->execute(`DROP TABLE IF EXISTS "AllTypes"`);
+    _ = check h2DbClient->execute(`
+        CREATE TABLE "AllTypes" (
+        	"id" INT NOT NULL,
+        	"booleanType" BOOLEAN NOT NULL,
+        	"intType" INT NOT NULL,
+        	"floatType" FLOAT NOT NULL,
+        	"decimalType" DECIMAL(10, 2) NOT NULL,
+        	"stringType" VARCHAR(191) NOT NULL,
+        	"byteArrayType" VARBINARY NOT NULL,
+        	"dateType" DATE NOT NULL,
+        	"timeOfDayType" TIME NOT NULL,
+        	"civilType" TIMESTAMP NOT NULL,
+        	"booleanTypeOptional" BOOLEAN,
+        	"intTypeOptional" INT,
+        	"floatTypeOptional" FLOAT,
+        	"decimalTypeOptional" DECIMAL(10, 2),
+        	"stringTypeOptional" VARCHAR(191),
+        	"dateTypeOptional" DATE,
+        	"timeOfDayTypeOptional" TIME,
+        	"civilTypeOptional" TIMESTAMP,
+        	"enumType" VARCHAR(6) CHECK ("enumType" IN ('TYPE_1', 'TYPE_2', 'TYPE_3', 'TYPE_4')) NOT NULL,
+        	"enumTypeOptional" VARCHAR(6) CHECK ("enumTypeOptional" IN ('TYPE_1', 'TYPE_2', 'TYPE_3', 'TYPE_4')),
+        	PRIMARY KEY("id")
+        );
+    `);
+
+    _ = check h2DbClient->execute(`DROP TABLE IF EXISTS "FloatIdRecord"`);
+    _ = check h2DbClient->execute(`
+        CREATE TABLE "FloatIdRecord" (
+            "id" FLOAT NOT NULL,
+            "randomField" VARCHAR(191) NOT NULL,
+            PRIMARY KEY("id")
+        );
+    `);
+
+    _ = check h2DbClient->execute(`DROP TABLE IF EXISTS "StringIdRecord"`);
+    _ = check h2DbClient->execute(`
+        CREATE TABLE "StringIdRecord" (
+            "id" VARCHAR(191) NOT NULL,
+            "randomField" VARCHAR(191) NOT NULL,
+            PRIMARY KEY("id")
+        );
+    `);
+
+    _ = check h2DbClient->execute(`DROP TABLE IF EXISTS "DecimalIdRecord"`);
+    _ = check h2DbClient->execute(`
+        CREATE TABLE "DecimalIdRecord" (
+            "id" DECIMAL(10, 2) NOT NULL,
+            "randomField" VARCHAR(191) NOT NULL,
+            PRIMARY KEY("id")
+        );
+    `);
+
+    _ = check h2DbClient->execute(`DROP TABLE IF EXISTS "BooleanIdRecord"`);
+    _ = check h2DbClient->execute(`
+        CREATE TABLE "BooleanIdRecord" (
+            "id" BOOLEAN NOT NULL,
+            "randomField" VARCHAR(191) NOT NULL,
+            PRIMARY KEY("id")
+        );
+    `);
+
+    _ = check h2DbClient->execute(`DROP TABLE IF EXISTS "IntIdRecord"`);
+    _ = check h2DbClient->execute(`
+        CREATE TABLE "IntIdRecord" (
+            "id" INT NOT NULL,
+            "randomField" VARCHAR(191) NOT NULL,
+            PRIMARY KEY("id")
+        );
+    `);
+
+    _ = check h2DbClient->execute(`DROP TABLE IF EXISTS "AllTypesIdRecord"`);
+    _ = check h2DbClient->execute(`
+        CREATE TABLE "AllTypesIdRecord" (
+            "booleanType" BOOLEAN NOT NULL,
+            "intType" INT NOT NULL,
+            "floatType" FLOAT NOT NULL,
+            "decimalType" DECIMAL(10, 2) NOT NULL,
+            "stringType" VARCHAR(191) NOT NULL,
+            "randomField" VARCHAR(191) NOT NULL,
+            PRIMARY KEY("booleanType","intType","floatType","decimalType","stringType")
+        );
+    `);
+
+    _ = check h2DbClient->execute(`DROP TABLE IF EXISTS "CompositeAssociationRecord"`);
+    _ = check h2DbClient->execute(`
+        CREATE TABLE "CompositeAssociationRecord" (
+            "id" VARCHAR(191) NOT NULL,
+            "randomField" VARCHAR(191) NOT NULL,
+            "alltypesidrecordBooleanType" BOOLEAN NOT NULL,
+            "alltypesidrecordIntType" INT NOT NULL,
+            "alltypesidrecordFloatType" FLOAT NOT NULL,
+            "alltypesidrecordDecimalType" DECIMAL(10, 2) NOT NULL,
+            "alltypesidrecordStringType" VARCHAR(191) NOT NULL,
+            CONSTRAINT FK_COMPOSITEASSOCIATIONRECORD_ALLTYPESIDRECORD FOREIGN KEY("alltypesidrecordBooleanType", "alltypesidrecordIntType", "alltypesidrecordFloatType", "alltypesidrecordDecimalType", "alltypesidrecordStringType") REFERENCES "AllTypesIdRecord"("booleanType", "intType", "floatType", "decimalType", "stringType"),
+            PRIMARY KEY("id")
+        );
+    `);
+    check h2DbClient.close();
 }
 
 AllTypes allTypes1 = {

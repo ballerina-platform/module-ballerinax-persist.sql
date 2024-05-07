@@ -16,16 +16,16 @@ graalvmCompatible = true
 groupId = "io.ballerina.stdlib"
 artifactId = "persist.sql-native"
 version = "1.3.0"
-path = "../native/build/libs/persist.sql-native-1.3.0-SNAPSHOT.jar"
+path = "../native/build/libs/persist.sql-native-1.3.0.jar"
 
 [[platform.java17.dependency]]
 groupId = "io.ballerina.stdlib"
 artifactId = "persist-native"
 version = "1.3.0"
-path = "./lib/persist-native-1.3.0-20240410-140300-bb3a202.jar"
+path = "./lib/persist-native-1.3.0.jar"
 
 [[platform.java17.dependency]]
 groupId = "io.ballerina.stdlib"
 artifactId = "sql-native"
-version = "1.13.0-20240410-205900-22f19c6"
-path = "./lib/sql-native-1.13.0-20240410-205900-22f19c6.jar"
+version = "1.13.0"
+path = "./lib/sql-native-1.13.0.jar"

@@ -29,6 +29,7 @@ public class PersistSqlCompilerPlugin extends CompilerPlugin {
 
     @Override
     public void init(CompilerPluginContext compilerPluginContext) {
+        compilerPluginContext.addCodeAnalyzer(new PersistSqlCodeAnalyzer());
         compilerPluginContext.addCodeModifier(new PersistCodeModifier());
     }
 }

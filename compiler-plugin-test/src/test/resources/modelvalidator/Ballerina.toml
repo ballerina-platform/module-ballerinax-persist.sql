@@ -1,0 +1,14 @@
+[package]
+org = "root"
+name = "project_1"
+version = "0.1.0"
+
+[[tool.persist]]
+id = "generate-db-client"
+targetModule = "project_1.test"
+options.datastore = "mysql"
+filePath = "persist/model.bal"
+
+[persist]
+datastore = "mysql"
+module = "Demo.db"

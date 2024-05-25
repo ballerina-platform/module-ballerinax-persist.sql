@@ -397,9 +397,9 @@ AllTypes allTypes3 = {
     floatTypeOptional: 66.0,
     decimalTypeOptional: (),
     stringTypeOptional: (),
-    dateTypeOptional: (),
-    timeOfDayTypeOptional: (),
-    civilTypeOptional: (),
+    dateTypeOptional: {year: 1293, month: 11, day: 3},
+    timeOfDayTypeOptional: {hour: 19, minute: 32, second: 34},
+    civilTypeOptional: {year: 1989, month: 11, day: 3, hour: 12, minute: 32, second: 34},
     enumType: "TYPE_1",
     enumTypeOptional: ()
 };

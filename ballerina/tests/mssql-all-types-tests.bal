@@ -248,6 +248,6 @@ function mssqlAllTypesDeleteTest() returns error? {
     AllTypes[] allTypesCollection = check from AllTypes allTypesRecord in allTypesStream
         select allTypesRecord;
 
-    test:assertEquals(allTypesCollection, [allTypes1UpdatedExpected, allTypes3Expected]);
+    test:assertEquals(allTypesCollection, [allTypes1UpdatedExpected, allTypes3Expected, allTypes4Expected]);
     check testEntitiesClient.close();
 }

@@ -248,6 +248,6 @@ function postgresqlAllTypesDeleteTest() returns error? {
     AllTypes[] allTypesCollection = check from AllTypes allTypesRecord in allTypesStream
         select allTypesRecord;
 
-    test:assertEquals(allTypesCollection, [allTypes3Expected, allTypes1UpdatedExpected, allTypes4Expected]);
+    test:assertEquals(allTypesCollection, [allTypes3Expected, allTypes4Expected, allTypes1UpdatedExpected]);
     check testEntitiesClient.close();
 }

@@ -394,7 +394,7 @@ AllTypes allTypes3 = {
     civilType: {year: 1999, month: 11, day: 3, hour: 12, minute: 32, second: 34},
     booleanTypeOptional: (),
     intTypeOptional: (),
-    floatTypeOptional: (),
+    floatTypeOptional: 66.0,
     decimalTypeOptional: (),
     stringTypeOptional: (),
     dateTypeOptional: (),

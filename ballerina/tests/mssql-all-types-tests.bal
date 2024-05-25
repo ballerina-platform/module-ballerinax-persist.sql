@@ -38,21 +38,24 @@ function mssqlAllTypesCreateTest() returns error? {
 @test:Config {
     groups: ["all-types", "mssql"]
 }
-function mssqlAllTypesCreateOptionalTest() returns error? {
+function mssqlAllTypesCreateMixedTest() returns error? {
     MSSQLTestEntitiesClient testEntitiesClient = check new ();
 
-    int[] ids = check testEntitiesClient->/alltypes.post([allTypes3]);
-    test:assertEquals(ids, [allTypes3.id]);
+    int[] ids = check testEntitiesClient->/alltypes.post([allTypes3, allTypes4]);
+    test:assertEquals(ids, [allTypes3.id, allTypes4.id]);
 
     AllTypes allTypesRetrieved = check testEntitiesClient->/alltypes/[allTypes3.id].get();
     test:assertEquals(allTypesRetrieved, allTypes3Expected);
+
+    allTypesRetrieved = check testEntitiesClient->/alltypes/[allTypes4.id].get();
+    test:assertEquals(allTypesRetrieved, allTypes4Expected);
 
     check testEntitiesClient.close();
 }
 
 @test:Config {
     groups: ["all-types", "mssql"],
-    dependsOn: [mssqlAllTypesCreateTest, mssqlAllTypesCreateOptionalTest]
+    dependsOn: [mssqlAllTypesCreateTest, mssqlAllTypesCreateMixedTest]
 }
 function mssqlAllTypesReadTest() returns error? {
     MSSQLTestEntitiesClient testEntitiesClient = check new ();
@@ -61,13 +64,13 @@ function mssqlAllTypesReadTest() returns error? {
     AllTypes[] allTypes = check from AllTypes allTypesRecord in allTypesStream
         select allTypesRecord;
 
-    test:assertEquals(allTypes, [allTypes1Expected, allTypes2Expected, allTypes3Expected]);
+    test:assertEquals(allTypes, [allTypes1Expected, allTypes2Expected, allTypes3Expected, allTypes4Expected]);
     check testEntitiesClient.close();
 }
 
 @test:Config {
     groups: ["all-types", "mssql", "dependent"],
-    dependsOn: [mssqlAllTypesCreateTest, mssqlAllTypesCreateOptionalTest]
+    dependsOn: [mssqlAllTypesCreateTest, mssqlAllTypesCreateMixedTest]
 }
 function mssqlAllTypesReadDependentTest() returns error? {
     MSSQLTestEntitiesClient testEntitiesClient = check new ();
@@ -133,6 +136,25 @@ function mssqlAllTypesReadDependentTest() returns error? {
             dateTypeOptional: allTypes3Expected.dateTypeOptional,
             timeOfDayTypeOptional: allTypes3Expected.timeOfDayTypeOptional,
             civilTypeOptional: allTypes3Expected.civilTypeOptional
+        },
+        {
+            booleanType: allTypes4Expected.booleanType,
+            intType: allTypes4Expected.intType,
+            floatType: allTypes4Expected.floatType,
+            decimalType: allTypes4Expected.decimalType,
+            stringType: allTypes4Expected.stringType,
+            byteArrayType: allTypes4Expected.byteArrayType,
+            dateType: allTypes4Expected.dateType,
+            timeOfDayType: allTypes4Expected.timeOfDayType,
+            civilType: allTypes4Expected.civilType,
+            booleanTypeOptional: allTypes4Expected.booleanTypeOptional,
+            intTypeOptional: allTypes4Expected.intTypeOptional,
+            floatTypeOptional: allTypes4Expected.floatTypeOptional,
+            decimalTypeOptional: allTypes4Expected.decimalTypeOptional,
+            stringTypeOptional: allTypes4Expected.stringTypeOptional,
+            dateTypeOptional: allTypes4Expected.dateTypeOptional,
+            timeOfDayTypeOptional: allTypes4Expected.timeOfDayTypeOptional,
+            civilTypeOptional: allTypes4Expected.civilTypeOptional
         }
     ]);
     check testEntitiesClient.close();
@@ -140,7 +162,7 @@ function mssqlAllTypesReadDependentTest() returns error? {
 
 @test:Config {
     groups: ["all-types", "mssql"],
-    dependsOn: [mssqlAllTypesCreateTest, mssqlAllTypesCreateOptionalTest]
+    dependsOn: [mssqlAllTypesCreateTest, mssqlAllTypesCreateMixedTest]
 }
 function mssqlAllTypesReadOneTest() returns error? {
     MSSQLTestEntitiesClient testEntitiesClient = check new ();
@@ -154,6 +176,9 @@ function mssqlAllTypesReadOneTest() returns error? {
     allTypesRetrieved = check testEntitiesClient->/alltypes/[allTypes3.id].get();
     test:assertEquals(allTypesRetrieved, allTypes3Expected);
 
+    allTypesRetrieved = check testEntitiesClient->/alltypes/[allTypes4.id].get();
+    test:assertEquals(allTypesRetrieved, allTypes4Expected);
+
     check testEntitiesClient.close();
 }
 
@@ -163,9 +188,9 @@ function mssqlAllTypesReadOneTest() returns error? {
 function mssqlAllTypesReadOneTestNegative() returns error? {
     MSSQLTestEntitiesClient testEntitiesClient = check new ();
 
-    AllTypes|persist:Error allTypesRetrieved = testEntitiesClient->/alltypes/[4].get();
+    AllTypes|persist:Error allTypesRetrieved = testEntitiesClient->/alltypes/[5].get();
     if allTypesRetrieved is persist:NotFoundError {
-        test:assertEquals(allTypesRetrieved.message(), "A record with the key '4' does not exist for the entity 'AllTypes'.");
+        test:assertEquals(allTypesRetrieved.message(), "A record with the key '5' does not exist for the entity 'AllTypes'.");
     }
     else {
         test:assertFail("persist:NotFoundError expected.");

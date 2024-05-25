@@ -427,6 +427,52 @@ AllTypes allTypes3Expected = {
     enumTypeOptional: allTypes3.enumTypeOptional
 };
 
+AllTypes allTypes4 = {
+    id: 4,
+    booleanType: true,
+    intType: 35,
+    floatType: 63.0,
+    decimalType: 233.44,
+    stringType: "test2",
+    byteArrayType: base16 `55 EE 66 AF 77 AB`,
+    dateType: {year: 1996, month: 11, day: 3},
+    timeOfDayType: {hour: 17, minute: 32, second: 34},
+    civilType: {year: 1999, month: 11, day: 3, hour: 12, minute: 32, second: 34},
+    booleanTypeOptional: true,
+    intTypeOptional: 35,
+    floatTypeOptional: 63.0,
+    decimalTypeOptional: 233.44,
+    stringTypeOptional: "test2",
+    dateTypeOptional: {year: 1996, month: 11, day: 3},
+    timeOfDayTypeOptional: {hour: 17, minute: 32, second: 34},
+    civilTypeOptional: {year: 1999, month: 11, day: 3, hour: 12, minute: 32, second: 34},
+    enumType: "TYPE_1",
+    enumTypeOptional: "TYPE_3"
+};
+
+AllTypes allTypes4Expected = {
+    id: allTypes4.id,
+    booleanType: allTypes4.booleanType,
+    intType: allTypes4.intType,
+    floatType: allTypes4.floatType,
+    decimalType: allTypes4.decimalType,
+    stringType: allTypes4.stringType,
+    byteArrayType: allTypes4.byteArrayType,
+    dateType: allTypes4.dateType,
+    timeOfDayType: allTypes4.timeOfDayType,
+    civilType: allTypes4.civilType,
+    booleanTypeOptional: allTypes4.booleanTypeOptional,
+    intTypeOptional: allTypes4.intTypeOptional,
+    floatTypeOptional: allTypes4.floatTypeOptional,
+    decimalTypeOptional: allTypes4.decimalTypeOptional,
+    stringTypeOptional: allTypes4.stringTypeOptional,
+    dateTypeOptional: allTypes4.dateTypeOptional,
+    timeOfDayTypeOptional: allTypes4.timeOfDayTypeOptional,
+    civilTypeOptional: allTypes4.civilTypeOptional,
+    enumType: allTypes4.enumType,
+    enumTypeOptional: allTypes4.enumTypeOptional
+};
+
 AllTypes allTypes1Updated = {
     id: 1,
     booleanType: true,

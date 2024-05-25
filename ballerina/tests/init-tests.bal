@@ -434,7 +434,7 @@ AllTypes allTypes4 = {
     floatType: 63.0,
     decimalType: 233.44,
     stringType: "test2",
-    byteArrayType: base16 `55 EE 66 AF 77 AB`,
+    byteArrayType: base16 `55 EE 66 FF 77 AB`,
     dateType: {year: 1996, month: 11, day: 3},
     timeOfDayType: {hour: 17, minute: 32, second: 34},
     civilType: {year: 1999, month: 11, day: 3, hour: 12, minute: 32, second: 34},

@@ -64,7 +64,7 @@ function postgresqlAllTypesReadTest() returns error? {
     AllTypes[] allTypes = check from AllTypes allTypesRecord in allTypesStream
         select allTypesRecord;
 
-    test:assertEquals(allTypes, [allTypes3Expected, allTypes1Expected, allTypes2Expected, allTypes4Expected]);
+    test:assertEquals(allTypes, [allTypes3Expected, allTypes4Expected, allTypes1Expected, allTypes2Expected]);
     check testEntitiesClient.close();
 }
 
@@ -98,6 +98,25 @@ function postgresqlAllTypesReadDependentTest() returns error? {
             dateTypeOptional: allTypes3Expected.dateTypeOptional,
             timeOfDayTypeOptional: allTypes3Expected.timeOfDayTypeOptional,
             civilTypeOptional: allTypes3Expected.civilTypeOptional
+        },
+        {
+            booleanType: allTypes4Expected.booleanType,
+            intType: allTypes4Expected.intType,
+            floatType: allTypes4Expected.floatType,
+            decimalType: allTypes4Expected.decimalType,
+            stringType: allTypes4Expected.stringType,
+            byteArrayType: allTypes4Expected.byteArrayType,
+            dateType: allTypes4Expected.dateType,
+            timeOfDayType: allTypes4Expected.timeOfDayType,
+            civilType: allTypes4Expected.civilType,
+            booleanTypeOptional: allTypes4Expected.booleanTypeOptional,
+            intTypeOptional: allTypes4Expected.intTypeOptional,
+            floatTypeOptional: allTypes4Expected.floatTypeOptional,
+            decimalTypeOptional: allTypes4Expected.decimalTypeOptional,
+            stringTypeOptional: allTypes4Expected.stringTypeOptional,
+            dateTypeOptional: allTypes4Expected.dateTypeOptional,
+            timeOfDayTypeOptional: allTypes4Expected.timeOfDayTypeOptional,
+            civilTypeOptional: allTypes4Expected.civilTypeOptional
         },
         {
             booleanType: allTypes1Expected.booleanType,
@@ -136,25 +155,6 @@ function postgresqlAllTypesReadDependentTest() returns error? {
             dateTypeOptional: allTypes2Expected.dateTypeOptional,
             timeOfDayTypeOptional: allTypes2Expected.timeOfDayTypeOptional,
             civilTypeOptional: allTypes2Expected.civilTypeOptional
-        },
-        {
-            booleanType: allTypes4Expected.booleanType,
-            intType: allTypes4Expected.intType,
-            floatType: allTypes4Expected.floatType,
-            decimalType: allTypes4Expected.decimalType,
-            stringType: allTypes4Expected.stringType,
-            byteArrayType: allTypes4Expected.byteArrayType,
-            dateType: allTypes4Expected.dateType,
-            timeOfDayType: allTypes4Expected.timeOfDayType,
-            civilType: allTypes4Expected.civilType,
-            booleanTypeOptional: allTypes4Expected.booleanTypeOptional,
-            intTypeOptional: allTypes4Expected.intTypeOptional,
-            floatTypeOptional: allTypes4Expected.floatTypeOptional,
-            decimalTypeOptional: allTypes4Expected.decimalTypeOptional,
-            stringTypeOptional: allTypes4Expected.stringTypeOptional,
-            dateTypeOptional: allTypes4Expected.dateTypeOptional,
-            timeOfDayTypeOptional: allTypes4Expected.timeOfDayTypeOptional,
-            civilTypeOptional: allTypes4Expected.civilTypeOptional
         }
     ]);
     check testEntitiesClient.close();
@@ -248,6 +248,6 @@ function postgresqlAllTypesDeleteTest() returns error? {
     AllTypes[] allTypesCollection = check from AllTypes allTypesRecord in allTypesStream
         select allTypesRecord;
 
-    test:assertEquals(allTypesCollection, [allTypes3Expected, allTypes1UpdatedExpected]);
+    test:assertEquals(allTypesCollection, [allTypes3Expected, allTypes1UpdatedExpected, allTypes4Expected]);
     check testEntitiesClient.close();
 }

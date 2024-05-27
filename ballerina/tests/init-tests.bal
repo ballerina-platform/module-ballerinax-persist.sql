@@ -394,6 +394,8 @@ AllTypes allTypes3 = {
     civilType: {year: 1999, month: 11, day: 3, hour: 12, minute: 32, second: 34},
     booleanTypeOptional: (),
     intTypeOptional: (),
+    // Passing () for float, date, time, civil types are not supported in MSSQL connector.
+    // Issue: https://github.com/ballerina-platform/ballerina-library/issues/6562
     floatTypeOptional: 66.0,
     decimalTypeOptional: (),
     stringTypeOptional: (),

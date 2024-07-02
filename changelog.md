@@ -14,6 +14,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Changed
 - [Fix class cast exception when executing query with non-global variable](https://github.com/ballerina-platform/persist-tools/issues/311)
 - [Updated update query and delete query to support alias table names](https://github.com/ballerina-platform/ballerina-library/issues/6013)
+- [Fix the bulk insert failure in sql modules](https://github.com/ballerina-platform/ballerina-library/issues/6563)
 
 ## [1.2.0] - 2023-09-18
 

@@ -2,7 +2,7 @@
 
 This package provides relational database support for the `bal persist` feature, which provides functionality to store and query data from a relational database through a data model instead of writing SQL.
 
-Currently, this package supports MySQL, MSSQL, and PostgreSQL databases. However, we are also planning to add support for other relational databases such as Oracle.
+Currently, this package supports MySQL, MSSQL, H2 and PostgreSQL databases. However, we are also planning to add support for other relational databases such as Oracle.
 
 ## How to use with `bal persist`
 
@@ -13,7 +13,7 @@ By default, `bal persist` utilizes the in-memory data store. Therefore, you must
 1. Initialize `bal persist` and integrate to `bal build` using the following command,
 
     ```
-    $ bal persist add --datastore [mysql/mssql/postgresql] --module <module_name>
+    $ bal persist add --datastore [mysql/mssql/postgresql/h2] --module <module_name>
     ```
 
 2. After defining the entities, build the application using the following command,
@@ -33,7 +33,7 @@ By default, `bal persist` utilizes the in-memory data store. Therefore, you must
 2. Generate the persist client using the following command,
 
     ```
-    $ bal persist generate --datastore [mysql/mssql/postgresql] --module <module_name>
+    $ bal persist generate --datastore [mysql/mssql/postgresql/h2] --module <module_name>
    ```
 
 ## Supported Ballerina Types

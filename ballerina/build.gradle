@@ -204,65 +204,65 @@ task stopMySQLTestDockerContainer() {
 }
 
 task createMSSQLTestDockerImage(type: Exec) {
-    if (!Os.isFamily(Os.FAMILY_WINDOWS)) {
-        def standardOutput = new ByteArrayOutputStream()
-        commandLine 'sh', '-c', "docker build -f $project.projectDir/tests/resources/mssql/Dockerfile -t ballerina-persist-mssql" +
-                " -q $project.projectDir/tests/resources/mssql/"
-        doLast {
-            checkExecResult(executionResult, 'Error', standardOutput)
-            sleep(10 * 1000)
-        }
-    }
+   if (!Os.isFamily(Os.FAMILY_WINDOWS)) {
+       def standardOutput = new ByteArrayOutputStream()
+       commandLine 'sh', '-c', "docker build -f $project.projectDir/tests/resources/mssql/Dockerfile -t ballerina-persist-mssql" +
+               " -q $project.projectDir/tests/resources/mssql/"
+       doLast {
+           checkExecResult(executionResult, 'Error', standardOutput)
+           sleep(10 * 1000)
+       }
+   }
 }
 
 def checkMSSQLTestDockerContainerStatus(containerName) {
-    if (!Os.isFamily(Os.FAMILY_WINDOWS)) {
-        try {
-            return exec {
-                commandLine 'sh', '-c',
-                        "docker exec ${containerName} /opt/mssql-tools/bin/sqlcmd -S localhost -U sa -P Test123#"
-            }.exitValue
-        } catch (all) {
-            return 1;
-        }
-    }
+   if (!Os.isFamily(Os.FAMILY_WINDOWS)) {
+       try {
+           return exec {
+               commandLine 'sh', '-c',
+                       "docker exec ${containerName} /opt/mssql-tools/bin/sqlcmd -S localhost -U sa -P Test123#"
+           }.exitValue
+       } catch (all) {
+           return 1;
+       }
+   }
 }
 
 task startMSSQLTestDockerContainer(type: Exec) {
-    if (!Os.isFamily(Os.FAMILY_WINDOWS)) {
-        def standardOutput = new ByteArrayOutputStream()
-        commandLine 'sh', '-c',
-                "docker run --rm -d --name ballerina-persist-mssql -e ACCEPT_EULA=1 -e SA_PASSWORD=Test123# -p 1433:1433 -d ballerina-persist-mssql"
-        def healthCheck = 1;
-        def counter = 0;
-        doLast {
-            checkExecResult(executionResult, 'Error', standardOutput)
-            while (healthCheck != 0 && counter < 12) {
-                sleep(5 * 1000)
-                healthCheck = checkMSSQLTestDockerContainerStatus("ballerina-persist-mssql")
-                counter = counter + 1;
-            }
-            if (healthCheck != 0) {
-                throw new GradleException("Docker container 'ballerina-persist-mssql' health test exceeded timeout!")
-            }
-        }
-    }
+   if (!Os.isFamily(Os.FAMILY_WINDOWS)) {
+       def standardOutput = new ByteArrayOutputStream()
+       commandLine 'sh', '-c',
+               "docker run --rm -d --name ballerina-persist-mssql -e ACCEPT_EULA=1 -e SA_PASSWORD=Test123# -p 1433:1433 -d ballerina-persist-mssql"
+       def healthCheck = 1;
+       def counter = 0;
+       doLast {
+           checkExecResult(executionResult, 'Error', standardOutput)
+           while (healthCheck != 0 && counter < 12) {
+               sleep(5 * 1000)
+               healthCheck = checkMSSQLTestDockerContainerStatus("ballerina-persist-mssql")
+               counter = counter + 1;
+           }
+           if (healthCheck != 0) {
+               throw new GradleException("Docker container 'ballerina-persist-mssql' health test exceeded timeout!")
+           }
+       }
+   }
 }
 
 task stopMSSQLTestDockerContainer() {
-    doLast {
-        if (!Os.isFamily(Os.FAMILY_WINDOWS)) {
-            try {
-                def stdOut = new ByteArrayOutputStream()
-                exec {
-                    commandLine 'sh', '-c', "docker stop ballerina-persist-mssql"
-                    standardOutput = stdOut
-                }
-            } catch (all) {
-                println("Process can safely ignore stopTestDockerContainer task")
-            }
-        }
-    }
+   doLast {
+       if (!Os.isFamily(Os.FAMILY_WINDOWS)) {
+           try {
+               def stdOut = new ByteArrayOutputStream()
+               exec {
+                   commandLine 'sh', '-c', "docker stop ballerina-persist-mssql"
+                   standardOutput = stdOut
+               }
+           } catch (all) {
+               println("Process can safely ignore stopTestDockerContainer task")
+           }
+       }
+   }
 }
 
 task createPostgreSQLTestDockerImage(type: Exec) {

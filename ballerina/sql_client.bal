@@ -254,12 +254,7 @@ public isolated client class SQLClient {
             if columnCount > 0 {
                 params = sql:queryConcat(params, `,`);
             }
-
-            if 'object[key] is () {
-                params = sql:queryConcat(params, `NULL`);
-            } else {
-                params = sql:queryConcat(params, `${<sql:Value>'object[key]}`);
-            }
+            params = sql:queryConcat(params, `${<sql:Value>'object[key]}`);
             columnCount = columnCount + 1;
         }
         params = sql:queryConcat(params, `)`);

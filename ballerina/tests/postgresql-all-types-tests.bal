@@ -38,21 +38,24 @@ function postgresqlAllTypesCreateTest() returns error? {
 @test:Config {
     groups: ["all-types", "postgresql"]
 }
-function postgresqlAllTypesCreateOptionalTest() returns error? {
+function postgresqlAllTypesCreateMixedTest() returns error? {
     PostgreSQLTestEntitiesClient testEntitiesClient = check new ();
 
-    int[] ids = check testEntitiesClient->/alltypes.post([allTypes3]);
-    test:assertEquals(ids, [allTypes3.id]);
+    int[] ids = check testEntitiesClient->/alltypes.post([allTypes3, allTypes4]);
+    test:assertEquals(ids, [allTypes3.id, allTypes4.id]);
 
     AllTypes allTypesRetrieved = check testEntitiesClient->/alltypes/[allTypes3.id].get();
     test:assertEquals(allTypesRetrieved, allTypes3Expected);
+
+    allTypesRetrieved = check testEntitiesClient->/alltypes/[allTypes4.id].get();
+    test:assertEquals(allTypesRetrieved, allTypes4Expected);
 
     check testEntitiesClient.close();
 }
 
 @test:Config {
     groups: ["all-types", "postgresql"],
-    dependsOn: [postgresqlAllTypesCreateTest, postgresqlAllTypesCreateOptionalTest]
+    dependsOn: [postgresqlAllTypesCreateTest, postgresqlAllTypesCreateMixedTest]
 }
 function postgresqlAllTypesReadTest() returns error? {
     PostgreSQLTestEntitiesClient testEntitiesClient = check new ();
@@ -61,13 +64,13 @@ function postgresqlAllTypesReadTest() returns error? {
     AllTypes[] allTypes = check from AllTypes allTypesRecord in allTypesStream
         select allTypesRecord;
 
-    test:assertEquals(allTypes, [allTypes3Expected, allTypes1Expected, allTypes2Expected]);
+    test:assertEquals(allTypes, [allTypes3Expected, allTypes4Expected, allTypes1Expected, allTypes2Expected]);
     check testEntitiesClient.close();
 }
 
 @test:Config {
     groups: ["all-types", "postgresql", "dependent"],
-    dependsOn: [postgresqlAllTypesCreateTest, postgresqlAllTypesCreateOptionalTest]
+    dependsOn: [postgresqlAllTypesCreateTest, postgresqlAllTypesCreateMixedTest]
 }
 function postgresqlAllTypesReadDependentTest() returns error? {
     PostgreSQLTestEntitiesClient testEntitiesClient = check new ();
@@ -95,6 +98,25 @@ function postgresqlAllTypesReadDependentTest() returns error? {
             dateTypeOptional: allTypes3Expected.dateTypeOptional,
             timeOfDayTypeOptional: allTypes3Expected.timeOfDayTypeOptional,
             civilTypeOptional: allTypes3Expected.civilTypeOptional
+        },
+        {
+            booleanType: allTypes4Expected.booleanType,
+            intType: allTypes4Expected.intType,
+            floatType: allTypes4Expected.floatType,
+            decimalType: allTypes4Expected.decimalType,
+            stringType: allTypes4Expected.stringType,
+            byteArrayType: allTypes4Expected.byteArrayType,
+            dateType: allTypes4Expected.dateType,
+            timeOfDayType: allTypes4Expected.timeOfDayType,
+            civilType: allTypes4Expected.civilType,
+            booleanTypeOptional: allTypes4Expected.booleanTypeOptional,
+            intTypeOptional: allTypes4Expected.intTypeOptional,
+            floatTypeOptional: allTypes4Expected.floatTypeOptional,
+            decimalTypeOptional: allTypes4Expected.decimalTypeOptional,
+            stringTypeOptional: allTypes4Expected.stringTypeOptional,
+            dateTypeOptional: allTypes4Expected.dateTypeOptional,
+            timeOfDayTypeOptional: allTypes4Expected.timeOfDayTypeOptional,
+            civilTypeOptional: allTypes4Expected.civilTypeOptional
         },
         {
             booleanType: allTypes1Expected.booleanType,
@@ -140,7 +162,7 @@ function postgresqlAllTypesReadDependentTest() returns error? {
 
 @test:Config {
     groups: ["all-types", "postgresql"],
-    dependsOn: [postgresqlAllTypesCreateTest, postgresqlAllTypesCreateOptionalTest]
+    dependsOn: [postgresqlAllTypesCreateTest, postgresqlAllTypesCreateMixedTest]
 }
 function postgresqlAllTypesReadOneTest() returns error? {
     PostgreSQLTestEntitiesClient testEntitiesClient = check new ();
@@ -154,6 +176,9 @@ function postgresqlAllTypesReadOneTest() returns error? {
     allTypesRetrieved = check testEntitiesClient->/alltypes/[allTypes3.id].get();
     test:assertEquals(allTypesRetrieved, allTypes3Expected);
 
+    allTypesRetrieved = check testEntitiesClient->/alltypes/[allTypes4.id].get();
+    test:assertEquals(allTypesRetrieved, allTypes4Expected);
+
     check testEntitiesClient.close();
 }
 
@@ -163,9 +188,9 @@ function postgresqlAllTypesReadOneTest() returns error? {
 function postgresqlAllTypesReadOneTestNegative() returns error? {
     PostgreSQLTestEntitiesClient testEntitiesClient = check new ();
 
-    AllTypes|persist:Error allTypesRetrieved = testEntitiesClient->/alltypes/[4].get();
+    AllTypes|persist:Error allTypesRetrieved = testEntitiesClient->/alltypes/[5].get();
     if allTypesRetrieved is persist:NotFoundError {
-        test:assertEquals(allTypesRetrieved.message(), "A record with the key '4' does not exist for the entity 'AllTypes'.");
+        test:assertEquals(allTypesRetrieved.message(), "A record with the key '5' does not exist for the entity 'AllTypes'.");
     }
     else {
         test:assertFail("persist:NotFoundError expected.");
@@ -223,6 +248,6 @@ function postgresqlAllTypesDeleteTest() returns error? {
     AllTypes[] allTypesCollection = check from AllTypes allTypesRecord in allTypesStream
         select allTypesRecord;
 
-    test:assertEquals(allTypesCollection, [allTypes3Expected, allTypes1UpdatedExpected]);
+    test:assertEquals(allTypesCollection, [allTypes3Expected, allTypes4Expected, allTypes1UpdatedExpected]);
     check testEntitiesClient.close();
 }

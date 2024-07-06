@@ -19,7 +19,8 @@ import ballerina/persist;
 
 @test:Config {
     groups: ["native", "mssql"],
-    dependsOn: [mssqlEmployeeRelationsTest, mssqlWorkspaceRelationsTest, mssqlBuildingRelationsTest, mssqlDepartmentRelationsTest]
+    dependsOn: [mssqlEmployeeRelationsTest, mssqlWorkspaceRelationsTest, mssqlBuildingRelationsTest, mssqlDepartmentRelationsTest],
+    enable: true
 }
 function mssqlNativeExecuteTest() returns error? {
     MSSQLRainierClient rainierClient = check new ();
@@ -69,7 +70,8 @@ function mssqlNativeExecuteTest() returns error? {
 
 @test:Config {
     groups: ["native", "mssql"],
-    dependsOn: [mssqlNativeExecuteTest]
+    dependsOn: [mssqlNativeExecuteTest],
+    enable: true
 }
 function mssqlNativeExecuteTestNegative1() returns error? {
     MSSQLRainierClient rainierClient = check new ();
@@ -89,7 +91,8 @@ function mssqlNativeExecuteTestNegative1() returns error? {
 
 @test:Config {
     groups: ["native", "mssql"],
-    dependsOn: [mssqlNativeExecuteTest]
+    dependsOn: [mssqlNativeExecuteTest],
+    enable: true
 }
 function mssqlNativeExecuteTestNegative2() returns error? {
     MSSQLRainierClient rainierClient = check new ();
@@ -109,7 +112,8 @@ function mssqlNativeExecuteTestNegative2() returns error? {
 
 @test:Config {
     groups: ["native", "mssql"],
-    dependsOn: [mssqlNativeExecuteTest]
+    dependsOn: [mssqlNativeExecuteTest],
+    enable: true
 }
 function mssqlNativeQueryTest() returns error? {
     MSSQLRainierClient rainierClient = check new ();
@@ -142,7 +146,8 @@ function mssqlNativeQueryTest() returns error? {
 
 @test:Config {
     groups: ["native", "mssql"],
-    dependsOn: [mssqlNativeExecuteTest]
+    dependsOn: [mssqlNativeExecuteTest],
+    enable: true
 }
 function mssqlNativeQueryTestNegative() returns error? {
     MSSQLRainierClient rainierClient = check new ();
@@ -162,7 +167,8 @@ function mssqlNativeQueryTestNegative() returns error? {
 
 @test:Config {
     groups: ["native", "mssql"],
-    dependsOn: [mssqlNativeExecuteTest]
+    dependsOn: [mssqlNativeExecuteTest],
+    enable: true
 }
 function mssqlNativeQueryComplexTest() returns error? {
     MSSQLRainierClient rainierClient = check new ();
@@ -190,7 +196,8 @@ function mssqlNativeQueryComplexTest() returns error? {
 
 @test:Config {
     groups: ["transactions", "mssql", "native"],
-    dependsOn: [mssqlNativeExecuteTestNegative1, mssqlNativeQueryTest, mssqlNativeQueryTestNegative, mssqlNativeQueryComplexTest]
+    dependsOn: [mssqlNativeExecuteTestNegative1, mssqlNativeQueryTest, mssqlNativeQueryTestNegative, mssqlNativeQueryComplexTest],
+    enable: true
 }
 function mssqlNativeTransactionTest() returns error? {
     MSSQLRainierClient rainierClient = check new ();
@@ -235,7 +242,8 @@ function mssqlNativeTransactionTest() returns error? {
 
 @test:Config {
     groups: ["transactions", "mssql", "native"],
-    dependsOn: [mssqlNativeExecuteTestNegative1, mssqlNativeQueryTest, mssqlNativeQueryTestNegative, mssqlNativeQueryComplexTest]
+    dependsOn: [mssqlNativeExecuteTestNegative1, mssqlNativeQueryTest, mssqlNativeQueryTestNegative, mssqlNativeQueryComplexTest],
+    enable: true
 }
 function mssqlNativeTransactionTest2() returns error? {
     MSSQLRainierClient rainierClient = check new ();
@@ -276,7 +284,8 @@ function mssqlNativeTransactionTest2() returns error? {
 
 @test:Config {
     groups: ["mssql", "native"],
-    dependsOn: [mssqlAllTypesDeleteTest]
+    dependsOn: [mssqlAllTypesDeleteTest],
+    enable: true
 }
 function mssqlNativeAllTypesTest() returns error? {
     MSSQLRainierClient rainierClient = check new ();

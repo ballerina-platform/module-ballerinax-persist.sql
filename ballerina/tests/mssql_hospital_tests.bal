@@ -18,7 +18,7 @@ import ballerina/persist;
 import ballerina/test;
 
 
-@test:Config{}
+@test:Config{enable: true}
 function testCreatePatientMsSql() returns error? {
     MsSqlHospitalClient mssqlDbHospital = check new();
     PatientInsert patient = {
@@ -31,7 +31,7 @@ function testCreatePatientMsSql() returns error? {
     _ = check mssqlDbHospital->/patients.post([patient]);
 }
 
-@test:Config{}
+@test:Config{enable: true}
 function testCreateDoctorMsSql() returns error? {
     MsSqlHospitalClient mssqlDbHospital = check new();
     DoctorInsert doctor = {
@@ -45,7 +45,8 @@ function testCreateDoctorMsSql() returns error? {
 }
 
 @test:Config{
-  dependsOn: [testCreateDoctorMsSql]
+  dependsOn: [testCreateDoctorMsSql],
+  enable: true
 }
 function testCreateDoctorAlreadyExistsMsSql() returns error? {
     MsSqlHospitalClient mssqlDbHospital = check new();
@@ -63,7 +64,8 @@ function testCreateDoctorAlreadyExistsMsSql() returns error? {
 }
 
 @test:Config{
-  dependsOn: [testCreatePatientMsSql, testCreateDoctorMsSql]
+  dependsOn: [testCreatePatientMsSql, testCreateDoctorMsSql],
+  enable: true
 }
 function testCreateAppointmentMsSql() returns error? {
     MsSqlHospitalClient mssqlDbHospital = check new();
@@ -79,7 +81,8 @@ function testCreateAppointmentMsSql() returns error? {
 }
 
 @test:Config{
-  dependsOn: [testCreatePatientMsSql, testCreateDoctorMsSql, testCreateAppointmentMsSql]
+  dependsOn: [testCreatePatientMsSql, testCreateDoctorMsSql, testCreateAppointmentMsSql],
+  enable: true
 }
 function testCreateAppointmentAlreadyExistsMsSql() returns error? {
     MsSqlHospitalClient mssqlDbHospital = check new();
@@ -98,7 +101,8 @@ function testCreateAppointmentAlreadyExistsMsSql() returns error? {
 }
 
 @test:Config{
-  dependsOn: [testCreateDoctorMsSql]
+  dependsOn: [testCreateDoctorMsSql],
+  enable: true
 }
 function testGetDoctorsMsSql() returns error? {
     MsSqlHospitalClient mssqlDbHospital = check new();
@@ -111,7 +115,8 @@ function testGetDoctorsMsSql() returns error? {
 }
 
 @test:Config{
-  dependsOn: [testCreatePatientMsSql]
+  dependsOn: [testCreatePatientMsSql],
+  enable: true
 }
 function testGetPatientByIdMsSql() returns error? {
     MsSqlHospitalClient mssqlDbHospital = check new();
@@ -120,7 +125,7 @@ function testGetPatientByIdMsSql() returns error? {
     test:assertEquals(patient, expected, "Patient details should be returned");
 }
 
-@test:Config{}
+@test:Config{enable: true}
 function testGetPatientNotFoundMsSql() returns error? {
     MsSqlHospitalClient mssqlDbHospital = check new();
     Patient|persist:Error patient = mssqlDbHospital->/patients/[10].get();
@@ -130,7 +135,8 @@ function testGetPatientNotFoundMsSql() returns error? {
 }
 
 @test:Config{
-  dependsOn: [testCreateAppointmentMsSql]
+  dependsOn: [testCreateAppointmentMsSql],
+  enable: true
 }
 function testGetAppointmentByDoctorMsSql() returns error? {
     MsSqlHospitalClient mssqlDbHospital = check new();
@@ -186,7 +192,8 @@ function testGetAppointmentByDoctorMsSql() returns error? {
 }
 
 @test:Config{
-  dependsOn: [testCreateAppointmentMsSql]
+  dependsOn: [testCreateAppointmentMsSql],
+  enable: true
 }
 function testGetAppointmentByPatientMsSql() returns error? {
     MsSqlHospitalClient mssqlDbHospital = check new();
@@ -235,7 +242,8 @@ function testGetAppointmentByPatientMsSql() returns error? {
 }
 
 @test:Config{
-  dependsOn: [testCreateAppointmentMsSql, testGetAppointmentByDoctorMsSql, testGetAppointmentByPatientMsSql]
+  dependsOn: [testCreateAppointmentMsSql, testGetAppointmentByDoctorMsSql, testGetAppointmentByPatientMsSql],
+  enable: true
 }
 function testPatchAppointmentMsSql() returns error? {
     MsSqlHospitalClient mssqlDbHospital = check new();
@@ -287,7 +295,8 @@ function testPatchAppointmentMsSql() returns error? {
 }
 
 @test:Config{
-  dependsOn: [testCreateAppointmentMsSql, testGetAppointmentByDoctorMsSql, testGetAppointmentByPatientMsSql, testPatchAppointmentMsSql]
+  dependsOn: [testCreateAppointmentMsSql, testGetAppointmentByDoctorMsSql, testGetAppointmentByPatientMsSql, testPatchAppointmentMsSql],
+  enable: true
 }
 function testDeleteAppointmentByPatientIdMsSql() returns error? {
     MsSqlHospitalClient mssqlDbHospital = check new();
@@ -318,7 +327,8 @@ function testDeleteAppointmentByPatientIdMsSql() returns error? {
 }
 
 @test:Config{
-  dependsOn: [testGetPatientByIdMsSql, testDeleteAppointmentByPatientIdMsSql]
+  dependsOn: [testGetPatientByIdMsSql, testDeleteAppointmentByPatientIdMsSql],
+  enable: true
 }
 function testDeletePatientMsSql() returns error? {
     MsSqlHospitalClient mssqlDbHospital = check new();
@@ -329,7 +339,8 @@ function testDeletePatientMsSql() returns error? {
 }
 
 @test:Config{
-  dependsOn: [testGetDoctorsMsSql, testDeleteAppointmentByPatientIdMsSql]
+  dependsOn: [testGetDoctorsMsSql, testDeleteAppointmentByPatientIdMsSql],
+  enable: true
 }
 function testDeleteDoctorMsSql() returns error? {
     MsSqlHospitalClient mssqlDbHospital = check new();

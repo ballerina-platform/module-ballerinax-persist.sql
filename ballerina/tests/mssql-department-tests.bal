@@ -18,7 +18,8 @@ import ballerina/test;
 import ballerina/persist;
 
 @test:Config {
-    groups: ["department", "mssql"]
+    groups: ["department", "mssql"],
+    enable: true
 }
 function mssqlDepartmentCreateTest() returns error? {
     MSSQLRainierClient rainierClient = check new ();
@@ -32,7 +33,8 @@ function mssqlDepartmentCreateTest() returns error? {
 }
 
 @test:Config {
-    groups: ["department", "mssql"]
+    groups: ["department", "mssql"],
+    enable: true
 }
 function mssqlDepartmentCreateTest2() returns error? {
     MSSQLRainierClient rainierClient = check new ();
@@ -50,7 +52,8 @@ function mssqlDepartmentCreateTest2() returns error? {
 }
 
 @test:Config {
-    groups: ["department", "mssql"]
+    groups: ["department", "mssql"],
+    enable: true
 }
 function mssqlDepartmentCreateTestNegative() returns error? {
     MSSQLRainierClient rainierClient = check new ();
@@ -66,7 +69,8 @@ function mssqlDepartmentCreateTestNegative() returns error? {
 
 @test:Config {
     groups: ["department", "mssql"],
-    dependsOn: [mssqlDepartmentCreateTest]
+    dependsOn: [mssqlDepartmentCreateTest],
+    enable: true
 }
 function mssqlDepartmentReadOneTest() returns error? {
     MSSQLRainierClient rainierClient = check new ();
@@ -78,7 +82,8 @@ function mssqlDepartmentReadOneTest() returns error? {
 
 @test:Config {
     groups: ["department", "mssql"],
-    dependsOn: [mssqlDepartmentCreateTest]
+    dependsOn: [mssqlDepartmentCreateTest],
+    enable: true
 }
 function mssqlDepartmentReadOneTestNegative() returns error? {
     MSSQLRainierClient rainierClient = check new ();
@@ -94,7 +99,8 @@ function mssqlDepartmentReadOneTestNegative() returns error? {
 
 @test:Config {
     groups: ["department", "mssql"],
-    dependsOn: [mssqlDepartmentCreateTest, mssqlDepartmentCreateTest2]
+    dependsOn: [mssqlDepartmentCreateTest, mssqlDepartmentCreateTest2],
+    enable: true
 }
 function mssqlDepartmentReadManyTest() returns error? {
     MSSQLRainierClient rainierClient = check new ();
@@ -108,7 +114,8 @@ function mssqlDepartmentReadManyTest() returns error? {
 
 @test:Config {
     groups: ["department", "mssql", "dependent"],
-    dependsOn: [mssqlDepartmentCreateTest, mssqlDepartmentCreateTest2]
+    dependsOn: [mssqlDepartmentCreateTest, mssqlDepartmentCreateTest2],
+    enable: true
 }
 function mssqlDepartmentReadManyTestDependent() returns error? {
     MSSQLRainierClient rainierClient = check new ();
@@ -127,7 +134,8 @@ function mssqlDepartmentReadManyTestDependent() returns error? {
 
 @test:Config {
     groups: ["department", "mssql"],
-    dependsOn: [mssqlDepartmentReadOneTest, mssqlDepartmentReadManyTest, mssqlDepartmentReadManyTestDependent]
+    dependsOn: [mssqlDepartmentReadOneTest, mssqlDepartmentReadManyTest, mssqlDepartmentReadManyTestDependent],
+    enable: true
 }
 function mssqlDepartmentUpdateTest() returns error? {
     MSSQLRainierClient rainierClient = check new ();
@@ -145,7 +153,8 @@ function mssqlDepartmentUpdateTest() returns error? {
 
 @test:Config {
     groups: ["department", "mssql"],
-    dependsOn: [mssqlDepartmentReadOneTest, mssqlDepartmentReadManyTest, mssqlDepartmentReadManyTestDependent]
+    dependsOn: [mssqlDepartmentReadOneTest, mssqlDepartmentReadManyTest, mssqlDepartmentReadManyTestDependent],
+    enable: true
 }
 function mssqlDepartmentUpdateTestNegative1() returns error? {
     MSSQLRainierClient rainierClient = check new ();
@@ -164,7 +173,8 @@ function mssqlDepartmentUpdateTestNegative1() returns error? {
 
 @test:Config {
     groups: ["department", "mssql"],
-    dependsOn: [mssqlDepartmentReadOneTest, mssqlDepartmentReadManyTest, mssqlDepartmentReadManyTestDependent]
+    dependsOn: [mssqlDepartmentReadOneTest, mssqlDepartmentReadManyTest, mssqlDepartmentReadManyTestDependent],
+    enable: true
 }
 function mssqlDepartmentUpdateTestNegative2() returns error? {
     MSSQLRainierClient rainierClient = check new ();
@@ -183,7 +193,8 @@ function mssqlDepartmentUpdateTestNegative2() returns error? {
 
 @test:Config {
     groups: ["department", "mssql"],
-    dependsOn: [mssqlDepartmentUpdateTest, mssqlDepartmentUpdateTestNegative2]
+    dependsOn: [mssqlDepartmentUpdateTest, mssqlDepartmentUpdateTestNegative2],
+    enable: true
 }
 function mssqlDepartmentDeleteTest() returns error? {
     MSSQLRainierClient rainierClient = check new ();
@@ -201,7 +212,8 @@ function mssqlDepartmentDeleteTest() returns error? {
 
 @test:Config {
     groups: ["department", "mssql"],
-    dependsOn: [mssqlDepartmentDeleteTest]
+    dependsOn: [mssqlDepartmentDeleteTest],
+    enable: true
 }
 function mssqlDepartmentDeleteTestNegative() returns error? {
     MSSQLRainierClient rainierClient = check new ();

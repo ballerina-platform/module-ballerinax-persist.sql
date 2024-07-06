@@ -17,7 +17,8 @@
 import ballerina/test;
 
 @test:Config {
-    groups: ["id-fields", "mssql"]
+    groups: ["id-fields", "mssql"],
+    enable: true
 }
 function mssqlIntIdFieldTest() returns error? {
     MSSQLTestEntitiesClient testEntitiesClient = check new ();
@@ -77,7 +78,8 @@ function mssqlIntIdFieldTest() returns error? {
 }
 
 @test:Config {
-    groups: ["id-fields", "mssql"]
+    groups: ["id-fields", "mssql"],
+    enable: true
 }
 function mssqlStringIdFieldTest() returns error? {
     MSSQLTestEntitiesClient testEntitiesClient = check new ();
@@ -137,7 +139,8 @@ function mssqlStringIdFieldTest() returns error? {
 }
 
 @test:Config {
-    groups: ["id-fields", "mssql"]
+    groups: ["id-fields", "mssql"],
+    enable: true
 }
 function mssqlFloatIdFieldTest() returns error? {
     MSSQLTestEntitiesClient testEntitiesClient = check new ();
@@ -195,7 +198,8 @@ function mssqlFloatIdFieldTest() returns error? {
 }
 
 @test:Config {
-    groups: ["id-fields", "mssql"]
+    groups: ["id-fields", "mssql"],
+    enable: true
 }
 function mssqlDecimalIdFieldTest() returns error? {
     MSSQLTestEntitiesClient testEntitiesClient = check new ();
@@ -255,7 +259,8 @@ function mssqlDecimalIdFieldTest() returns error? {
 }
 
 @test:Config {
-    groups: ["id-fields", "mssql"]
+    groups: ["id-fields", "mssql"],
+    enable: true
 }
 function mssqlBooleanIdFieldTest() returns error? {
     MSSQLTestEntitiesClient testEntitiesClient = check new ();
@@ -311,7 +316,8 @@ function mssqlBooleanIdFieldTest() returns error? {
 }
 
 @test:Config {
-    groups: ["id-fields", "mssql"]
+    groups: ["id-fields", "mssql"],
+    enable: true
 }
 function mssqlAllTypesIdFieldTest() returns error? {
     MSSQLTestEntitiesClient testEntitiesClient = check new ();
@@ -383,7 +389,8 @@ function mssqlAllTypesIdFieldTest() returns error? {
 
 @test:Config {
     groups: ["id-fields", "mssql", "associations"],
-    dependsOn: [mssqlAllTypesIdFieldTest]
+    dependsOn: [mssqlAllTypesIdFieldTest],
+    enable: true
 }
 function mssqlCompositeAssociationsTest() returns error? {
     MSSQLTestEntitiesClient testEntitiesClient = check new ();

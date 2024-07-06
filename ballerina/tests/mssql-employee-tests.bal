@@ -19,7 +19,8 @@ import ballerina/persist;
 
 @test:Config {
     groups: ["employee", "mssql"],
-    dependsOn: [mssqlWorkspaceDeleteTestNegative, mssqlDepartmentDeleteTestNegative]
+    dependsOn: [mssqlWorkspaceDeleteTestNegative, mssqlDepartmentDeleteTestNegative],
+    enable: true
 }
 function mssqlEmployeeCreateTest() returns error? {
     MSSQLRainierClient rainierClient = check new ();
@@ -34,7 +35,8 @@ function mssqlEmployeeCreateTest() returns error? {
 
 @test:Config {
     groups: ["employee", "mssql"],
-    dependsOn: [mssqlWorkspaceDeleteTestNegative, mssqlDepartmentDeleteTestNegative]
+    dependsOn: [mssqlWorkspaceDeleteTestNegative, mssqlDepartmentDeleteTestNegative],
+    enable: true
 }
 function mssqlEmployeeCreateTest2() returns error? {
     MSSQLRainierClient rainierClient = check new ();
@@ -52,7 +54,8 @@ function mssqlEmployeeCreateTest2() returns error? {
 }
 
 @test:Config {
-    groups: ["employee", "mssql"]
+    groups: ["employee", "mssql"],
+    enable: true
 }
 function mssqlEmployeeCreateTestNegative() returns error? {
     MSSQLRainierClient rainierClient = check new ();
@@ -68,7 +71,8 @@ function mssqlEmployeeCreateTestNegative() returns error? {
 
 @test:Config {
     groups: ["employee", "mssql"],
-    dependsOn: [mssqlEmployeeCreateTest]
+    dependsOn: [mssqlEmployeeCreateTest],
+    enable: true
 }
 function mssqlEmployeeReadOneTest() returns error? {
     MSSQLRainierClient rainierClient = check new ();
@@ -80,7 +84,8 @@ function mssqlEmployeeReadOneTest() returns error? {
 
 @test:Config {
     groups: ["employee", "mssql"],
-    dependsOn: [mssqlEmployeeCreateTest]
+    dependsOn: [mssqlEmployeeCreateTest],
+    enable: true
 }
 function mssqlEmployeeReadOneTestNegative() returns error? {
     MSSQLRainierClient rainierClient = check new ();
@@ -96,7 +101,8 @@ function mssqlEmployeeReadOneTestNegative() returns error? {
 
 @test:Config {
     groups: ["employee", "mssql"],
-    dependsOn: [mssqlEmployeeCreateTest, mssqlEmployeeCreateTest2]
+    dependsOn: [mssqlEmployeeCreateTest, mssqlEmployeeCreateTest2],
+    enable: true
 }
 function mssqlEmployeeReadManyTest() returns error? {
     MSSQLRainierClient rainierClient = check new ();
@@ -111,7 +117,8 @@ function mssqlEmployeeReadManyTest() returns error? {
 
 @test:Config {
     groups: ["dependent", "employee"],
-    dependsOn: [mssqlEmployeeCreateTest, mssqlEmployeeCreateTest2]
+    dependsOn: [mssqlEmployeeCreateTest, mssqlEmployeeCreateTest2],
+    enable: true
 }
 function mssqlEmployeeReadManyDependentTest1() returns error? {
     MSSQLRainierClient rainierClient = check new ();
@@ -130,7 +137,8 @@ function mssqlEmployeeReadManyDependentTest1() returns error? {
 
 @test:Config {
     groups: ["dependent", "employee"],
-    dependsOn: [mssqlEmployeeCreateTest, mssqlEmployeeCreateTest2]
+    dependsOn: [mssqlEmployeeCreateTest, mssqlEmployeeCreateTest2],
+    enable: true
 }
 function mssqlEmployeeReadManyDependentTest2() returns error? {
     MSSQLRainierClient rainierClient = check new ();
@@ -149,7 +157,8 @@ function mssqlEmployeeReadManyDependentTest2() returns error? {
 
 @test:Config {
     groups: ["employee", "mssql"],
-    dependsOn: [mssqlEmployeeReadOneTest, mssqlEmployeeReadManyTest, mssqlEmployeeReadManyDependentTest1, mssqlEmployeeReadManyDependentTest2]
+    dependsOn: [mssqlEmployeeReadOneTest, mssqlEmployeeReadManyTest, mssqlEmployeeReadManyDependentTest1, mssqlEmployeeReadManyDependentTest2],
+    enable: true
 }
 function mssqlEmployeeUpdateTest() returns error? {
     MSSQLRainierClient rainierClient = check new ();
@@ -169,7 +178,8 @@ function mssqlEmployeeUpdateTest() returns error? {
 
 @test:Config {
     groups: ["employee", "mssql"],
-    dependsOn: [mssqlEmployeeReadOneTest, mssqlEmployeeReadManyTest, mssqlEmployeeReadManyDependentTest1, mssqlEmployeeReadManyDependentTest2]
+    dependsOn: [mssqlEmployeeReadOneTest, mssqlEmployeeReadManyTest, mssqlEmployeeReadManyDependentTest1, mssqlEmployeeReadManyDependentTest2],
+    enable: true
 }
 function mssqlEmployeeUpdateTestNegative1() returns error? {
     MSSQLRainierClient rainierClient = check new ();
@@ -188,7 +198,8 @@ function mssqlEmployeeUpdateTestNegative1() returns error? {
 
 @test:Config {
     groups: ["employee", "mssql"],
-    dependsOn: [mssqlEmployeeReadOneTest, mssqlEmployeeReadManyTest, mssqlEmployeeReadManyDependentTest1, mssqlEmployeeReadManyDependentTest2]
+    dependsOn: [mssqlEmployeeReadOneTest, mssqlEmployeeReadManyTest, mssqlEmployeeReadManyDependentTest1, mssqlEmployeeReadManyDependentTest2],
+    enable: true
 }
 function mssqlEmployeeUpdateTestNegative2() returns error? {
     MSSQLRainierClient rainierClient = check new ();
@@ -207,7 +218,8 @@ function mssqlEmployeeUpdateTestNegative2() returns error? {
 
 @test:Config {
     groups: ["employee", "mssql"],
-    dependsOn: [mssqlEmployeeReadOneTest, mssqlEmployeeReadManyTest, mssqlEmployeeReadManyDependentTest1, mssqlEmployeeReadManyDependentTest2]
+    dependsOn: [mssqlEmployeeReadOneTest, mssqlEmployeeReadManyTest, mssqlEmployeeReadManyDependentTest1, mssqlEmployeeReadManyDependentTest2],
+    enable: true
 }
 function mssqlEmployeeUpdateTestNegative3() returns error? {
     MSSQLRainierClient rainierClient = check new ();
@@ -222,7 +234,8 @@ function mssqlEmployeeUpdateTestNegative3() returns error? {
 
 @test:Config {
     groups: ["employee", "mssql"],
-    dependsOn: [mssqlEmployeeUpdateTest, mssqlEmployeeUpdateTestNegative2, mssqlEmployeeUpdateTestNegative3]
+    dependsOn: [mssqlEmployeeUpdateTest, mssqlEmployeeUpdateTestNegative2, mssqlEmployeeUpdateTestNegative3],
+    enable: true
 }
 function mssqlEmployeeDeleteTest() returns error? {
     MSSQLRainierClient rainierClient = check new ();
@@ -240,7 +253,8 @@ function mssqlEmployeeDeleteTest() returns error? {
 
 @test:Config {
     groups: ["employee", "mssql"],
-    dependsOn: [mssqlEmployeeDeleteTest]
+    dependsOn: [mssqlEmployeeDeleteTest],
+    enable: true
 }
 function mssqlEmployeeDeleteTestNegative() returns error? {
     MSSQLRainierClient rainierClient = check new ();

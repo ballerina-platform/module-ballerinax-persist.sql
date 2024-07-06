@@ -75,10 +75,10 @@ configurable record {|
 
 @test:BeforeSuite
 function initSuite() returns error? {
-    check initMySQLTest();
-    check initMSSQLTest();
-    check initPostgreSQLTest();
-    check initH2Test();
+    check initMySqlTests();
+    check initMsSqlTests();
+    check initPostgreSqlTests();
+    check initH2Tests();
 }
 
 function initMySqlTests() returns error? {
@@ -309,7 +309,7 @@ function initPostgreSqlTests() returns error? {
     check postgresqlDbClient.close();
 }
 
-function initH2Test() returns error? {
+function initH2Tests() returns error? {
     jdbc:Client h2DbClient = check new (url = h2.url, user = h2.user, password = h2.password);
     _ = check h2DbClient->execute(`DROP TABLE IF EXISTS "Building"`);
     _ = check h2DbClient->execute(`
@@ -532,7 +532,7 @@ AllTypes allTypes2 = {
     floatTypeOptional: 66.0,
     decimalTypeOptional: 233.44,
     stringTypeOptional: "test2",
-    dateTypeOptional: {year: 1293, month: 11, day: 3},
+    dateTypeOptional: {year: 1993, month: 11, day: 3},
     timeOfDayTypeOptional: {hour: 19, minute: 32, second: 34},
     civilTypeOptional: {year: 1989, month: 11, day: 3, hour: 12, minute: 32, second: 34},
     enumType: "TYPE_1",
@@ -580,7 +580,7 @@ AllTypes allTypes3 = {
     floatTypeOptional: 66.0,
     decimalTypeOptional: (),
     stringTypeOptional: (),
-    dateTypeOptional: {year: 1293, month: 11, day: 3},
+    dateTypeOptional: {year: 1993, month: 11, day: 3},
     timeOfDayTypeOptional: {hour: 19, minute: 32, second: 34},
     civilTypeOptional: {year: 1989, month: 11, day: 3, hour: 12, minute: 32, second: 34},
     enumType: "TYPE_1",

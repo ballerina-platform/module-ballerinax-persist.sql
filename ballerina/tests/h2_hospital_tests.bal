@@ -20,7 +20,7 @@ import ballerina/test;
 
 @test:Config{}
 function testCreatePatientH2() returns error? {
-    H2HospitalClient H2DbHospital = check new();
+    H2HospitalClient h2DbHospital = check new();
     PatientInsert patient = {
       name: "John Doe",
       age: 30,

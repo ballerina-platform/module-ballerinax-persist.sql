@@ -487,7 +487,7 @@ function initH2Tests() returns error? {
             "age" INT NOT NULL,
             "ADD_RESS" VARCHAR(191) NOT NULL,
             "phoneNumber" CHAR(10) NOT NULL,
-            "gender" ENUM('MALE', 'FEMALE') NOT NULL,
+            "gender" VARCHAR(6) CHECK ("gender" IN ('MALE', 'FEMALE')) NOT NULL,
             PRIMARY KEY("IDP")
         );
     `);
@@ -497,7 +497,7 @@ function initH2Tests() returns error? {
         "id" INT NOT NULL,
         "reason" VARCHAR(191) NOT NULL,
         "appointmentTime" DATETIME NOT NULL,
-        "status" ENUM('SCHEDULED', 'STARTED', 'ENDED') NOT NULL,
+        "status" VARCHAR(9) CHECK ("status" IN ('SCHEDULED', 'STARTED', 'ENDED')) NOT NULL,
         "patient_id" INT NOT NULL,
         FOREIGN KEY("patient_id") REFERENCES "patients"("IDP"),
         "doctorId" INT NOT NULL,

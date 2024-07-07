@@ -14,6 +14,7 @@
 // specific language governing permissions and limitations
 // under the License.
 
+import ballerina/log;
 import ballerina/persist;
 import ballerina/test;
 
@@ -327,7 +328,8 @@ function testDeletePatientH2() returns error? {
     MySqlHospitalClient h2DbHospital = check new();
     Patient|persist:Error result = h2DbHospital->/patients/[1].delete();
     if result is persist:Error {
-            test:assertFail("Patient should be deleted");
+        log:printError("Error: ", result);
+        test:assertFail("Patient should be deleted");
     }
 }
 
@@ -338,6 +340,6 @@ function testDeleteDoctorH2() returns error? {
     MySqlHospitalClient h2DbHospital = check new();
     Doctor|persist:Error result = h2DbHospital->/doctors/[1].delete();
     if result is persist:Error {
-            test:assertFail("Patient should be deleted");
+        test:assertFail("Patient should be deleted");
     }
 }

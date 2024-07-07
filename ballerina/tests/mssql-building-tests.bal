@@ -18,8 +18,7 @@ import ballerina/test;
 import ballerina/persist;
 
 @test:Config {
-    groups: ["building", "mssql"],
-    enable: true
+    groups: ["building", "mssql"]
 }
 function mssqlBuildingCreateTest() returns error? {
     MSSQLRainierClient rainierClient = check new ();
@@ -33,8 +32,7 @@ function mssqlBuildingCreateTest() returns error? {
 }
 
 @test:Config {
-    groups: ["building", "mssql"],
-    enable: true
+    groups: ["building", "mssql"]
 }
 function mssqlBuildingCreateTest2() returns error? {
     MSSQLRainierClient rainierClient = check new ();
@@ -53,8 +51,7 @@ function mssqlBuildingCreateTest2() returns error? {
 }
 
 @test:Config {
-    groups: ["building", "mssql"],
-    enable: true
+    groups: ["building", "mssql"]
 }
 function mssqlBuildingCreateTestNegative() returns error? {
     MSSQLRainierClient rainierClient = check new ();
@@ -70,8 +67,7 @@ function mssqlBuildingCreateTestNegative() returns error? {
 
 @test:Config {
     groups: ["building", "mssql"],
-    dependsOn: [mssqlBuildingCreateTest],
-    enable: true
+    dependsOn: [mssqlBuildingCreateTest]
 }
 function mssqlBuildingReadOneTest() returns error? {
     MSSQLRainierClient rainierClient = check new ();
@@ -83,8 +79,7 @@ function mssqlBuildingReadOneTest() returns error? {
 
 @test:Config {
     groups: ["building", "mssql"],
-    dependsOn: [mssqlBuildingCreateTest],
-    enable: true
+    dependsOn: [mssqlBuildingCreateTest]
 }
 function mssqlBuildingReadOneTestNegative() returns error? {
     MSSQLRainierClient rainierClient = check new ();
@@ -100,8 +95,7 @@ function mssqlBuildingReadOneTestNegative() returns error? {
 
 @test:Config {
     groups: ["building", "mssql"],
-    dependsOn: [mssqlBuildingCreateTest, mssqlBuildingCreateTest2],
-    enable: true
+    dependsOn: [mssqlBuildingCreateTest, mssqlBuildingCreateTest2]
 }
 function mssqlBuildingReadManyTest() returns error? {
     MSSQLRainierClient rainierClient = check new ();
@@ -116,8 +110,7 @@ function mssqlBuildingReadManyTest() returns error? {
 
 @test:Config {
     groups: ["building", "mssql", "dependent"],
-    dependsOn: [mssqlBuildingCreateTest, mssqlBuildingCreateTest2],
-    enable: true
+    dependsOn: [mssqlBuildingCreateTest, mssqlBuildingCreateTest2]
 }
 function mssqlBuildingReadManyDependentTest() returns error? {
     MSSQLRainierClient rainierClient = check new ();
@@ -136,8 +129,7 @@ function mssqlBuildingReadManyDependentTest() returns error? {
 
 @test:Config {
     groups: ["building", "mssql"],
-    dependsOn: [mssqlBuildingReadOneTest, mssqlBuildingReadManyTest, mssqlBuildingReadManyDependentTest],
-    enable: true
+    dependsOn: [mssqlBuildingReadOneTest, mssqlBuildingReadManyTest, mssqlBuildingReadManyDependentTest]
 }
 function mssqlBuildingUpdateTest() returns error? {
     MSSQLRainierClient rainierClient = check new ();
@@ -158,8 +150,7 @@ function mssqlBuildingUpdateTest() returns error? {
 
 @test:Config {
     groups: ["building", "mssql"],
-    dependsOn: [mssqlBuildingReadOneTest, mssqlBuildingReadManyTest, mssqlBuildingReadManyDependentTest],
-    enable: true
+    dependsOn: [mssqlBuildingReadOneTest, mssqlBuildingReadManyTest, mssqlBuildingReadManyDependentTest]
 }
 function mssqlBuildingUpdateTestNegative1() returns error? {
     MSSQLRainierClient rainierClient = check new ();
@@ -180,8 +171,7 @@ function mssqlBuildingUpdateTestNegative1() returns error? {
 
 @test:Config {
     groups: ["building", "mssql"],
-    dependsOn: [mssqlBuildingReadOneTest, mssqlBuildingReadManyTest, mssqlBuildingReadManyDependentTest],
-    enable: true
+    dependsOn: [mssqlBuildingReadOneTest, mssqlBuildingReadManyTest, mssqlBuildingReadManyDependentTest]
 }
 function mssqlBuildingUpdateTestNegative2() returns error? {
     MSSQLRainierClient rainierClient = check new ();
@@ -202,8 +192,7 @@ function mssqlBuildingUpdateTestNegative2() returns error? {
 
 @test:Config {
     groups: ["building", "mssql"],
-    dependsOn: [mssqlBuildingUpdateTest, mssqlBuildingUpdateTestNegative2],
-    enable: true
+    dependsOn: [mssqlBuildingUpdateTest, mssqlBuildingUpdateTestNegative2]
 }
 function mssqlBuildingDeleteTest() returns error? {
     MSSQLRainierClient rainierClient = check new ();
@@ -221,8 +210,7 @@ function mssqlBuildingDeleteTest() returns error? {
 
 @test:Config {
     groups: ["building", "mssql"],
-    dependsOn: [mssqlBuildingDeleteTest],
-    enable: true
+    dependsOn: [mssqlBuildingDeleteTest]
 }
 function mssqlBuildingDeleteTestNegative() returns error? {
     MSSQLRainierClient rainierClient = check new ();

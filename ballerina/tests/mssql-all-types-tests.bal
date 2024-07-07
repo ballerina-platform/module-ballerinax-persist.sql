@@ -18,8 +18,7 @@ import ballerina/test;
 import ballerina/persist;
 
 @test:Config {
-    groups: ["all-types", "mssql"],
-    enable: true
+    groups: ["all-types", "mssql"]
 }
 function mssqlAllTypesCreateTest() returns error? {
     MSSQLTestEntitiesClient testEntitiesClient = check new ();
@@ -37,8 +36,7 @@ function mssqlAllTypesCreateTest() returns error? {
 }
 
 @test:Config {
-    groups: ["all-types", "mssql"],
-    enable: true
+    groups: ["all-types", "mssql"]
 }
 function mssqlAllTypesCreateMixedTest() returns error? {
     MSSQLTestEntitiesClient testEntitiesClient = check new ();
@@ -57,8 +55,7 @@ function mssqlAllTypesCreateMixedTest() returns error? {
 
 @test:Config {
     groups: ["all-types", "mssql"],
-    dependsOn: [mssqlAllTypesCreateTest, mssqlAllTypesCreateMixedTest],
-    enable: true
+    dependsOn: [mssqlAllTypesCreateTest, mssqlAllTypesCreateMixedTest]
 }
 function mssqlAllTypesReadTest() returns error? {
     MSSQLTestEntitiesClient testEntitiesClient = check new ();
@@ -73,8 +70,7 @@ function mssqlAllTypesReadTest() returns error? {
 
 @test:Config {
     groups: ["all-types", "mssql", "dependent"],
-    dependsOn: [mssqlAllTypesCreateTest, mssqlAllTypesCreateMixedTest],
-    enable: true
+    dependsOn: [mssqlAllTypesCreateTest, mssqlAllTypesCreateMixedTest]
 }
 function mssqlAllTypesReadDependentTest() returns error? {
     MSSQLTestEntitiesClient testEntitiesClient = check new ();
@@ -166,8 +162,7 @@ function mssqlAllTypesReadDependentTest() returns error? {
 
 @test:Config {
     groups: ["all-types", "mssql"],
-    dependsOn: [mssqlAllTypesCreateTest, mssqlAllTypesCreateMixedTest],
-    enable: true
+    dependsOn: [mssqlAllTypesCreateTest, mssqlAllTypesCreateMixedTest]
 }
 function mssqlAllTypesReadOneTest() returns error? {
     MSSQLTestEntitiesClient testEntitiesClient = check new ();
@@ -188,8 +183,7 @@ function mssqlAllTypesReadOneTest() returns error? {
 }
 
 @test:Config {
-    groups: ["all-types", "mssql"],
-    enable: true
+    groups: ["all-types", "mssql"]
 }
 function mssqlAllTypesReadOneTestNegative() returns error? {
     MSSQLTestEntitiesClient testEntitiesClient = check new ();
@@ -207,8 +201,7 @@ function mssqlAllTypesReadOneTestNegative() returns error? {
 
 @test:Config {
     groups: ["all-types", "mssql"],
-    dependsOn: [mssqlAllTypesReadOneTest, mssqlAllTypesReadTest, mssqlAllTypesReadDependentTest],
-    enable: true
+    dependsOn: [mssqlAllTypesReadOneTest, mssqlAllTypesReadTest, mssqlAllTypesReadDependentTest]
 }
 function mssqlAllTypesUpdateTest() returns error? {
     MSSQLTestEntitiesClient testEntitiesClient = check new ();
@@ -243,8 +236,7 @@ function mssqlAllTypesUpdateTest() returns error? {
 
 @test:Config {
     groups: ["all-types", "mssql"],
-    dependsOn: [mssqlAllTypesUpdateTest],
-    enable: true
+    dependsOn: [mssqlAllTypesUpdateTest]
 }
 function mssqlAllTypesDeleteTest() returns error? {
     MSSQLTestEntitiesClient testEntitiesClient = check new ();

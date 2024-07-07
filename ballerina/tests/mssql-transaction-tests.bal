@@ -18,8 +18,7 @@ import ballerina/test;
 import ballerina/persist;
 
 @test:Config {
-    groups: ["transactions", "mssql"],
-    enable: true
+    groups: ["transactions", "mssql"]
 }
 function mssqlTransactionTest() returns error? {
     MSSQLRainierClient rainierClient = check new ();
@@ -44,8 +43,7 @@ function mssqlTransactionTest() returns error? {
 }
 
 @test:Config {
-    groups: ["transactions", "mssql"],
-    enable: true
+    groups: ["transactions", "mssql"]
 }
 function mssqlTransactionTest2() returns error? {
     MSSQLRainierClient rainierClient = check new ();

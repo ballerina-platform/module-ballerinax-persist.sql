@@ -19,8 +19,7 @@ import ballerina/persist;
 
 @test:Config {
     groups: ["associations", "mssql"],
-    dependsOn: [mssqlEmployeeDeleteTestNegative],
-    enable: true
+    dependsOn: [mssqlEmployeeDeleteTestNegative]
 }
 function mssqlEmployeeRelationsTest() returns error? {
     MSSQLRainierClient rainierClient = check new ();
@@ -87,8 +86,7 @@ function mssqlEmployeeRelationsTest() returns error? {
 
 @test:Config {
     groups: ["associations", "mssql"],
-    dependsOn: [mssqlEmployeeDeleteTestNegative],
-    enable: true
+    dependsOn: [mssqlEmployeeDeleteTestNegative]
 }
 function mssqlDepartmentRelationsTest() returns error? {
     MSSQLRainierClient rainierClient = check new ();
@@ -168,8 +166,7 @@ function mssqlDepartmentRelationsTest() returns error? {
 
 @test:Config {
     groups: ["associations", "mssql"],
-    dependsOn: [mssqlEmployeeRelationsTest],
-    enable: true
+    dependsOn: [mssqlEmployeeRelationsTest]
 }
 function mssqlWorkspaceRelationsTest() returns error? {
     MSSQLRainierClient rainierClient = check new ();
@@ -245,8 +242,7 @@ function mssqlWorkspaceRelationsTest() returns error? {
 
 @test:Config {
     groups: ["associations", "mssql"],
-    dependsOn: [mssqlEmployeeRelationsTest],
-    enable: true
+    dependsOn: [mssqlEmployeeRelationsTest]
 }
 function mssqlBuildingRelationsTest() returns error? {
     MSSQLRainierClient rainierClient = check new ();

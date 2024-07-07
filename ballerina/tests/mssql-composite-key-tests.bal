@@ -18,8 +18,7 @@ import ballerina/test;
 import ballerina/persist;
 
 @test:Config {
-    groups: ["composite-key", "mssql"],
-    enable: true
+    groups: ["composite-key", "mssql"]
 }
 function mssqlCompositeKeyCreateTest() returns error? {
     MSSQLRainierClient rainierClient = check new ();
@@ -38,8 +37,7 @@ function mssqlCompositeKeyCreateTest() returns error? {
 
 @test:Config {
     groups: ["composite-key", "mssql"],
-    dependsOn: [mssqlCompositeKeyCreateTest],
-    enable: true
+    dependsOn: [mssqlCompositeKeyCreateTest]
 }
 function mssqlCompositeKeyCreateTestNegative() returns error? {
     MSSQLRainierClient rainierClient = check new ();
@@ -56,8 +54,7 @@ function mssqlCompositeKeyCreateTestNegative() returns error? {
 
 @test:Config {
     groups: ["composite-key", "mssql"],
-    dependsOn: [mssqlCompositeKeyCreateTest],
-    enable: true
+    dependsOn: [mssqlCompositeKeyCreateTest]
 }
 function mssqlCompositeKeyReadManyTest() returns error? {
     MSSQLRainierClient rainierClient = check new ();
@@ -72,8 +69,7 @@ function mssqlCompositeKeyReadManyTest() returns error? {
 
 @test:Config {
     groups: ["composite-key", "mssql"],
-    dependsOn: [mssqlCompositeKeyCreateTest],
-    enable: true
+    dependsOn: [mssqlCompositeKeyCreateTest]
 }
 function mssqlCompositeKeyReadOneTest() returns error? {
     MSSQLRainierClient rainierClient = check new ();
@@ -84,8 +80,7 @@ function mssqlCompositeKeyReadOneTest() returns error? {
 
 @test:Config {
     groups: ["composite-key2"],
-    dependsOn: [mssqlCompositeKeyCreateTest],
-    enable: true
+    dependsOn: [mssqlCompositeKeyCreateTest]
 }
 function mssqlCompositeKeyReadOneTest2() returns error? {
     MSSQLRainierClient rainierClient = check new ();
@@ -96,8 +91,7 @@ function mssqlCompositeKeyReadOneTest2() returns error? {
 
 @test:Config {
     groups: ["composite-key", "mssql"],
-    dependsOn: [mssqlCompositeKeyCreateTest],
-    enable: true
+    dependsOn: [mssqlCompositeKeyCreateTest]
 }
 function mssqlCompositeKeyReadOneTestNegative1() returns error? {
     MSSQLRainierClient rainierClient = check new ();
@@ -114,8 +108,7 @@ function mssqlCompositeKeyReadOneTestNegative1() returns error? {
 
 @test:Config {
     groups: ["composite-key", "mssql"],
-    dependsOn: [mssqlCompositeKeyCreateTest],
-    enable: true
+    dependsOn: [mssqlCompositeKeyCreateTest]
 }
 function mssqlCompositeKeyReadOneTestNegative2() returns error? {
     MSSQLRainierClient rainierClient = check new ();
@@ -132,8 +125,7 @@ function mssqlCompositeKeyReadOneTestNegative2() returns error? {
 
 @test:Config {
     groups: ["composite-key", "mssql"],
-    dependsOn: [mssqlCompositeKeyCreateTest, mssqlCompositeKeyReadOneTest, mssqlCompositeKeyReadManyTest, mssqlCompositeKeyReadOneTest2],
-    enable: true
+    dependsOn: [mssqlCompositeKeyCreateTest, mssqlCompositeKeyReadOneTest, mssqlCompositeKeyReadManyTest, mssqlCompositeKeyReadOneTest2]
 }
 function mssqlCompositeKeyUpdateTest() returns error? {
     MSSQLRainierClient rainierClient = check new ();
@@ -152,8 +144,7 @@ function mssqlCompositeKeyUpdateTest() returns error? {
 
 @test:Config {
     groups: ["composite-key", "mssql"],
-    dependsOn: [mssqlCompositeKeyCreateTest, mssqlCompositeKeyReadOneTest, mssqlCompositeKeyReadManyTest, mssqlCompositeKeyReadOneTest2],
-    enable: true
+    dependsOn: [mssqlCompositeKeyCreateTest, mssqlCompositeKeyReadOneTest, mssqlCompositeKeyReadManyTest, mssqlCompositeKeyReadOneTest2]
 }
 function mssqlCompositeKeyUpdateTestNegative() returns error? {
     MSSQLRainierClient rainierClient = check new ();
@@ -173,8 +164,7 @@ function mssqlCompositeKeyUpdateTestNegative() returns error? {
 
 @test:Config {
     groups: ["composite-key", "mssql"],
-    dependsOn: [mssqlCompositeKeyUpdateTest],
-    enable: true
+    dependsOn: [mssqlCompositeKeyUpdateTest]
 }
 function mssqlCompositeKeyDeleteTest() returns error? {
     MSSQLRainierClient rainierClient = check new ();
@@ -190,8 +180,7 @@ function mssqlCompositeKeyDeleteTest() returns error? {
 
 @test:Config {
     groups: ["composite-key", "mssql"],
-    dependsOn: [mssqlCompositeKeyUpdateTest],
-    enable: true
+    dependsOn: [mssqlCompositeKeyUpdateTest]
 }
 function mssqlCompositeKeyDeleteTestNegative() returns error? {
     MSSQLRainierClient rainierClient = check new ();

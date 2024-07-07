@@ -19,8 +19,7 @@ import ballerina/persist;
 
 @test:Config {
     groups: ["workspace", "mssql"],
-    dependsOn: [mssqlBuildingDeleteTestNegative],
-    enable: true
+    dependsOn: [mssqlBuildingDeleteTestNegative]
 }
 function mssqlWorkspaceCreateTest() returns error? {
     MSSQLRainierClient rainierClient = check new ();
@@ -33,8 +32,7 @@ function mssqlWorkspaceCreateTest() returns error? {
 }
 
 @test:Config {
-    groups: ["workspace", "mssql"],
-    enable: true
+    groups: ["workspace", "mssql"]
 }
 function mssqlWorkspaceCreateTest2() returns error? {
     MSSQLRainierClient rainierClient = check new ();
@@ -52,8 +50,7 @@ function mssqlWorkspaceCreateTest2() returns error? {
 }
 
 @test:Config {
-    groups: ["workspace", "mssql"],
-    enable: true
+    groups: ["workspace", "mssql"]
 }
 function mssqlWorkspaceCreateTestNegative() returns error? {
     MSSQLRainierClient rainierClient = check new ();
@@ -69,8 +66,7 @@ function mssqlWorkspaceCreateTestNegative() returns error? {
 
 @test:Config {
     groups: ["workspace", "mssql"],
-    dependsOn: [mssqlWorkspaceCreateTest],
-    enable: true
+    dependsOn: [mssqlWorkspaceCreateTest]
 }
 function mssqlWorkspaceReadOneTest() returns error? {
     MSSQLRainierClient rainierClient = check new ();
@@ -82,8 +78,7 @@ function mssqlWorkspaceReadOneTest() returns error? {
 
 @test:Config {
     groups: ["workspace", "mssql"],
-    dependsOn: [mssqlWorkspaceCreateTest],
-    enable: true
+    dependsOn: [mssqlWorkspaceCreateTest]
 }
 function mssqlWorkspaceReadOneDependentTest() returns error? {
     MSSQLRainierClient rainierClient = check new ();
@@ -100,8 +95,7 @@ function mssqlWorkspaceReadOneDependentTest() returns error? {
 
 @test:Config {
     groups: ["workspace", "mssql"],
-    dependsOn: [mssqlWorkspaceCreateTest],
-    enable: true
+    dependsOn: [mssqlWorkspaceCreateTest]
 }
 function mssqlWorkspaceReadOneTestNegative() returns error? {
     MSSQLRainierClient rainierClient = check new ();
@@ -117,8 +111,7 @@ function mssqlWorkspaceReadOneTestNegative() returns error? {
 
 @test:Config {
     groups: ["workspace", "mssql"],
-    dependsOn: [mssqlWorkspaceCreateTest, mssqlWorkspaceCreateTest2],
-    enable: true
+    dependsOn: [mssqlWorkspaceCreateTest, mssqlWorkspaceCreateTest2]
 }
 function mssqlWorkspaceReadManyTest() returns error? {
     MSSQLRainierClient rainierClient = check new ();
@@ -133,8 +126,7 @@ function mssqlWorkspaceReadManyTest() returns error? {
 
 @test:Config {
     groups: ["workspace", "mssql", "dependent"],
-    dependsOn: [mssqlWorkspaceCreateTest, mssqlWorkspaceCreateTest2],
-    enable: true
+    dependsOn: [mssqlWorkspaceCreateTest, mssqlWorkspaceCreateTest2]
 }
 function mssqlWorkspaceReadManyDependentTest() returns error? {
     MSSQLRainierClient rainierClient = check new ();
@@ -153,8 +145,7 @@ function mssqlWorkspaceReadManyDependentTest() returns error? {
 
 @test:Config {
     groups: ["workspace", "mssql"],
-    dependsOn: [mssqlWorkspaceReadOneTest, mssqlWorkspaceReadManyTest, mssqlWorkspaceReadManyDependentTest],
-    enable: true
+    dependsOn: [mssqlWorkspaceReadOneTest, mssqlWorkspaceReadManyTest, mssqlWorkspaceReadManyDependentTest]
 }
 function mssqlWorkspaceUpdateTest() returns error? {
     MSSQLRainierClient rainierClient = check new ();
@@ -172,8 +163,7 @@ function mssqlWorkspaceUpdateTest() returns error? {
 
 @test:Config {
     groups: ["workspace", "mssql"],
-    dependsOn: [mssqlWorkspaceReadOneTest, mssqlWorkspaceReadManyTest, mssqlWorkspaceReadManyDependentTest],
-    enable: true
+    dependsOn: [mssqlWorkspaceReadOneTest, mssqlWorkspaceReadManyTest, mssqlWorkspaceReadManyDependentTest]
 }
 function mssqlWorkspaceUpdateTestNegative1() returns error? {
     MSSQLRainierClient rainierClient = check new ();
@@ -192,8 +182,7 @@ function mssqlWorkspaceUpdateTestNegative1() returns error? {
 
 @test:Config {
     groups: ["workspace", "mssql"],
-    dependsOn: [mssqlWorkspaceReadOneTest, mssqlWorkspaceReadManyTest, mssqlWorkspaceReadManyDependentTest],
-    enable: true
+    dependsOn: [mssqlWorkspaceReadOneTest, mssqlWorkspaceReadManyTest, mssqlWorkspaceReadManyDependentTest]
 }
 function mssqlWorkspaceUpdateTestNegative2() returns error? {
     MSSQLRainierClient rainierClient = check new ();
@@ -212,8 +201,7 @@ function mssqlWorkspaceUpdateTestNegative2() returns error? {
 
 @test:Config {
     groups: ["workspace", "mssql"],
-    dependsOn: [mssqlWorkspaceUpdateTest, mssqlWorkspaceUpdateTestNegative2],
-    enable: true
+    dependsOn: [mssqlWorkspaceUpdateTest, mssqlWorkspaceUpdateTestNegative2]
 }
 function mssqlWorkspaceDeleteTest() returns error? {
     MSSQLRainierClient rainierClient = check new ();
@@ -231,8 +219,7 @@ function mssqlWorkspaceDeleteTest() returns error? {
 
 @test:Config {
     groups: ["workspace", "mssql"],
-    dependsOn: [mssqlWorkspaceDeleteTest],
-    enable: true
+    dependsOn: [mssqlWorkspaceDeleteTest]
 }
 function mssqlWorkspaceDeleteTestNegative() returns error? {
     MSSQLRainierClient rainierClient = check new ();

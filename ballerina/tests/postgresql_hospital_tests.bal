@@ -18,7 +18,9 @@ import ballerina/persist;
 import ballerina/test;
 
 
-@test:Config{}
+@test:Config {
+    groups: ["annotation", "postgresql"]
+}
 function testCreatePatientPostgreSql() returns error? {
     PostgreSqlHospitalClient postgreSqlDbHospital = check new();
     PatientInsert patient = {
@@ -31,7 +33,9 @@ function testCreatePatientPostgreSql() returns error? {
     _ = check postgreSqlDbHospital->/patients.post([patient]);
 }
 
-@test:Config{}
+@test:Config {
+    groups: ["annotation", "postgresql"]
+}
 function testCreateDoctorPostgreSql() returns error? {
     PostgreSqlHospitalClient postgresSqlDbHospital = check new();
     DoctorInsert doctor = {
@@ -44,8 +48,9 @@ function testCreateDoctorPostgreSql() returns error? {
     _ = check postgresSqlDbHospital->/doctors.post([doctor]);
 }
 
-@test:Config{
-  dependsOn: [testCreateDoctorPostgreSql]
+@test:Config {
+    groups: ["annotation", "postgresql"],
+    dependsOn: [testCreateDoctorPostgreSql]
 }
 function testCreateDoctorAlreadyExistsPostgreSql() returns error? {
     PostgreSqlHospitalClient postgresSqlDbHospital = check new();
@@ -62,8 +67,9 @@ function testCreateDoctorAlreadyExistsPostgreSql() returns error? {
     }
 }
 
-@test:Config{
-  dependsOn: [testCreatePatientPostgreSql, testCreateDoctorPostgreSql]
+@test:Config {
+    groups: ["annotation", "postgresql"],
+    dependsOn: [testCreatePatientPostgreSql, testCreateDoctorPostgreSql]
 }
 function testCreateAppointmentPostgreSql() returns error? {
     PostgreSqlHospitalClient postgresSqlDbHospital = check new();
@@ -78,8 +84,9 @@ function testCreateAppointmentPostgreSql() returns error? {
     _ = check postgresSqlDbHospital->/appointments.post([appointment]);
 }
 
-@test:Config{
-  dependsOn: [testCreatePatientPostgreSql, testCreateDoctorPostgreSql, testCreateAppointmentPostgreSql]
+@test:Config {
+    groups: ["annotation", "postgresql"],
+    dependsOn: [testCreatePatientPostgreSql, testCreateDoctorPostgreSql, testCreateAppointmentPostgreSql]
 }
 function testCreateAppointmentAlreadyExistsPostgreSql() returns error? {
     PostgreSqlHospitalClient postgresSqlDbHospital = check new();
@@ -97,8 +104,9 @@ function testCreateAppointmentAlreadyExistsPostgreSql() returns error? {
     }
 }
 
-@test:Config{
-  dependsOn: [testCreateDoctorPostgreSql]
+@test:Config {
+    groups: ["annotation", "postgresql"],
+    dependsOn: [testCreateDoctorPostgreSql]
 }
 function testGetDoctorsPostgreSql() returns error? {
     PostgreSqlHospitalClient postgresSqlDbHospital = check new();
@@ -110,8 +118,9 @@ function testGetDoctorsPostgreSql() returns error? {
     test:assertEquals(doctorsArr, expected, "Doctor details should be returned");
 }
 
-@test:Config{
-  dependsOn: [testCreatePatientPostgreSql]
+@test:Config {
+    groups: ["annotation", "postgresql"],
+    dependsOn: [testCreatePatientPostgreSql]
 }
 function testGetPatientByIdPostgreSql() returns error? {
     PostgreSqlHospitalClient postgresSqlDbHospital = check new();
@@ -120,7 +129,9 @@ function testGetPatientByIdPostgreSql() returns error? {
     test:assertEquals(patient, expected, "Patient details should be returned");
 }
 
-@test:Config{}
+@test:Config {
+    groups: ["annotation", "postgresql"]
+}
 function testGetPatientNotFoundPostgreSql() returns error? {
     PostgreSqlHospitalClient postgresSqlDbHospital = check new();
     Patient|persist:Error patient = postgresSqlDbHospital->/patients/[10].get();
@@ -129,8 +140,9 @@ function testGetPatientNotFoundPostgreSql() returns error? {
     }
 }
 
-@test:Config{
-  dependsOn: [testCreateAppointmentPostgreSql]
+@test:Config {
+    groups: ["annotation", "postgresql"],
+    dependsOn: [testCreateAppointmentPostgreSql]
 }
 function testGetAppointmentByDoctorPostgreSql() returns error? {
     PostgreSqlHospitalClient postgresSqlDbHospital = check new();
@@ -185,8 +197,9 @@ function testGetAppointmentByDoctorPostgreSql() returns error? {
     test:assertEquals(filteredAppointments2, [], "Appointment details should be empty");
 }
 
-@test:Config{
-  dependsOn: [testCreateAppointmentPostgreSql]
+@test:Config {
+    groups: ["annotation", "postgresql"],
+    dependsOn: [testCreateAppointmentPostgreSql]
 }
 function testGetAppointmentByPatientPostgreSql() returns error? {
     PostgreSqlHospitalClient postgresSqlDbHospital = check new();
@@ -234,8 +247,9 @@ function testGetAppointmentByPatientPostgreSql() returns error? {
     test:assertEquals(filteredAppointments2, [], "Appointment details should be empty");
 }
 
-@test:Config{
-  dependsOn: [testCreateAppointmentPostgreSql, testGetAppointmentByDoctorPostgreSql, testGetAppointmentByPatientPostgreSql]
+@test:Config {
+    groups: ["annotation", "postgresql"],
+    dependsOn: [testCreateAppointmentPostgreSql, testGetAppointmentByDoctorPostgreSql, testGetAppointmentByPatientPostgreSql]
 }
 function testPatchAppointmentPostgreSql() returns error? {
     PostgreSqlHospitalClient postgresSqlDbHospital = check new();
@@ -286,8 +300,9 @@ function testPatchAppointmentPostgreSql() returns error? {
     }
 }
 
-@test:Config{
-  dependsOn: [testCreateAppointmentPostgreSql, testGetAppointmentByDoctorPostgreSql, testGetAppointmentByPatientPostgreSql, testPatchAppointmentPostgreSql]
+@test:Config {
+    groups: ["annotation", "postgresql"],
+    dependsOn: [testCreateAppointmentPostgreSql, testGetAppointmentByDoctorPostgreSql, testGetAppointmentByPatientPostgreSql, testPatchAppointmentPostgreSql]
 }
 function testDeleteAppointmentByPatientIdPostgreSql() returns error? {
     PostgreSqlHospitalClient postgresSqlDbHospital = check new();
@@ -317,8 +332,9 @@ function testDeleteAppointmentByPatientIdPostgreSql() returns error? {
     test:assertEquals(result3, [], "Appointment details should be empty");
 }
 
-@test:Config{
-  dependsOn: [testGetPatientByIdPostgreSql, testDeleteAppointmentByPatientIdPostgreSql]
+@test:Config {
+    groups: ["annotation", "postgresql"],
+    dependsOn: [testGetPatientByIdPostgreSql, testDeleteAppointmentByPatientIdPostgreSql]
 }
 function testDeletePatientPostgreSql() returns error? {
     PostgreSqlHospitalClient postgresSqlDbHospital = check new();
@@ -328,8 +344,9 @@ function testDeletePatientPostgreSql() returns error? {
     }
 }
 
-@test:Config{
-  dependsOn: [testGetDoctorsPostgreSql, testDeleteAppointmentByPatientIdPostgreSql]
+@test:Config {
+    groups: ["annotation", "postgresql"],
+    dependsOn: [testGetDoctorsPostgreSql, testDeleteAppointmentByPatientIdPostgreSql]
 }
 function testDeleteDoctorPostgreSql() returns error? {
     PostgreSqlHospitalClient postgresSqlDbHospital = check new();

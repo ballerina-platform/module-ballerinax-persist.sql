@@ -18,7 +18,9 @@ import ballerina/persist;
 import ballerina/test;
 
 
-@test:Config{}
+@test:Config{
+  groups: ["annotation", "mssql"]
+}
 function testCreatePatientMsSql() returns error? {
     MsSqlHospitalClient mssqlDbHospital = check new();
     PatientInsert patient = {
@@ -31,7 +33,9 @@ function testCreatePatientMsSql() returns error? {
     _ = check mssqlDbHospital->/patients.post([patient]);
 }
 
-@test:Config{}
+@test:Config{
+  groups: ["annotation", "mssql"]
+}
 function testCreateDoctorMsSql() returns error? {
     MsSqlHospitalClient mssqlDbHospital = check new();
     DoctorInsert doctor = {
@@ -45,6 +49,7 @@ function testCreateDoctorMsSql() returns error? {
 }
 
 @test:Config{
+  groups: ["annotation", "mssql"],
   dependsOn: [testCreateDoctorMsSql]
 }
 function testCreateDoctorAlreadyExistsMsSql() returns error? {
@@ -63,6 +68,7 @@ function testCreateDoctorAlreadyExistsMsSql() returns error? {
 }
 
 @test:Config{
+  groups: ["annotation", "mssql"],
   dependsOn: [testCreatePatientMsSql, testCreateDoctorMsSql]
 }
 function testCreateAppointmentMsSql() returns error? {
@@ -79,6 +85,7 @@ function testCreateAppointmentMsSql() returns error? {
 }
 
 @test:Config{
+  groups: ["annotation", "mssql"],
   dependsOn: [testCreatePatientMsSql, testCreateDoctorMsSql, testCreateAppointmentMsSql]
 }
 function testCreateAppointmentAlreadyExistsMsSql() returns error? {
@@ -98,6 +105,7 @@ function testCreateAppointmentAlreadyExistsMsSql() returns error? {
 }
 
 @test:Config{
+  groups: ["annotation", "mssql"],
   dependsOn: [testCreateDoctorMsSql]
 }
 function testGetDoctorsMsSql() returns error? {
@@ -111,6 +119,7 @@ function testGetDoctorsMsSql() returns error? {
 }
 
 @test:Config{
+  groups: ["annotation", "mssql"],
   dependsOn: [testCreatePatientMsSql]
 }
 function testGetPatientByIdMsSql() returns error? {
@@ -120,7 +129,9 @@ function testGetPatientByIdMsSql() returns error? {
     test:assertEquals(patient, expected, "Patient details should be returned");
 }
 
-@test:Config{}
+@test:Config{
+  groups: ["annotation", "mssql"]
+}
 function testGetPatientNotFoundMsSql() returns error? {
     MsSqlHospitalClient mssqlDbHospital = check new();
     Patient|persist:Error patient = mssqlDbHospital->/patients/[10].get();
@@ -130,6 +141,7 @@ function testGetPatientNotFoundMsSql() returns error? {
 }
 
 @test:Config{
+  groups: ["annotation", "mssql"],
   dependsOn: [testCreateAppointmentMsSql]
 }
 function testGetAppointmentByDoctorMsSql() returns error? {
@@ -186,6 +198,7 @@ function testGetAppointmentByDoctorMsSql() returns error? {
 }
 
 @test:Config{
+  groups: ["annotation", "mssql"],
   dependsOn: [testCreateAppointmentMsSql]
 }
 function testGetAppointmentByPatientMsSql() returns error? {
@@ -235,6 +248,7 @@ function testGetAppointmentByPatientMsSql() returns error? {
 }
 
 @test:Config{
+  groups: ["annotation", "mssql"],
   dependsOn: [testCreateAppointmentMsSql, testGetAppointmentByDoctorMsSql, testGetAppointmentByPatientMsSql]
 }
 function testPatchAppointmentMsSql() returns error? {
@@ -287,6 +301,7 @@ function testPatchAppointmentMsSql() returns error? {
 }
 
 @test:Config{
+  groups: ["annotation", "mssql"],
   dependsOn: [testCreateAppointmentMsSql, testGetAppointmentByDoctorMsSql, testGetAppointmentByPatientMsSql, testPatchAppointmentMsSql]
 }
 function testDeleteAppointmentByPatientIdMsSql() returns error? {
@@ -318,6 +333,7 @@ function testDeleteAppointmentByPatientIdMsSql() returns error? {
 }
 
 @test:Config{
+  groups: ["annotation", "mssql"],
   dependsOn: [testGetPatientByIdMsSql, testDeleteAppointmentByPatientIdMsSql]
 }
 function testDeletePatientMsSql() returns error? {
@@ -329,7 +345,9 @@ function testDeletePatientMsSql() returns error? {
 }
 
 @test:Config{
-  dependsOn: [testGetDoctorsMsSql, testDeleteAppointmentByPatientIdMsSql]
+  groups: ["annotation", "mssql"],
+  dependsOn: [testGetDoctorsMsSql, testDeleteAppointmentByPatientIdMsSql],
+  enable: true
 }
 function testDeleteDoctorMsSql() returns error? {
     MsSqlHospitalClient mssqlDbHospital = check new();

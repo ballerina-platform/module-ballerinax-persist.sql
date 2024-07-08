@@ -18,7 +18,9 @@ import ballerina/persist;
 import ballerina/test;
 
 
-@test:Config{}
+@test:Config{
+    groups: ["annotation", "mysql"]
+}
 function testCreatePatientMySql() returns error? {
     MySqlHospitalClient mysqlDbHospital = check new();
     PatientInsert patient = {
@@ -32,7 +34,9 @@ function testCreatePatientMySql() returns error? {
     test:assertEquals(unionResult[0], 1, "Patient should be created");
 }
 
-@test:Config{}
+@test:Config{
+    groups: ["annotation", "mysql"]
+}
 function testCreateDoctorMySql() returns error? {
     MySqlHospitalClient mysqlDbHospital = check new();
     DoctorInsert doctor = {
@@ -47,7 +51,8 @@ function testCreateDoctorMySql() returns error? {
 }
 
 @test:Config{
-  dependsOn: [testCreateDoctorMySql]
+    groups: ["annotation", "mysql"],
+    dependsOn: [testCreateDoctorMySql]
 }
 function testCreateDoctorAlreadyExistsMySql() returns error? {
     MySqlHospitalClient mysqlDbHospital = check new();
@@ -65,7 +70,8 @@ function testCreateDoctorAlreadyExistsMySql() returns error? {
 }
 
 @test:Config{
-  dependsOn: [testCreatePatientMySql, testCreateDoctorMySql]
+    groups: ["annotation", "mysql"],
+    dependsOn: [testCreatePatientMySql, testCreateDoctorMySql]
 }
 function testCreateAppointmentMySql() returns error? {
     MySqlHospitalClient mysqlDbHospital = check new();
@@ -82,7 +88,8 @@ function testCreateAppointmentMySql() returns error? {
 }
 
 @test:Config{
-  dependsOn: [testCreatePatientMySql, testCreateDoctorMySql, testCreateAppointmentMySql]
+    groups: ["annotation", "mysql"],
+    dependsOn: [testCreatePatientMySql, testCreateDoctorMySql, testCreateAppointmentMySql]
 }
 function testCreateAppointmentAlreadyExistsMySql() returns error? {
     MySqlHospitalClient mysqlDbHospital = check new();
@@ -101,7 +108,8 @@ function testCreateAppointmentAlreadyExistsMySql() returns error? {
 }
 
 @test:Config{
-  dependsOn: [testCreateDoctorMySql]
+    groups: ["annotation", "mysql"],
+    dependsOn: [testCreateDoctorMySql]
 }
 function testGetDoctorsMySql() returns error? {
     MySqlHospitalClient mysqlDbHospital = check new();
@@ -114,7 +122,8 @@ function testGetDoctorsMySql() returns error? {
 }
 
 @test:Config{
-  dependsOn: [testCreatePatientMySql]
+    groups: ["annotation", "mysql"],
+    dependsOn: [testCreatePatientMySql]
 }
 function testGetPatientByIdMySql() returns error? {
     MySqlHospitalClient mysqlDbHospital = check new();
@@ -123,7 +132,9 @@ function testGetPatientByIdMySql() returns error? {
     test:assertEquals(patient, expected, "Patient details should be returned");
 }
 
-@test:Config{}
+@test:Config{
+    groups: ["annotation", "mysql"]
+}
 function testGetPatientNotFoundMySql() returns error? {
     MySqlHospitalClient mysqlDbHospital = check new();
     Patient|persist:Error patient = mysqlDbHospital->/patients/[10].get();
@@ -133,7 +144,8 @@ function testGetPatientNotFoundMySql() returns error? {
 }
 
 @test:Config{
-  dependsOn: [testCreateAppointmentMySql]
+    groups: ["annotation", "mysql"],
+    dependsOn: [testCreateAppointmentMySql]
 }
 function testGetAppointmentByDoctorMySql() returns error? {
     MySqlHospitalClient mysqlDbHospital = check new();
@@ -189,7 +201,8 @@ function testGetAppointmentByDoctorMySql() returns error? {
 }
 
 @test:Config{
-  dependsOn: [testCreateAppointmentMySql]
+    groups: ["annotation", "mysql"],
+    dependsOn: [testCreateAppointmentMySql]
 }
 function testGetAppointmentByPatientMySql() returns error? {
     MySqlHospitalClient mysqlDbHospital = check new();
@@ -238,7 +251,8 @@ function testGetAppointmentByPatientMySql() returns error? {
 }
 
 @test:Config{
-  dependsOn: [testCreateAppointmentMySql, testGetAppointmentByDoctorMySql, testGetAppointmentByPatientMySql]
+    groups: ["annotation", "mysql"],
+    dependsOn: [testCreateAppointmentMySql, testGetAppointmentByDoctorMySql, testGetAppointmentByPatientMySql]
 }
 function testPatchAppointmentMySql() returns error? {
     MySqlHospitalClient mysqlDbHospital = check new();
@@ -290,7 +304,8 @@ function testPatchAppointmentMySql() returns error? {
 }
 
 @test:Config{
-  dependsOn: [testCreateAppointmentMySql, testGetAppointmentByDoctorMySql, testGetAppointmentByPatientMySql, testPatchAppointmentMySql]
+    groups: ["annotation", "mysql"],
+    dependsOn: [testCreateAppointmentMySql, testGetAppointmentByDoctorMySql, testGetAppointmentByPatientMySql, testPatchAppointmentMySql]
 }
 function testDeleteAppointmentByPatientIdMySql() returns error? {
     MySqlHospitalClient mysqlDbHospital = check new();
@@ -321,7 +336,8 @@ function testDeleteAppointmentByPatientIdMySql() returns error? {
 }
 
 @test:Config{
-  dependsOn: [testGetPatientByIdMySql, testDeleteAppointmentByPatientIdMySql]
+    groups: ["annotation", "mysql"],
+    dependsOn: [testGetPatientByIdMySql, testDeleteAppointmentByPatientIdMySql]
 }
 function testDeletePatientMySql() returns error? {
     MySqlHospitalClient mysqlDbHospital = check new();
@@ -332,7 +348,8 @@ function testDeletePatientMySql() returns error? {
 }
 
 @test:Config{
-  dependsOn: [testGetDoctorsMySql, testDeleteAppointmentByPatientIdMySql]
+    groups: ["annotation", "mysql"],
+    dependsOn: [testGetDoctorsMySql, testDeleteAppointmentByPatientIdMySql]
 }
 function testDeleteDoctorMySql() returns error? {
     MySqlHospitalClient mysqlDbHospital = check new();

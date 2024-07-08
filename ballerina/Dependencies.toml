@@ -44,7 +44,7 @@ dependencies = [
 [[package]]
 org = "ballerina"
 name = "crypto"
-version = "2.7.0"
+version = "2.7.2"
 scope = "testOnly"
 dependencies = [
 	{org = "ballerina", name = "jballerina.java"},
@@ -66,7 +66,7 @@ dependencies = [
 [[package]]
 org = "ballerina"
 name = "http"
-version = "2.11.0"
+version = "2.11.2"
 scope = "testOnly"
 dependencies = [
 	{org = "ballerina", name = "auth"},
@@ -294,7 +294,7 @@ modules = [
 [[package]]
 org = "ballerina"
 name = "sql"
-version = "1.13.0"
+version = "1.13.2"
 dependencies = [
 	{org = "ballerina", name = "io"},
 	{org = "ballerina", name = "jballerina.java"},
@@ -385,6 +385,31 @@ modules = [
 
 [[package]]
 org = "ballerinax"
+name = "h2.driver"
+version = "1.1.0"
+scope = "testOnly"
+modules = [
+	{org = "ballerinax", packageName = "h2.driver", moduleName = "h2.driver"}
+]
+
+[[package]]
+org = "ballerinax"
+name = "java.jdbc"
+version = "1.11.0"
+scope = "testOnly"
+dependencies = [
+	{org = "ballerina", name = "io"},
+	{org = "ballerina", name = "jballerina.java"},
+	{org = "ballerina", name = "lang.string"},
+	{org = "ballerina", name = "sql"},
+	{org = "ballerina", name = "time"}
+]
+modules = [
+	{org = "ballerinax", packageName = "java.jdbc", moduleName = "java.jdbc"}
+]
+
+[[package]]
+org = "ballerinax"
 name = "mssql"
 version = "1.12.0"
 scope = "testOnly"
@@ -435,7 +460,7 @@ modules = [
 [[package]]
 org = "ballerinax"
 name = "persist.sql"
-version = "1.3.0"
+version = "1.4.0"
 dependencies = [
 	{org = "ballerina", name = "jballerina.java"},
 	{org = "ballerina", name = "log"},
@@ -444,6 +469,8 @@ dependencies = [
 	{org = "ballerina", name = "test"},
 	{org = "ballerina", name = "time"},
 	{org = "ballerinai", name = "transaction"},
+	{org = "ballerinax", name = "h2.driver"},
+	{org = "ballerinax", name = "java.jdbc"},
 	{org = "ballerinax", name = "mssql"},
 	{org = "ballerinax", name = "mssql.driver"},
 	{org = "ballerinax", name = "mysql"},

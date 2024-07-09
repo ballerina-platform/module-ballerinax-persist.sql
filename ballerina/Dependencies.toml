@@ -112,7 +112,7 @@ modules = [
 [[package]]
 org = "ballerina"
 name = "jwt"
-version = "2.11.0"
+version = "2.12.1"
 scope = "testOnly"
 dependencies = [
 	{org = "ballerina", name = "cache"},
@@ -395,7 +395,7 @@ modules = [
 [[package]]
 org = "ballerinax"
 name = "java.jdbc"
-version = "1.11.0"
+version = "2.0.0"
 scope = "testOnly"
 dependencies = [
 	{org = "ballerina", name = "io"},

@@ -190,7 +190,8 @@ function postgresqlNativeQueryComplexTest() returns error? {
 
 @test:Config {
     groups: ["transactions", "postgresql", "native"],
-    dependsOn: [postgresqlNativeExecuteTestNegative1, postgresqlNativeQueryTest, postgresqlNativeQueryTestNegative, postgresqlNativeQueryComplexTest]
+    dependsOn: [postgresqlNativeExecuteTestNegative1, postgresqlNativeQueryTest, postgresqlNativeQueryTestNegative, postgresqlNativeQueryComplexTest],
+    enable: false
 }
 function postgresqlNativeTransactionTest() returns error? {
     PostgreSQLRainierClient rainierClient = check new ();

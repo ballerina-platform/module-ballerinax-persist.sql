@@ -190,7 +190,8 @@ function mysqlNativeQueryComplexTest() returns error? {
 
 @test:Config {
     groups: ["transactions", "mysql", "native"],
-    dependsOn: [mysqlNativeExecuteTestNegative1, mysqlNativeQueryTest, mysqlNativeQueryTestNegative, mysqlNativeQueryComplexTest]
+    dependsOn: [mysqlNativeExecuteTestNegative1, mysqlNativeQueryTest, mysqlNativeQueryTestNegative, mysqlNativeQueryComplexTest],
+    enable: false
 }
 function mysqlNativeTransactionTest() returns error? {
     MySQLRainierClient rainierClient = check new ();

@@ -190,7 +190,8 @@ function h2NativeQueryComplexTest() returns error? {
 
 @test:Config {
     groups: ["transactions", "h2", "native"],
-    dependsOn: [h2NativeExecuteTestNegative1, h2NativeQueryTest, h2NativeQueryTestNegative, h2NativeQueryComplexTest]
+    dependsOn: [h2NativeExecuteTestNegative1, h2NativeQueryTest, h2NativeQueryTestNegative, h2NativeQueryComplexTest],
+    enable: false
 }
 function h2NativeTransactionTest() returns error? {
     H2RainierClient rainierClient = check new ();

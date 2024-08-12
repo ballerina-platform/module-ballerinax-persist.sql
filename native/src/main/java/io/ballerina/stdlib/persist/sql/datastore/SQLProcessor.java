@@ -198,7 +198,7 @@ public class SQLProcessor {
         StreamType streamType = TypeCreator.createStreamType(recordType, PredefinedTypes.TYPE_NULL);
         TransactionResourceManager trxResourceManager = TransactionResourceManager.getInstance();
         TransactionLocalContext currentTrxContext = trxResourceManager.getCurrentTransactionContext();
-        Map<String, Object> properties = new HashMap<>();
+        Map<String, Object> properties = null;
         if (currentTrxContext != null) {
             properties = Map.of(RuntimeConstants.CURRENT_TRANSACTION_CONTEXT_PROPERTY, currentTrxContext);
         }
@@ -238,7 +238,7 @@ public class SQLProcessor {
                 io.ballerina.stdlib.persist.sql.Constants.PERSIST_EXECUTION_RESULT, getModule(), 0, true, 0);
         TransactionResourceManager trxResourceManager = TransactionResourceManager.getInstance();
         TransactionLocalContext currentTrxContext = trxResourceManager.getCurrentTransactionContext();
-        Map<String, Object> properties = new HashMap<>();
+        Map<String, Object> properties = null;
         if (currentTrxContext != null) {
             properties = Map.of(RuntimeConstants.CURRENT_TRANSACTION_CONTEXT_PROPERTY, currentTrxContext);
         }

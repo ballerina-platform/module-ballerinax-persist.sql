@@ -266,8 +266,7 @@ public class SQLProcessor {
                         BError persistError = wrapError(bError);
                         balFuture.complete(persistError);
                     }
-                }, properties,
-                persistExecutionResultType, paramSQLString, true);
+                }, properties, persistExecutionResultType, paramSQLString, true);
 
         return null;
     }

@@ -43,7 +43,6 @@ import io.ballerina.stdlib.persist.Constants;
 import io.ballerina.stdlib.persist.ModuleUtils;
 import io.ballerina.stdlib.persist.sql.Utils;
 
-import java.util.HashMap;
 import java.util.Map;
 
 import static io.ballerina.stdlib.persist.Constants.ERROR;

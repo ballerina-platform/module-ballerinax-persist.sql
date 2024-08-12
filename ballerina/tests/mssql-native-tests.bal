@@ -191,7 +191,7 @@ function mssqlNativeQueryComplexTest() returns error? {
 @test:Config {
     groups: ["transactions", "mssql", "native"],
     dependsOn: [mssqlNativeExecuteTestNegative1, mssqlNativeQueryTest, mssqlNativeQueryTestNegative, mssqlNativeQueryComplexTest],
-    enable: false
+    enable: true
 }
 function mssqlNativeTransactionTest() returns error? {
     MSSQLRainierClient rainierClient = check new ();

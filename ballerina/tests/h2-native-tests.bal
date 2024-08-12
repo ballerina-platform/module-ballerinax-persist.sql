@@ -16,7 +16,6 @@
 
 import ballerina/test;
 import ballerina/persist;
-import ballerina/io;
 
 @test:Config {
     groups: ["native", "h2"],

@@ -191,7 +191,7 @@ function h2NativeQueryComplexTest() returns error? {
 @test:Config {
     groups: ["transactions", "h2", "native"],
     dependsOn: [h2NativeExecuteTestNegative1, h2NativeQueryTest, h2NativeQueryTestNegative, h2NativeQueryComplexTest],
-    enable: false
+    enable: true
 }
 function h2NativeTransactionTest() returns error? {
     H2RainierClient rainierClient = check new ();
@@ -254,17 +254,14 @@ function h2NativeTransactionTest2() returns error? {
     check buildingStream.close();
     test:assertEquals(buildings, [building33]);
 
-    transaction {
-        _ = check rainierClient->executeNativeSQL(`
-            UPDATE "Building"
-            SET
-                "city" = ${building33Updated.city},
-                "state" = ${building33Updated.state},
-                "country" = ${building33Updated.country}
-            WHERE "buildingCode" = ${building33.buildingCode}
-        `);
-        check commit;
-    }
+    _ = check rainierClient->executeNativeSQL(`
+        UPDATE "Building"
+        SET
+            "city" = ${building33Updated.city},
+            "state" = ${building33Updated.state},
+            "country" = ${building33Updated.country}
+        WHERE "buildingCode" = ${building33.buildingCode}
+    `);
 
     stream<Building, persist:Error?> buildingStream3 = rainierClient->queryNativeSQL(`SELECT * FROM "Building" WHERE "buildingCode" = ${building33.buildingCode}`);
     Building[] buildings3 = check from Building building in buildingStream3

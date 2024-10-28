@@ -236,8 +236,8 @@ public isolated client class SQLClient {
     # + include - The relations to be retrieved (SQL `JOINs` to be performed)
     # + return - `()` if the operation is performed successfully or a `persist:Error` if the operation fails
     public isolated function verifyEntityAssociation(anydata 'object, string[] fields, string[] include) returns persist:Error? {
-        if !('object is record {}) {
-            return <persist:Error>error("The 'object' parameter should be a record");
+        if 'object !is record {} {
+            return error persist:Error("The 'object' parameter should be a record");
         }
 
         do {

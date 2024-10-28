@@ -164,3 +164,21 @@ CREATE TABLE test.appointment (
   FOREIGN KEY(doctorId) REFERENCES Doctor(id),
   PRIMARY KEY(id)
 );
+
+CREATE TABLE test.ApiMetadata (
+	apiId VARCHAR(191) NOT NULL,
+	orgId VARCHAR(191) NOT NULL,
+	apiName VARCHAR(191) NOT NULL,
+	metadata VARCHAR(191) NOT NULL,
+	PRIMARY KEY(apiId,orgId)
+);
+
+CREATE TABLE test.Subscription (
+	subscriptionId VARCHAR(191) NOT NULL,
+	userName VARCHAR(191) NOT NULL,
+	apimetadataApiId VARCHAR(191) NOT NULL,
+	apimetadataOrgId VARCHAR(191) NOT NULL,
+	UNIQUE (apimetadataApiId, apimetadataOrgId),
+	FOREIGN KEY(apimetadataApiId, apimetadataOrgId) REFERENCES ApiMetadata(apiId, orgId),
+	PRIMARY KEY(subscriptionId)
+);

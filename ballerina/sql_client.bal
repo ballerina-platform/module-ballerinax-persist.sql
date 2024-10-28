@@ -229,6 +229,62 @@ public isolated client class SQLClient {
         }
     }
 
+    # Check whether associated entries exist for the given record.
+    #
+    # + 'object - The record to which the retrieved records should be appended
+    # + fields - The fields to be retrieved
+    # + include - The relations to be retrieved (SQL `JOINs` to be performed)
+    # + return - `()` if the operation is performed successfully or a `persist:Error` if the operation fails
+    public isolated function verifyEntityAssociation(anydata 'object, string[] fields, string[] include) returns persist:Error? {
+        if !('object is record {}) {
+            return <persist:Error>error("The 'object' parameter should be a record");
+        }
+
+        do {
+            // check the values of included entities are ()
+            foreach string joinKey in self.getJoinFields(include) {
+                JoinMetadata joinMetadata = self.joinMetadata.get(joinKey);
+                anydata associatedEntity = 'object.get(joinMetadata.fieldName);
+                if associatedEntity is record {} {
+                    // check if the fields are empty in the associated record.
+                    map<anydata> nonEmptyAssocEntity = associatedEntity.filter(value => value != ());
+                    // If the associated entity has non-empty fields, then the association is already verified.
+                    if (nonEmptyAssocEntity.length() > 0) {
+                        continue;
+                    }
+
+                    // check if the associated record values contain the foreign fields, if so, we can skip the query.
+                    boolean hasKeys = true;
+                    foreach string refColumn in joinMetadata.refColumns {
+                        if !associatedEntity.hasKey(refColumn) {
+                            hasKeys = false;
+                            break;
+                        }
+                    }
+                    if (hasKeys) {
+                        'object[joinMetadata.fieldName] = ();
+                        continue;
+                    }
+                    // construct the query to check whether the associated entries are exists
+                    sql:ParameterizedQuery query = ``;
+                    map<string> whereFilter = check self.getManyRelationWhereFilter('object, joinMetadata);
+                    query = sql:queryConcat(
+                        ` SELECT COUNT(*) AS count`,
+                        ` FROM `, stringToParameterizedQuery(self.escape(joinMetadata.refTable)),
+                        ` WHERE`, check self.getWhereClauses(whereFilter, true)
+                    );
+                    // execute the query and check the count of the associated entries
+                    int count = check self.dbClient->queryRow(query);
+                    if (count == 0) {
+                        'object[joinMetadata.fieldName] = ();
+                    }
+                }
+            }            
+        } on fail error err {
+            return error persist:Error(err.message(), err);
+        }
+    } 
+
     public isolated function getKeyFields() returns string[] {
         return self.keyFields;
     }

@@ -6,6 +6,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Fixed
+- [[Bug] Bal Persist fails when tries to retrieve record with a nonexistent associations](https://github.com/ballerina-platform/ballerina-library/issues/7304)
+
+## [1.4.0] - 2024-08-20
+
 ### Added
 - [Added support for H2 DB as a datasource](https://github.com/ballerina-platform/ballerina-library/issues/5715)
 

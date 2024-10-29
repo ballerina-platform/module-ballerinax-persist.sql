@@ -68,7 +68,7 @@ public isolated client class MsSqlApimClient {
     public isolated function init() returns persist:Error? {
         mssql:Client|error dbClient = new (host = mssql.host, user = mssql.user, password = mssql.password, database = mssql.database, port = mssql.port);
         if dbClient is error {
-            return <persist:Error>error(dbClient.message());
+            return error persist:Error(dbClient.message());
         }
         self.dbClient = dbClient;
         self.persistClients = {

@@ -249,7 +249,7 @@ public isolated client class SQLClient {
                     // check if the fields are empty in the associated record.
                     map<anydata> nonEmptyAssocEntity = associatedEntity.filter(value => value != ());
                     // If the associated entity has non-empty fields, then the association is already verified.
-                    if (nonEmptyAssocEntity.length() > 0) {
+                    if nonEmptyAssocEntity.length() > 0 {
                         continue;
                     }
 
@@ -261,7 +261,7 @@ public isolated client class SQLClient {
                             break;
                         }
                     }
-                    if (hasKeys) {
+                    if hasKeys {
                         'object[joinMetadata.fieldName] = ();
                         continue;
                     }
@@ -275,7 +275,7 @@ public isolated client class SQLClient {
                     );
                     // execute the query and check the count of the associated entries
                     int count = check self.dbClient->queryRow(query);
-                    if (count == 0) {
+                    if count == 0 {
                         'object[joinMetadata.fieldName] = ();
                     }
                 }

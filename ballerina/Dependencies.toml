@@ -100,9 +100,6 @@ dependencies = [
 	{org = "ballerina", name = "jballerina.java"},
 	{org = "ballerina", name = "lang.value"}
 ]
-modules = [
-	{org = "ballerina", packageName = "io", moduleName = "io"}
-]
 
 [[package]]
 org = "ballerina"
@@ -400,7 +397,7 @@ modules = [
 [[package]]
 org = "ballerinax"
 name = "java.jdbc"
-version = "1.12.0"
+version = "1.12.1"
 scope = "testOnly"
 dependencies = [
 	{org = "ballerina", name = "io"},
@@ -467,7 +464,6 @@ org = "ballerinax"
 name = "persist.sql"
 version = "1.4.1"
 dependencies = [
-	{org = "ballerina", name = "io"},
 	{org = "ballerina", name = "jballerina.java"},
 	{org = "ballerina", name = "log"},
 	{org = "ballerina", name = "persist"},
@@ -491,7 +487,7 @@ modules = [
 [[package]]
 org = "ballerinax"
 name = "postgresql"
-version = "1.13.0"
+version = "1.13.1"
 scope = "testOnly"
 dependencies = [
 	{org = "ballerina", name = "crypto"},

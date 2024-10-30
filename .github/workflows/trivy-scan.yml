@@ -8,9 +8,6 @@ on:
 jobs:
   call_workflow:
     name: Run Trivy Scan Workflow
-    env:
-      TRIVY_DB_REPOSITORY: ghcr.io/aquasecurity/trivy-db,public.ecr.aws/aquasecurity/trivy-db
-      TRIVY_JAVA_DB_REPOSITORY: ghcr.io/aquasecurity/trivy-java-db,public.ecr.aws/aquasecurity/trivy-java-db
     if: ${{ github.repository_owner == 'ballerina-platform' }}
     uses: ballerina-platform/ballerina-library/.github/workflows/trivy-scan-template.yml@main
     secrets: inherit

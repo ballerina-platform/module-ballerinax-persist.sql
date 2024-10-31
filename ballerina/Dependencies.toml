@@ -66,7 +66,7 @@ dependencies = [
 [[package]]
 org = "ballerina"
 name = "http"
-version = "2.12.2"
+version = "2.12.0"
 scope = "testOnly"
 dependencies = [
 	{org = "ballerina", name = "auth"},
@@ -241,7 +241,7 @@ modules = [
 [[package]]
 org = "ballerina"
 name = "mime"
-version = "2.10.1"
+version = "2.10.0"
 scope = "testOnly"
 dependencies = [
 	{org = "ballerina", name = "io"},
@@ -296,7 +296,7 @@ modules = [
 [[package]]
 org = "ballerina"
 name = "sql"
-version = "1.14.1"
+version = "1.14.0"
 dependencies = [
 	{org = "ballerina", name = "io"},
 	{org = "ballerina", name = "jballerina.java"},
@@ -397,7 +397,7 @@ modules = [
 [[package]]
 org = "ballerinax"
 name = "java.jdbc"
-version = "1.12.1"
+version = "1.12.0"
 scope = "testOnly"
 dependencies = [
 	{org = "ballerina", name = "io"},
@@ -437,7 +437,7 @@ modules = [
 [[package]]
 org = "ballerinax"
 name = "mysql"
-version = "1.13.1"
+version = "1.13.0"
 scope = "testOnly"
 dependencies = [
 	{org = "ballerina", name = "crypto"},
@@ -487,7 +487,7 @@ modules = [
 [[package]]
 org = "ballerinax"
 name = "postgresql"
-version = "1.13.1"
+version = "1.13.0"
 scope = "testOnly"
 dependencies = [
 	{org = "ballerina", name = "crypto"},

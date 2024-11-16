@@ -20,6 +20,9 @@ package io.ballerina.stdlib.persist.sql;
 
 import io.ballerina.runtime.api.Environment;
 import io.ballerina.runtime.api.Module;
+import io.ballerina.runtime.api.creators.ErrorCreator;
+
+import java.util.concurrent.CompletableFuture;
 
 /**
  * Utility functions relevant to module operations.
@@ -39,5 +42,13 @@ public class ModuleUtils {
 
     public static Module getModule() {
         return sqlModule;
+    }
+
+    public static Object getResult(CompletableFuture<Object> balFuture) {
+        try {
+            return balFuture.get();
+        } catch (Throwable throwable) {
+            throw ErrorCreator.createError(throwable);
+        }
     }
 }

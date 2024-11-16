@@ -60,6 +60,8 @@ public class PersistSQLStream {
                     return <persist:Error>error(value.message());
                 }
                 check (<SQLClient>self.persistClient).getManyRelations(value, self.fields, self.include, self.typeDescriptions);
+                // verifies the entity association whether associated entity is available in the database.
+                check (<SQLClient>self.persistClient).verifyEntityAssociation(value, self.fields, self.include);
 
                 string[] keyFields = (<SQLClient>self.persistClient).getKeyFields();
                 foreach string keyField in keyFields {

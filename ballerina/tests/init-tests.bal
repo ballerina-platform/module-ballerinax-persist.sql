@@ -86,6 +86,8 @@ function initMySqlTests() returns error? {
       _ = check mysqlDbClient->execute(`TRUNCATE Doctor`);
       _ = check mysqlDbClient->execute(`TRUNCATE appointment`);
       _ = check mysqlDbClient->execute(`TRUNCATE patients`);
+      _ = check mysqlDbClient->execute(`TRUNCATE Subscription`);
+      _ = check mysqlDbClient->execute(`TRUNCATE ApiMetadata`);
       _ = check mysqlDbClient->execute(`SET FOREIGN_KEY_CHECKS = 1`);
       check mysqlDbClient.close();
 }
@@ -275,6 +277,26 @@ function initMsSqlTests() returns error? {
 	          PRIMARY KEY([id])
         );
     `);
+    _ = check mssqlDbClient->execute(`
+        CREATE TABLE [ApiMetadata] (
+            [apiId] VARCHAR(191) NOT NULL,
+            [orgId] VARCHAR(191) NOT NULL,
+            [apiName] VARCHAR(191) NOT NULL,
+            [metadata] VARCHAR(191) NOT NULL,
+            PRIMARY KEY([apiId],[orgId])
+        );
+    `);
+    _ = check mssqlDbClient->execute(`
+        CREATE TABLE [Subscription] (
+            [subscriptionId] VARCHAR(191) NOT NULL,
+            [userName] VARCHAR(191) NOT NULL,
+            [apimetadataApiId] VARCHAR(191) NOT NULL,
+            [apimetadataOrgId] VARCHAR(191) NOT NULL,
+            UNIQUE ([apimetadataApiId], [apimetadataOrgId]),
+            FOREIGN KEY([apimetadataApiId], [apimetadataOrgId]) REFERENCES [ApiMetadata]([apiId], [orgId]),
+            PRIMARY KEY([subscriptionId])
+        );
+    `);
 }
 
 function initPostgreSqlTests() returns error? {
@@ -292,6 +314,8 @@ function initPostgreSqlTests() returns error? {
     _ = check postgresqlDbClient->execute(`TRUNCATE "IntIdRecord" CASCADE`);
     _ = check postgresqlDbClient->execute(`TRUNCATE "AllTypesIdRecord" CASCADE`);
     _ = check postgresqlDbClient->execute(`TRUNCATE "CompositeAssociationRecord" CASCADE`);
+    _ = check postgresqlDbClient->execute(`TRUNCATE "Subscription" CASCADE`);
+    _ = check postgresqlDbClient->execute(`TRUNCATE "ApiMetadata" CASCADE`);
     check postgresqlDbClient.close();
 }
 
@@ -490,6 +514,26 @@ function initH2Tests() returns error? {
         "doctorId" INT NOT NULL,
         FOREIGN KEY("doctorId") REFERENCES "Doctor"("id"),
         PRIMARY KEY("id")
+    )`);
+
+    _ = check h2DbClient->execute(`DROP TABLE IF EXISTS "Subscription"`);
+    _ = check h2DbClient->execute(`DROP TABLE IF EXISTS "ApiMetadata"`);
+    _ = check h2DbClient->execute(`CREATE TABLE "ApiMetadata" (
+        "apiId" VARCHAR(191) NOT NULL,
+        "orgId" VARCHAR(191) NOT NULL,
+        "apiName" VARCHAR(191) NOT NULL,
+        "metadata" VARCHAR(191) NOT NULL,
+        PRIMARY KEY("apiId","orgId")
+    )`);
+
+    _ = check h2DbClient->execute(`CREATE TABLE "Subscription" (
+        "subscriptionId" VARCHAR(191) NOT NULL,
+        "userName" VARCHAR(191) NOT NULL,
+        "apimetadataApiId" VARCHAR(191) NOT NULL,
+        "apimetadataOrgId" VARCHAR(191) NOT NULL,
+        UNIQUE ("apimetadataApiId", "apimetadataOrgId"),
+        FOREIGN KEY("apimetadataApiId", "apimetadataOrgId") REFERENCES "ApiMetadata"("apiId", "orgId"),
+        PRIMARY KEY("subscriptionId")
     )`);
 
     check h2DbClient.close();

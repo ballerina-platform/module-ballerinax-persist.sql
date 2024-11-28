@@ -19,8 +19,6 @@
 package io.ballerina.stdlib.persist.sql.datastore;
 
 import io.ballerina.runtime.api.Environment;
-import io.ballerina.runtime.api.concurrent.StrandMetadata;
-import io.ballerina.runtime.api.constants.RuntimeConstants;
 import io.ballerina.runtime.api.creators.TypeCreator;
 import io.ballerina.runtime.api.creators.ValueCreator;
 import io.ballerina.runtime.api.types.PredefinedTypes;
@@ -33,12 +31,8 @@ import io.ballerina.runtime.api.values.BObject;
 import io.ballerina.runtime.api.values.BStream;
 import io.ballerina.runtime.api.values.BString;
 import io.ballerina.runtime.api.values.BTypedesc;
-import io.ballerina.runtime.transactions.TransactionLocalContext;
-import io.ballerina.runtime.transactions.TransactionResourceManager;
 import io.ballerina.stdlib.persist.Constants;
 import io.ballerina.stdlib.persist.sql.Utils;
-
-import java.util.Map;
 
 import static io.ballerina.stdlib.persist.Constants.KEY_FIELDS;
 import static io.ballerina.stdlib.persist.ErrorGenerator.wrapError;
@@ -47,7 +41,6 @@ import static io.ballerina.stdlib.persist.Utils.getKey;
 import static io.ballerina.stdlib.persist.Utils.getMetadata;
 import static io.ballerina.stdlib.persist.Utils.getPersistClient;
 import static io.ballerina.stdlib.persist.Utils.getRecordTypeWithKeyFields;
-import static io.ballerina.stdlib.persist.Utils.getTransactionContextProperties;
 import static io.ballerina.stdlib.persist.sql.Constants.DB_CLIENT;
 import static io.ballerina.stdlib.persist.sql.Constants.PERSIST_EXECUTION_RESULT;
 import static io.ballerina.stdlib.persist.sql.Constants.SQL_EXECUTE_METHOD;
@@ -69,7 +62,6 @@ public class SQLProcessor {
     static BStream query(Environment env, BObject client, BTypedesc targetType, BObject whereClause,
                          BObject orderByClause, BObject limitClause, BObject groupByClause) {
         // This method will return `stream<targetType, persist:Error?>`
-
         BString entity = getEntity(env);
         BObject persistClient = getPersistClient(client, entity);
         BArray keyFields = (BArray) persistClient.get(KEY_FIELDS);
@@ -77,8 +69,6 @@ public class SQLProcessor {
 
         RecordType recordTypeWithIdFields = getRecordTypeWithKeyFields(keyFields, recordType);
         BTypedesc targetTypeWithIdFields = ValueCreator.createTypedescValue(recordTypeWithIdFields);
-
-        Map<String, Object> trxContextProperties = getTransactionContextProperties();
         BArray[] metadata = getMetadata(recordType);
         BArray fields = metadata[0];
         BArray includes = metadata[1];
@@ -90,9 +80,8 @@ public class SQLProcessor {
                         //      typedesc<record {}> rowType, string[] fields = [], string[] include = []
                         // )`
                         // which returns `stream<record {}, sql:Error?>|persist:Error`
-                        persistClient, Constants.RUN_READ_QUERY_METHOD, new StrandMetadata(false, trxContextProperties),
-                        targetTypeWithIdFields, fields, includes, whereClause,
-                        orderByClause, limitClause, groupByClause);
+                        persistClient, Constants.RUN_READ_QUERY_METHOD, null, targetTypeWithIdFields, fields, includes,
+                        whereClause, orderByClause, limitClause, groupByClause);
                 if (result instanceof BStream bStream) { // stream<record {}, sql:Error?>
                     return Utils.createPersistSQLStreamValue(bStream, targetType, fields, includes, typeDescriptions,
                             persistClient, null);
@@ -109,14 +98,12 @@ public class SQLProcessor {
 
     static Object queryOne(Environment env, BObject client, BArray path, BTypedesc targetType) {
         // This method will return `targetType|persist:Error`
-
         BString entity = getEntity(env);
         BObject persistClient = getPersistClient(client, entity);
 
         BArray keyFields = (BArray) persistClient.get(KEY_FIELDS);
         RecordType recordType = (RecordType) targetType.getDescribingType();
 
-        Map<String, Object> trxContextProperties = getTransactionContextProperties();
         RecordType recordTypeWithIdFields = getRecordTypeWithKeyFields(keyFields, recordType);
         BTypedesc targetTypeWithIdFields = ValueCreator.createTypedescValue(recordTypeWithIdFields);
 
@@ -134,9 +121,8 @@ public class SQLProcessor {
                         //      string[] fields = [], string[] include = [], typedesc<record {}>[] typeDescriptions = []
                         // )`
                         // which returns `record {}|persist:Error`
-                        getPersistClient(client, entity), Constants.RUN_READ_BY_KEY_QUERY_METHOD,
-                        new StrandMetadata(false, trxContextProperties), targetType, targetTypeWithIdFields, key,
-                        fields, includes, typeDescriptions);
+                        getPersistClient(client, entity), Constants.RUN_READ_BY_KEY_QUERY_METHOD, null, targetType,
+                        targetTypeWithIdFields, key, fields, includes, typeDescriptions);
             } catch (BError bError) {
                 return wrapError(bError);
             }
@@ -157,22 +143,13 @@ public class SQLProcessor {
     private static BStream queryNativeSQLBal(Environment env, BObject client, BObject paramSQLString,
                                             BTypedesc targetType) {
         // This method will return `stream<targetType, persist:Error?>`
-
         BObject dbClient = (BObject) client.get(DB_CLIENT);
-        TransactionResourceManager trxResourceManager = TransactionResourceManager.getInstance();
-        TransactionLocalContext currentTrxContext = trxResourceManager.getCurrentTransactionContext();
-
         return (BStream) env.yieldAndRun(() -> {
             try {
-                Map<String, Object> properties = null;
-                if (currentTrxContext != null) {
-                    properties = Map.of(RuntimeConstants.CURRENT_TRANSACTION_CONTEXT_PROPERTY, currentTrxContext);
-                }
                 Object result = env.getRuntime().callMethod(
                         // Call `sqlClient.query(paramSQLString, targetType)` which returns
                         // `stream<targetType, sql:Error?>`
-                        dbClient, SQL_QUERY_METHOD, new StrandMetadata(false, properties), paramSQLString,
-                        targetType);
+                        dbClient, SQL_QUERY_METHOD, null, paramSQLString, targetType);
                 // returned type is `stream<record {}, sql:Error?>`
                 BStream sqlStream = (BStream) result;
                 BObject persistNativeStream = createPersistNativeSQLStream(sqlStream, null);
@@ -188,18 +165,11 @@ public class SQLProcessor {
 
     private static Object executeNativeSQLBal(Environment env, BObject client, BObject paramSQLString) {
         BObject dbClient = (BObject) client.get(DB_CLIENT);
-        TransactionResourceManager trxResourceManager = TransactionResourceManager.getInstance();
-        TransactionLocalContext currentTrxContext = trxResourceManager.getCurrentTransactionContext();
-
         return env.yieldAndRun(() -> {
-            Map<String, Object> properties = null;
-            if (currentTrxContext != null) {
-                properties = Map.of(RuntimeConstants.CURRENT_TRANSACTION_CONTEXT_PROPERTY, currentTrxContext);
-            }
             try {
                 Object result = env.getRuntime().callMethod(
                         // Call `sqlClient.execute(paramSQLString)` which returns `sql:ExecutionResult|sql:Error`
-                        dbClient, SQL_EXECUTE_METHOD, new StrandMetadata(false, properties), paramSQLString);
+                        dbClient, SQL_EXECUTE_METHOD, null, paramSQLString);
                 if (result instanceof BMap map) { // returned type is `sql:ExecutionResult`
                     return ValueCreator.createRecordValue(getModule(), PERSIST_EXECUTION_RESULT, (BMap<BString,
                             Object>) map);

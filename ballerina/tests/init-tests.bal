@@ -29,6 +29,7 @@ configurable record {|
     string url;
     string user;
     string password;
+    string? defaultSchema = ();
     jdbc:Options connectionOptions = {};
 |} & readonly h2 = ?;
 
@@ -38,8 +39,9 @@ configurable record {|
     string user;
     string database;
     string password;
+    string? defaultSchema = ();
     mysql:Options connectionOptions = {};
-|} mysql = ?;
+|} & readonly mysql = ?;
 
 configurable record {|
     int port;
@@ -47,8 +49,9 @@ configurable record {|
     string user;
     string database;
     string password;
+    string? defaultSchema = ();
     mssql:Options connectionOptions = {};
-|} mssql = ?;
+|} & readonly mssql = ?;
 
 configurable record {|
     int port;
@@ -56,8 +59,9 @@ configurable record {|
     string user;
     string database;
     string password;
+    string? defaultSchema = ();
     postgresql:Options connectionOptions = {};
-|} postgresql = ?;
+|} & readonly postgresql = ?;
 
 @test:BeforeSuite
 function initSuite() returns error? {

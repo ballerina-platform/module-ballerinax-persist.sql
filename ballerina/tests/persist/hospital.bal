@@ -30,6 +30,7 @@ public enum PatientGender {
 }
 
 @sql:Name {value: "appointment"}
+@sql:Schema {value: "hospital"}
 public type Appointment record {|
     readonly int id;
     @sql:UniqueIndex {name: "reason_index"}
@@ -49,7 +50,7 @@ public type Appointment record {|
 
 @sql:Name {value: "patients"}
 public type Patient record {|
-    @sql:Name {value: "ID_P"}
+    @sql:Name {value: "IDP"}
     @sql:Generated
     readonly int idP;
     string name;

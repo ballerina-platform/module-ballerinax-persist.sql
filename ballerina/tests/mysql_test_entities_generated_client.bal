@@ -36,7 +36,7 @@ public isolated client class MySQLTestEntitiesClient {
 
     private final map<SQLClient> persistClients;
 
-    private final record {|SQLMetadata...;|} & readonly metadata = {
+    private final record {|SQLMetadata...;|} metadata = {
         [ALL_TYPES] : {
             entityName: "AllTypes",
             tableName: "AllTypes",
@@ -160,14 +160,14 @@ public isolated client class MySQLTestEntitiesClient {
         }
         self.dbClient = dbClient;
         self.persistClients = {
-            [ALL_TYPES] : check new (dbClient, self.metadata.get(ALL_TYPES), MYSQL_SPECIFICS),
-            [STRING_ID_RECORD] : check new (dbClient, self.metadata.get(STRING_ID_RECORD), MYSQL_SPECIFICS),
-            [INT_ID_RECORD] : check new (dbClient, self.metadata.get(INT_ID_RECORD), MYSQL_SPECIFICS),
-            [FLOAT_ID_RECORD] : check new (dbClient, self.metadata.get(FLOAT_ID_RECORD), MYSQL_SPECIFICS),
-            [DECIMAL_ID_RECORD] : check new (dbClient, self.metadata.get(DECIMAL_ID_RECORD), MYSQL_SPECIFICS),
-            [BOOLEAN_ID_RECORD] : check new (dbClient, self.metadata.get(BOOLEAN_ID_RECORD), MYSQL_SPECIFICS),
-            [COMPOSITE_ASSOCIATION_RECORD] : check new (dbClient, self.metadata.get(COMPOSITE_ASSOCIATION_RECORD), MYSQL_SPECIFICS),
-            [ALL_TYPES_ID_RECORD] : check new (dbClient, self.metadata.get(ALL_TYPES_ID_RECORD), MYSQL_SPECIFICS)
+            [ALL_TYPES] : check new (dbClient, self.metadata.get(ALL_TYPES).cloneReadOnly(), MYSQL_SPECIFICS),
+            [STRING_ID_RECORD] : check new (dbClient, self.metadata.get(STRING_ID_RECORD).cloneReadOnly(), MYSQL_SPECIFICS),
+            [INT_ID_RECORD] : check new (dbClient, self.metadata.get(INT_ID_RECORD).cloneReadOnly(), MYSQL_SPECIFICS),
+            [FLOAT_ID_RECORD] : check new (dbClient, self.metadata.get(FLOAT_ID_RECORD).cloneReadOnly(), MYSQL_SPECIFICS),
+            [DECIMAL_ID_RECORD] : check new (dbClient, self.metadata.get(DECIMAL_ID_RECORD).cloneReadOnly(), MYSQL_SPECIFICS),
+            [BOOLEAN_ID_RECORD] : check new (dbClient, self.metadata.get(BOOLEAN_ID_RECORD).cloneReadOnly(), MYSQL_SPECIFICS),
+            [COMPOSITE_ASSOCIATION_RECORD] : check new (dbClient, self.metadata.get(COMPOSITE_ASSOCIATION_RECORD).cloneReadOnly(), MYSQL_SPECIFICS),
+            [ALL_TYPES_ID_RECORD] : check new (dbClient, self.metadata.get(ALL_TYPES_ID_RECORD).cloneReadOnly(), MYSQL_SPECIFICS)
         };
     }
 

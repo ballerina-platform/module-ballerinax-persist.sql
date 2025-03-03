@@ -32,7 +32,7 @@ public isolated client class H2RainierClient {
 
     private final map<SQLClient> persistClients;
 
-    private final record {|SQLMetadata...;|} & readonly metadata = {
+    private final record {|SQLMetadata...;|} metadata = {
         [EMPLOYEE] : {
             entityName: "Employee",
             tableName: "Employee",
@@ -140,11 +140,11 @@ public isolated client class H2RainierClient {
         }
         self.dbClient = dbClient;
         self.persistClients = {
-            [EMPLOYEE] : check new (dbClient, self.metadata.get(EMPLOYEE), H2_SPECIFICS),
-            [WORKSPACE] : check new (dbClient, self.metadata.get(WORKSPACE), H2_SPECIFICS),
-            [BUILDING] : check new (dbClient, self.metadata.get(BUILDING), H2_SPECIFICS),
-            [DEPARTMENT] : check new (dbClient, self.metadata.get(DEPARTMENT), H2_SPECIFICS),
-            [ORDER_ITEM] : check new (dbClient, self.metadata.get(ORDER_ITEM), H2_SPECIFICS)
+            [EMPLOYEE] : check new (dbClient, self.metadata.get(EMPLOYEE).cloneReadOnly(), H2_SPECIFICS),
+            [WORKSPACE] : check new (dbClient, self.metadata.get(WORKSPACE).cloneReadOnly(), H2_SPECIFICS),
+            [BUILDING] : check new (dbClient, self.metadata.get(BUILDING).cloneReadOnly(), H2_SPECIFICS),
+            [DEPARTMENT] : check new (dbClient, self.metadata.get(DEPARTMENT).cloneReadOnly(), H2_SPECIFICS),
+            [ORDER_ITEM] : check new (dbClient, self.metadata.get(ORDER_ITEM).cloneReadOnly(), H2_SPECIFICS)
         };
     }
 

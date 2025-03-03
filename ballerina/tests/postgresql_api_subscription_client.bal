@@ -30,7 +30,7 @@ public isolated client class PostgreSqlApimClient {
 
     private final map<SQLClient> persistClients;
 
-    private final record {|SQLMetadata...;|} & readonly metadata = {
+    private final record {|SQLMetadata...;|} metadata = {
         [SUBSCRIPTION]: {
             entityName: "Subscription",
             tableName: "Subscription",
@@ -72,8 +72,8 @@ public isolated client class PostgreSqlApimClient {
         }
         self.dbClient = dbClient;
         self.persistClients = {
-            [SUBSCRIPTION]: check new (dbClient, self.metadata.get(SUBSCRIPTION), POSTGRESQL_SPECIFICS),
-            [API_METADATA]: check new (dbClient, self.metadata.get(API_METADATA), POSTGRESQL_SPECIFICS)
+            [SUBSCRIPTION]: check new (dbClient, self.metadata.get(SUBSCRIPTION).cloneReadOnly(), POSTGRESQL_SPECIFICS),
+            [API_METADATA]: check new (dbClient, self.metadata.get(API_METADATA).cloneReadOnly(), POSTGRESQL_SPECIFICS)
         };
     }
 

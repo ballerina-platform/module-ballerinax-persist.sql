@@ -206,12 +206,16 @@ task stopMySQLTestDockerContainer() {
 task createMSSQLTestDockerImage(type: Exec) {
    if (!Os.isFamily(Os.FAMILY_WINDOWS)) {
        def standardOutput = new ByteArrayOutputStream()
-       commandLine 'sh', '-c', "docker build -f $project.projectDir/tests/resources/mssql/Dockerfile -t ballerina-persist-mssql" +
-               " -q $project.projectDir/tests/resources/mssql/"
+       def errorOutput = new ByteArrayOutputStream()
+       commandLine 'sh', '-c', "docker build -f $project.projectDir/tests/resources/mssql/Dockerfile -t ballerina-persist-mssql -q $project.projectDir/tests/resources/mssql/"
        doLast {
            checkExecResult(executionResult, 'Error', standardOutput)
+           println "Standard Output: ${standardOutput.toString()}"
+           println "Error Output: ${errorOutput.toString()}"
            sleep(10 * 1000)
        }
+       standardOutput = standardOutput
+       errorOutput = errorOutput
    }
 }
 

@@ -34,7 +34,7 @@ public isolated client class MsSqlHospitalClient {
 
     private final map<SQLClient> persistClients;
 
-    private final record {|SQLMetadata...;|} & readonly metadata = {
+    private final record {|SQLMetadata...;|} metadata = {
         [APPOINTMENT]: {
             entityName: "Appointment",
             tableName: "appointment",
@@ -110,10 +110,30 @@ public isolated client class MsSqlHospitalClient {
             return <persist:Error>error(dbClient.message());
         }
         self.dbClient = dbClient;
+        // Update the metadata with the schema name
+        if mssql.defaultSchema != () {
+            lock {
+                foreach string key in self.metadata.keys() {
+                    SQLMetadata metadata = self.metadata.get(key);
+                    if metadata.schemaName == () {
+                        metadata.schemaName = mssql.defaultSchema;
+                    }
+                    map<JoinMetadata>? joinMetadataMap = metadata.joinMetadata;
+                    if joinMetadataMap != () {
+                        foreach string joinKey in joinMetadataMap.keys() {
+                            JoinMetadata joinMetadata = joinMetadataMap.get(joinKey);
+                            if joinMetadata.refSchema == () {
+                                joinMetadata.refSchema = mssql.defaultSchema;
+                            }
+                        }
+                    }
+                }
+            }
+        }
         self.persistClients = {
-            [APPOINTMENT]: check new (dbClient, self.metadata.get(APPOINTMENT), MSSQL_SPECIFICS),
-            [PATIENT]: check new (dbClient, self.metadata.get(PATIENT), MSSQL_SPECIFICS),
-            [DOCTOR]: check new (dbClient, self.metadata.get(DOCTOR), MSSQL_SPECIFICS)
+            [APPOINTMENT]: check new (dbClient, self.metadata.get(APPOINTMENT).cloneReadOnly(), MSSQL_SPECIFICS),
+            [PATIENT]: check new (dbClient, self.metadata.get(PATIENT).cloneReadOnly(), MSSQL_SPECIFICS),
+            [DOCTOR]: check new (dbClient, self.metadata.get(DOCTOR).cloneReadOnly(), MSSQL_SPECIFICS)
         };
     }
 

@@ -33,7 +33,7 @@ public isolated client class MySQLRainierClient {
 
     private final map<SQLClient> persistClients;
 
-    private final record {|SQLMetadata...;|} & readonly metadata = {
+    private final record {|SQLMetadata...;|} metadata = {
         [EMPLOYEE] : {
             entityName: "Employee",
             tableName: "Employee",
@@ -141,11 +141,11 @@ public isolated client class MySQLRainierClient {
         }
         self.dbClient = dbClient;
         self.persistClients = {
-            [EMPLOYEE] : check new (dbClient, self.metadata.get(EMPLOYEE), MYSQL_SPECIFICS),
-            [WORKSPACE] : check new (dbClient, self.metadata.get(WORKSPACE), MYSQL_SPECIFICS),
-            [BUILDING] : check new (dbClient, self.metadata.get(BUILDING), MYSQL_SPECIFICS),
-            [DEPARTMENT] : check new (dbClient, self.metadata.get(DEPARTMENT), MYSQL_SPECIFICS),
-            [ORDER_ITEM] : check new (dbClient, self.metadata.get(ORDER_ITEM), MYSQL_SPECIFICS)
+            [EMPLOYEE] : check new (dbClient, self.metadata.get(EMPLOYEE).cloneReadOnly(), MYSQL_SPECIFICS),
+            [WORKSPACE] : check new (dbClient, self.metadata.get(WORKSPACE).cloneReadOnly(), MYSQL_SPECIFICS),
+            [BUILDING] : check new (dbClient, self.metadata.get(BUILDING).cloneReadOnly(), MYSQL_SPECIFICS),
+            [DEPARTMENT] : check new (dbClient, self.metadata.get(DEPARTMENT).cloneReadOnly(), MYSQL_SPECIFICS),
+            [ORDER_ITEM] : check new (dbClient, self.metadata.get(ORDER_ITEM).cloneReadOnly(), MYSQL_SPECIFICS)
         };
     }
 

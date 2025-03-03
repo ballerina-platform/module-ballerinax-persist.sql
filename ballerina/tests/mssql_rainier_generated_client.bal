@@ -33,7 +33,7 @@ public isolated client class MSSQLRainierClient {
 
     private final map<SQLClient> persistClients;
 
-    private final record {|SQLMetadata...;|} & readonly metadata = {
+    private final record {|SQLMetadata...;|} metadata = {
         [EMPLOYEE] : {
             entityName: "Employee",
             tableName: "Employee",
@@ -141,11 +141,11 @@ public isolated client class MSSQLRainierClient {
         }
         self.dbClient = dbClient;
         self.persistClients = {
-            [EMPLOYEE] : check new (dbClient, self.metadata.get(EMPLOYEE), MSSQL_SPECIFICS),
-            [WORKSPACE] : check new (dbClient, self.metadata.get(WORKSPACE), MSSQL_SPECIFICS),
-            [BUILDING] : check new (dbClient, self.metadata.get(BUILDING), MSSQL_SPECIFICS),
-            [DEPARTMENT] : check new (dbClient, self.metadata.get(DEPARTMENT), MSSQL_SPECIFICS),
-            [ORDER_ITEM] : check new (dbClient, self.metadata.get(ORDER_ITEM), MSSQL_SPECIFICS)
+            [EMPLOYEE] : check new (dbClient, self.metadata.get(EMPLOYEE).cloneReadOnly(), MSSQL_SPECIFICS),
+            [WORKSPACE] : check new (dbClient, self.metadata.get(WORKSPACE).cloneReadOnly(), MSSQL_SPECIFICS),
+            [BUILDING] : check new (dbClient, self.metadata.get(BUILDING).cloneReadOnly(), MSSQL_SPECIFICS),
+            [DEPARTMENT] : check new (dbClient, self.metadata.get(DEPARTMENT).cloneReadOnly(), MSSQL_SPECIFICS),
+            [ORDER_ITEM] : check new (dbClient, self.metadata.get(ORDER_ITEM).cloneReadOnly(), MSSQL_SPECIFICS)
         };
     }
 

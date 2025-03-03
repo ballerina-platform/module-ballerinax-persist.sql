@@ -36,7 +36,7 @@ public isolated client class PostgreSQLTestEntitiesClient {
 
     private final map<SQLClient> persistClients;
 
-    private final record {|SQLMetadata...;|} & readonly metadata = {
+    private final record {|SQLMetadata...;|} metadata = {
         [ALL_TYPES] : {
             entityName: "AllTypes",
             tableName: "AllTypes",
@@ -160,14 +160,14 @@ public isolated client class PostgreSQLTestEntitiesClient {
         }
         self.dbClient = dbClient;
         self.persistClients = {
-            [ALL_TYPES] : check new (dbClient, self.metadata.get(ALL_TYPES), POSTGRESQL_SPECIFICS),
-            [STRING_ID_RECORD] : check new (dbClient, self.metadata.get(STRING_ID_RECORD), POSTGRESQL_SPECIFICS),
-            [INT_ID_RECORD] : check new (dbClient, self.metadata.get(INT_ID_RECORD), POSTGRESQL_SPECIFICS),
-            [FLOAT_ID_RECORD] : check new (dbClient, self.metadata.get(FLOAT_ID_RECORD), POSTGRESQL_SPECIFICS),
-            [DECIMAL_ID_RECORD] : check new (dbClient, self.metadata.get(DECIMAL_ID_RECORD), POSTGRESQL_SPECIFICS),
-            [BOOLEAN_ID_RECORD] : check new (dbClient, self.metadata.get(BOOLEAN_ID_RECORD), POSTGRESQL_SPECIFICS),
-            [COMPOSITE_ASSOCIATION_RECORD] : check new (dbClient, self.metadata.get(COMPOSITE_ASSOCIATION_RECORD), POSTGRESQL_SPECIFICS),
-            [ALL_TYPES_ID_RECORD] : check new (dbClient, self.metadata.get(ALL_TYPES_ID_RECORD), POSTGRESQL_SPECIFICS)
+            [ALL_TYPES] : check new (dbClient, self.metadata.get(ALL_TYPES).cloneReadOnly(), POSTGRESQL_SPECIFICS),
+            [STRING_ID_RECORD] : check new (dbClient, self.metadata.get(STRING_ID_RECORD).cloneReadOnly(), POSTGRESQL_SPECIFICS),
+            [INT_ID_RECORD] : check new (dbClient, self.metadata.get(INT_ID_RECORD).cloneReadOnly(), POSTGRESQL_SPECIFICS),
+            [FLOAT_ID_RECORD] : check new (dbClient, self.metadata.get(FLOAT_ID_RECORD).cloneReadOnly(), POSTGRESQL_SPECIFICS),
+            [DECIMAL_ID_RECORD] : check new (dbClient, self.metadata.get(DECIMAL_ID_RECORD).cloneReadOnly(), POSTGRESQL_SPECIFICS),
+            [BOOLEAN_ID_RECORD] : check new (dbClient, self.metadata.get(BOOLEAN_ID_RECORD).cloneReadOnly(), POSTGRESQL_SPECIFICS),
+            [COMPOSITE_ASSOCIATION_RECORD] : check new (dbClient, self.metadata.get(COMPOSITE_ASSOCIATION_RECORD).cloneReadOnly(), POSTGRESQL_SPECIFICS),
+            [ALL_TYPES_ID_RECORD] : check new (dbClient, self.metadata.get(ALL_TYPES_ID_RECORD).cloneReadOnly(), POSTGRESQL_SPECIFICS)
         };
     }
 

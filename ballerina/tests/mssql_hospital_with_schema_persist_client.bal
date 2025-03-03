@@ -20,17 +20,17 @@
 import ballerina/jballerina.java;
 import ballerina/persist;
 import ballerina/sql;
-import ballerinax/mysql;
-import ballerinax/mysql.driver as _;
+import ballerinax/mssql;
+import ballerinax/mssql.driver as _;
 
 const APPOINTMENT = "appointments";
 const PATIENT = "patients";
 const DOCTOR = "doctors";
 
-public isolated client class MySqlHospitalClient {
+public isolated client class MsSqlHospitalWithSchemaClient {
     *persist:AbstractPersistClient;
 
-    private final mysql:Client dbClient;
+    private final mssql:Client dbClient;
 
     private final map<SQLClient> persistClients;
 
@@ -38,6 +38,7 @@ public isolated client class MySqlHospitalClient {
         [APPOINTMENT]: {
             entityName: "Appointment",
             tableName: "appointment",
+            schemaName: "hospital",
             fieldMetadata: {
                 id: {columnName: "id"},
                 reason: {columnName: "reason"},
@@ -81,7 +82,7 @@ public isolated client class MySqlHospitalClient {
                 "appointments[].doctorId": {relation: {entityName: "appointments", refField: "doctorId"}}
             },
             keyFields: ["id"],
-            joinMetadata: {appointments: {entity: Appointment, fieldName: "appointments", refTable: "appointment", refColumns: ["patient_id"], joinColumns: ["IDP"], 'type: MANY_TO_ONE}}
+            joinMetadata: {appointments: {entity: Appointment, fieldName: "appointments", refTable: "appointment", refSchema: "hospital", refColumns: ["patient_id"], joinColumns: ["IDP"], 'type: MANY_TO_ONE}}
         },
         [DOCTOR]: {
             entityName: "Doctor",
@@ -100,30 +101,50 @@ public isolated client class MySqlHospitalClient {
                 "appointments[].doctorId": {relation: {entityName: "appointments", refField: "doctorId"}}
             },
             keyFields: ["id"],
-            joinMetadata: {appointments: {entity: Appointment, fieldName: "appointments", refTable: "appointment", refColumns: ["doctorId"], joinColumns: ["id"], 'type: MANY_TO_ONE}}
+            joinMetadata: {appointments: {entity: Appointment, fieldName: "appointments", refTable: "appointment", refSchema: "hospital", refColumns: ["doctorId"], joinColumns: ["id"], 'type: MANY_TO_ONE}}
         }
     };
 
     public isolated function init() returns persist:Error? {
-        mysql:Client|error dbClient = new (host = mysql.host, user = mysql.user, password = mysql.password, database = mysql.database, port = mysql.port);
+        mssql:Client|error dbClient = new (host = mssqlWithSchema.host, user = mssqlWithSchema.user, password = mssqlWithSchema.password, database = mssqlWithSchema.database, port = mssqlWithSchema.port);
         if dbClient is error {
             return <persist:Error>error(dbClient.message());
         }
         self.dbClient = dbClient;
+        // Update the metadata with the schema name
+        if mssqlWithSchema.defaultSchema != () {
+            lock {
+                foreach string key in self.metadata.keys() {
+                    SQLMetadata metadata = self.metadata.get(key);
+                    if metadata.schemaName == () {
+                        metadata.schemaName = mssqlWithSchema.defaultSchema;
+                    }
+                    map<JoinMetadata>? joinMetadataMap = metadata.joinMetadata;
+                    if joinMetadataMap != () {
+                        foreach string joinKey in joinMetadataMap.keys() {
+                            JoinMetadata joinMetadata = joinMetadataMap.get(joinKey);
+                            if joinMetadata.refSchema == () {
+                                joinMetadata.refSchema = mssqlWithSchema.defaultSchema;
+                            }
+                        }
+                    }
+                }
+            }
+        }
         self.persistClients = {
-            [APPOINTMENT]: check new (dbClient, self.metadata.get(APPOINTMENT).cloneReadOnly(), MYSQL_SPECIFICS),
-            [PATIENT]: check new (dbClient, self.metadata.get(PATIENT).cloneReadOnly(), MYSQL_SPECIFICS),
-            [DOCTOR]: check new (dbClient, self.metadata.get(DOCTOR).cloneReadOnly(), MYSQL_SPECIFICS)
+            [APPOINTMENT]: check new (dbClient, self.metadata.get(APPOINTMENT).cloneReadOnly(), MSSQL_SPECIFICS),
+            [PATIENT]: check new (dbClient, self.metadata.get(PATIENT).cloneReadOnly(), MSSQL_SPECIFICS),
+            [DOCTOR]: check new (dbClient, self.metadata.get(DOCTOR).cloneReadOnly(), MSSQL_SPECIFICS)
         };
     }
 
     isolated resource function get appointments(AppointmentTargetType targetType = <>, sql:ParameterizedQuery whereClause = ``, sql:ParameterizedQuery orderByClause = ``, sql:ParameterizedQuery limitClause = ``, sql:ParameterizedQuery groupByClause = ``) returns stream<targetType, persist:Error?> = @java:Method {
-        'class: "io.ballerina.stdlib.persist.sql.datastore.MySQLProcessor",
+        'class: "io.ballerina.stdlib.persist.sql.datastore.MSSQLProcessor",
         name: "query"
     } external;
 
     isolated resource function get appointments/[int id](AppointmentTargetType targetType = <>) returns targetType|persist:Error = @java:Method {
-        'class: "io.ballerina.stdlib.persist.sql.datastore.MySQLProcessor",
+        'class: "io.ballerina.stdlib.persist.sql.datastore.MSSQLProcessor",
         name: "queryOne"
     } external;
 
@@ -157,12 +178,12 @@ public isolated client class MySqlHospitalClient {
     }
 
     isolated resource function get patients(PatientTargetType targetType = <>, sql:ParameterizedQuery whereClause = ``, sql:ParameterizedQuery orderByClause = ``, sql:ParameterizedQuery limitClause = ``, sql:ParameterizedQuery groupByClause = ``) returns stream<targetType, persist:Error?> = @java:Method {
-        'class: "io.ballerina.stdlib.persist.sql.datastore.MySQLProcessor",
+        'class: "io.ballerina.stdlib.persist.sql.datastore.MSSQLProcessor",
         name: "query"
     } external;
 
     isolated resource function get patients/[int id](PatientTargetType targetType = <>) returns targetType|persist:Error = @java:Method {
-        'class: "io.ballerina.stdlib.persist.sql.datastore.MySQLProcessor",
+        'class: "io.ballerina.stdlib.persist.sql.datastore.MSSQLProcessor",
         name: "queryOne"
     } external;
 
@@ -197,12 +218,12 @@ public isolated client class MySqlHospitalClient {
     }
 
     isolated resource function get doctors(DoctorTargetType targetType = <>, sql:ParameterizedQuery whereClause = ``, sql:ParameterizedQuery orderByClause = ``, sql:ParameterizedQuery limitClause = ``, sql:ParameterizedQuery groupByClause = ``) returns stream<targetType, persist:Error?> = @java:Method {
-        'class: "io.ballerina.stdlib.persist.sql.datastore.MySQLProcessor",
+        'class: "io.ballerina.stdlib.persist.sql.datastore.MSSQLProcessor",
         name: "query"
     } external;
 
     isolated resource function get doctors/[int id](DoctorTargetType targetType = <>) returns targetType|persist:Error = @java:Method {
-        'class: "io.ballerina.stdlib.persist.sql.datastore.MySQLProcessor",
+        'class: "io.ballerina.stdlib.persist.sql.datastore.MSSQLProcessor",
         name: "queryOne"
     } external;
 
@@ -236,11 +257,11 @@ public isolated client class MySqlHospitalClient {
     }
 
     remote isolated function queryNativeSQL(sql:ParameterizedQuery sqlQuery, typedesc<record {}> rowType = <>) returns stream<rowType, persist:Error?> = @java:Method {
-        'class: "io.ballerina.stdlib.persist.sql.datastore.MySQLProcessor"
+        'class: "io.ballerina.stdlib.persist.sql.datastore.MSSQLProcessor"
     } external;
 
     remote isolated function executeNativeSQL(sql:ParameterizedQuery sqlQuery) returns ExecutionResult|persist:Error = @java:Method {
-        'class: "io.ballerina.stdlib.persist.sql.datastore.MySQLProcessor"
+        'class: "io.ballerina.stdlib.persist.sql.datastore.MSSQLProcessor"
     } external;
 
     public isolated function close() returns persist:Error? {

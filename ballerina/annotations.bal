@@ -24,6 +24,16 @@ public type NameConfig record {|
 # The Annotation used to specify the mapping of an entity/field to a database table/column.
 public annotation NameConfig Name on type, record field;
 
+# Groups the entity to a specific schema in the database.
+#
+# + value - name of the schema in the database
+public type SchemaConfig record {|
+    string value;
+|};
+
+# The Annotation used to specify the schema of an entity in the database.
+public annotation SchemaConfig Schema on type;
+
 # Marks the entity field as an index field.
 #
 # + name - specify a single index name or an array of index names

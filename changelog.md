@@ -6,6 +6,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+- [Added schema support for bal persist sql modules](https://github.com/ballerina-platform/ballerina-library/issues/7517)
+
+## [1.4.1] - 2024-10-31
+
 ### Fixed
 - [[Bug] Bal Persist fails when tries to retrieve record with a nonexistent associations](https://github.com/ballerina-platform/ballerina-library/issues/7304)
 

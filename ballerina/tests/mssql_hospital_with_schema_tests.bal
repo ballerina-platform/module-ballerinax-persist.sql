@@ -340,7 +340,7 @@ function testDeletePatientMsSqlWithSchema() returns error? {
     MsSqlHospitalWithSchemaClient mssqlDbHospital = check new();
     Patient|persist:Error result = mssqlDbHospital->/patients/[1].delete();
     if result is persist:Error {
-            test:assertFail("Patient should be deleted");
+        test:assertFail("Patient should be deleted");
     }
 }
 

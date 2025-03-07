@@ -17,7 +17,6 @@
 import ballerina/persist;
 import ballerina/test;
 
-
 @test:Config{
   groups: ["annotation", "mssql", "schema"]
 }

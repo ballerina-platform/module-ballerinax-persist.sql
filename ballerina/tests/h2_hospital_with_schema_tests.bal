@@ -317,7 +317,7 @@ function testDeleteAppointmentByPatientIdH2WithSchema() returns error? {
                 && appointment.appointmentTime.month == 5
                 && appointment.appointmentTime.day == 31
         select appointment;
-    if (result is persist:Error) {
+    if result is persist:Error {
         test:assertFail("Appointment should be found");
     }
     foreach Appointment appointment in result {

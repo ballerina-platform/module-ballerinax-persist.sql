@@ -20,4 +20,4 @@
 FROM mcr.microsoft.com/mssql/server:2019-latest
 
 ENV ACCEPT_EULA=Y
-ENV SA_PASSWORD=DefaultPassword123
+ENV SA_PASSWORD=Test123#

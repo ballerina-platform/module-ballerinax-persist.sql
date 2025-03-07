@@ -20,17 +20,17 @@
 import ballerina/jballerina.java;
 import ballerina/persist;
 import ballerina/sql;
-import ballerinax/mysql;
-import ballerinax/mysql.driver as _;
+import ballerinax/postgresql;
+import ballerinax/postgresql.driver as _;
 
 const APPOINTMENT = "appointments";
 const PATIENT = "patients";
 const DOCTOR = "doctors";
 
-public isolated client class MySqlHospitalClient {
+public isolated client class PostgreSqlHospitalClient {
     *persist:AbstractPersistClient;
 
-    private final mysql:Client dbClient;
+    private final postgresql:Client dbClient;
 
     private final map<SQLClient> persistClients;
 
@@ -105,25 +105,45 @@ public isolated client class MySqlHospitalClient {
     };
 
     public isolated function init() returns persist:Error? {
-        mysql:Client|error dbClient = new (host = mysql.host, user = mysql.user, password = mysql.password, database = mysql.database, port = mysql.port);
+        postgresql:Client|error dbClient = new (host = postgresql.host, username = postgresql.user, password = postgresql.password, database = postgresql.database, port = postgresql.port);
         if dbClient is error {
             return <persist:Error>error(dbClient.message());
         }
         self.dbClient = dbClient;
+        // Update the metadata with the schema name
+        if postgresql.defaultSchema != () {
+            lock {
+                foreach string key in self.metadata.keys() {
+                    SQLMetadata metadata = self.metadata.get(key);
+                    if metadata.schemaName == () {
+                        metadata.schemaName = postgresql.defaultSchema;
+                    }
+                    map<JoinMetadata>? joinMetadataMap = metadata.joinMetadata;
+                    if joinMetadataMap != () {
+                        foreach string joinKey in joinMetadataMap.keys() {
+                            JoinMetadata joinMetadata = joinMetadataMap.get(joinKey);
+                            if joinMetadata.refSchema == () {
+                                joinMetadata.refSchema = postgresql.defaultSchema;
+                            }
+                        }
+                    }
+                }
+            }
+        }
         self.persistClients = {
-            [APPOINTMENT]: check new (dbClient, self.metadata.get(APPOINTMENT).cloneReadOnly(), MYSQL_SPECIFICS),
-            [PATIENT]: check new (dbClient, self.metadata.get(PATIENT).cloneReadOnly(), MYSQL_SPECIFICS),
-            [DOCTOR]: check new (dbClient, self.metadata.get(DOCTOR).cloneReadOnly(), MYSQL_SPECIFICS)
+            [APPOINTMENT]: check new (dbClient, self.metadata.get(APPOINTMENT).cloneReadOnly(), POSTGRESQL_SPECIFICS),
+            [PATIENT]: check new (dbClient, self.metadata.get(PATIENT).cloneReadOnly(), POSTGRESQL_SPECIFICS),
+            [DOCTOR]: check new (dbClient, self.metadata.get(DOCTOR).cloneReadOnly(), POSTGRESQL_SPECIFICS)
         };
     }
 
     isolated resource function get appointments(AppointmentTargetType targetType = <>, sql:ParameterizedQuery whereClause = ``, sql:ParameterizedQuery orderByClause = ``, sql:ParameterizedQuery limitClause = ``, sql:ParameterizedQuery groupByClause = ``) returns stream<targetType, persist:Error?> = @java:Method {
-        'class: "io.ballerina.stdlib.persist.sql.datastore.MySQLProcessor",
+        'class: "io.ballerina.stdlib.persist.sql.datastore.PostgreSQLProcessor",
         name: "query"
     } external;
 
     isolated resource function get appointments/[int id](AppointmentTargetType targetType = <>) returns targetType|persist:Error = @java:Method {
-        'class: "io.ballerina.stdlib.persist.sql.datastore.MySQLProcessor",
+        'class: "io.ballerina.stdlib.persist.sql.datastore.PostgreSQLProcessor",
         name: "queryOne"
     } external;
 
@@ -157,12 +177,12 @@ public isolated client class MySqlHospitalClient {
     }
 
     isolated resource function get patients(PatientTargetType targetType = <>, sql:ParameterizedQuery whereClause = ``, sql:ParameterizedQuery orderByClause = ``, sql:ParameterizedQuery limitClause = ``, sql:ParameterizedQuery groupByClause = ``) returns stream<targetType, persist:Error?> = @java:Method {
-        'class: "io.ballerina.stdlib.persist.sql.datastore.MySQLProcessor",
+        'class: "io.ballerina.stdlib.persist.sql.datastore.PostgreSQLProcessor",
         name: "query"
     } external;
 
     isolated resource function get patients/[int id](PatientTargetType targetType = <>) returns targetType|persist:Error = @java:Method {
-        'class: "io.ballerina.stdlib.persist.sql.datastore.MySQLProcessor",
+        'class: "io.ballerina.stdlib.persist.sql.datastore.PostgreSQLProcessor",
         name: "queryOne"
     } external;
 
@@ -197,12 +217,12 @@ public isolated client class MySqlHospitalClient {
     }
 
     isolated resource function get doctors(DoctorTargetType targetType = <>, sql:ParameterizedQuery whereClause = ``, sql:ParameterizedQuery orderByClause = ``, sql:ParameterizedQuery limitClause = ``, sql:ParameterizedQuery groupByClause = ``) returns stream<targetType, persist:Error?> = @java:Method {
-        'class: "io.ballerina.stdlib.persist.sql.datastore.MySQLProcessor",
+        'class: "io.ballerina.stdlib.persist.sql.datastore.PostgreSQLProcessor",
         name: "query"
     } external;
 
     isolated resource function get doctors/[int id](DoctorTargetType targetType = <>) returns targetType|persist:Error = @java:Method {
-        'class: "io.ballerina.stdlib.persist.sql.datastore.MySQLProcessor",
+        'class: "io.ballerina.stdlib.persist.sql.datastore.PostgreSQLProcessor",
         name: "queryOne"
     } external;
 
@@ -236,11 +256,11 @@ public isolated client class MySqlHospitalClient {
     }
 
     remote isolated function queryNativeSQL(sql:ParameterizedQuery sqlQuery, typedesc<record {}> rowType = <>) returns stream<rowType, persist:Error?> = @java:Method {
-        'class: "io.ballerina.stdlib.persist.sql.datastore.MySQLProcessor"
+        'class: "io.ballerina.stdlib.persist.sql.datastore.PostgreSQLProcessor"
     } external;
 
     remote isolated function executeNativeSQL(sql:ParameterizedQuery sqlQuery) returns ExecutionResult|persist:Error = @java:Method {
-        'class: "io.ballerina.stdlib.persist.sql.datastore.MySQLProcessor"
+        'class: "io.ballerina.stdlib.persist.sql.datastore.PostgreSQLProcessor"
     } external;
 
     public isolated function close() returns persist:Error? {

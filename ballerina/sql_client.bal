@@ -25,6 +25,7 @@ public isolated client class SQLClient {
 
     private final string & readonly entityName;
     private final string & readonly tableName;
+    private final string? & readonly schemaName;
     private final map<FieldMetadata> & readonly fieldMetadata;
     private final string[] & readonly keyFields;
     private final map<JoinMetadata> & readonly joinMetadata;
@@ -40,6 +41,7 @@ public isolated client class SQLClient {
         self.tableName = metadata.tableName;
         self.fieldMetadata = metadata.fieldMetadata;
         self.keyFields = metadata.keyFields;
+        self.schemaName = metadata.schemaName;
         self.dbClient = dbClient;
         if metadata.joinMetadata is map<JoinMetadata> {
             self.joinMetadata = <map<JoinMetadata> & readonly>metadata.joinMetadata;
@@ -457,12 +459,12 @@ public isolated client class SQLClient {
 
     private isolated function getInsertQueries(record {}[] insertRecords) returns sql:ParameterizedQuery[] {
         return from record {} insertRecord in insertRecords
-            select sql:queryConcat(`INSERT INTO `, stringToParameterizedQuery(self.escape(self.tableName)), ` (`, self.getInsertColumnNames(), ` ) `, `VALUES `, self.getInsertQueryParams(insertRecord));
+            select sql:queryConcat(`INSERT INTO `, stringToParameterizedQuery(self.getTableName()), ` (`, self.getInsertColumnNames(), ` ) `, `VALUES `, self.getInsertQueryParams(insertRecord));
     }
 
     private isolated function getSelectQuery(string[] selectableFields) returns sql:ParameterizedQuery {
         return sql:queryConcat(
-            `SELECT `, self.getSelectColumnNames(selectableFields), ` FROM `, stringToParameterizedQuery(self.escape(self.tableName)), ` AS `, stringToParameterizedQuery(self.escape(self.entityName))
+            `SELECT `, self.getSelectColumnNames(selectableFields), ` FROM `, stringToParameterizedQuery(self.getTableName()), ` AS `, stringToParameterizedQuery(self.escape(self.entityName))
         );
     }
 
@@ -472,16 +474,25 @@ public isolated client class SQLClient {
 
     private isolated function getUpdateQuery(record {} updateRecord) returns sql:ParameterizedQuery|persist:Error {
         if self.dataSourceSpecifics == MSSQL_SPECIFICS {
-            return sql:queryConcat(`UPDATE `, stringToParameterizedQuery(self.escape(self.entityName)), ` SET `, check self.getSetClauses(updateRecord), ` FROM `, stringToParameterizedQuery(self.escape(self.tableName)), ` `, stringToParameterizedQuery(self.escape(self.entityName)));
+            return sql:queryConcat(`UPDATE `, stringToParameterizedQuery(self.escape(self.entityName)), ` SET `, check self.getSetClauses(updateRecord), ` FROM `, stringToParameterizedQuery(self.getTableName()), ` `, stringToParameterizedQuery(self.escape(self.entityName)));
         }
-        return sql:queryConcat(`UPDATE `, stringToParameterizedQuery(self.escape(self.tableName)), ` AS `, stringToParameterizedQuery(self.escape(self.entityName)), ` SET `, check self.getSetClauses(updateRecord));
+        return sql:queryConcat(`UPDATE `, stringToParameterizedQuery(self.getTableName()), ` AS `, stringToParameterizedQuery(self.escape(self.entityName)), ` SET `, check self.getSetClauses(updateRecord));
     }
 
     private isolated function getDeleteQuery() returns sql:ParameterizedQuery {
         if self.dataSourceSpecifics == MSSQL_SPECIFICS {
-            return sql:queryConcat(`DELETE `, stringToParameterizedQuery(self.escape(self.entityName)), ` FROM `, stringToParameterizedQuery(self.escape(self.tableName)), ` AS `, stringToParameterizedQuery(self.escape(self.entityName)));
+            return sql:queryConcat(`DELETE `, stringToParameterizedQuery(self.escape(self.entityName)), ` FROM `, stringToParameterizedQuery(self.getTableName()), ` AS `, stringToParameterizedQuery(self.escape(self.entityName)));
         }
-        return sql:queryConcat(`DELETE FROM `, stringToParameterizedQuery(self.escape(self.tableName)), ` AS `, stringToParameterizedQuery(self.escape(self.entityName)));
+        return sql:queryConcat(`DELETE FROM `, stringToParameterizedQuery(self.getTableName()), ` AS `, stringToParameterizedQuery(self.escape(self.entityName)));
+    }
+
+    // Constructs table name with schema name if schema name is available
+    private isolated function getTableName() returns string {
+        string? schemaName = self.schemaName;
+        if schemaName is () {
+            return self.escape(self.tableName);
+        }
+        return string `${schemaName}.${self.escape(self.tableName)}`;
     }
 
     private isolated function getJoinFields(string[] include) returns string[] {
@@ -512,7 +523,9 @@ public isolated client class SQLClient {
 
     private isolated function getJoinQuery(string joinKey) returns sql:ParameterizedQuery|persist:Error {
         JoinMetadata joinMetadata = self.joinMetadata.get(joinKey);
-        return sql:queryConcat(` LEFT JOIN `, stringToParameterizedQuery(self.escape(joinMetadata.refTable) + " " + self.escape(joinKey)),
+        string refSchema = joinMetadata.refSchema ?: "";
+        refSchema = joinMetadata.refSchema != () ? string `${refSchema}.` : refSchema;
+        return sql:queryConcat(` LEFT JOIN `, stringToParameterizedQuery(string `${refSchema}${self.escape(joinMetadata.refTable)} ${self.escape(joinKey)}`),
                                 ` ON `, check self.getJoinFilters(joinKey, joinMetadata.refColumns, <string[]>joinMetadata.joinColumns));
     }
 

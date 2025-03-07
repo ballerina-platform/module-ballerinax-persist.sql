@@ -30,7 +30,7 @@ public isolated client class H2ApimClient {
 
     private final map<SQLClient> persistClients;
 
-    private final record {|SQLMetadata...;|} & readonly metadata = {
+    private final record {|SQLMetadata...;|} metadata = {
         [SUBSCRIPTION]: {
             entityName: "Subscription",
             tableName: "Subscription",
@@ -72,8 +72,8 @@ public isolated client class H2ApimClient {
         }
         self.dbClient = dbClient;
         self.persistClients = {
-            [SUBSCRIPTION]: check new (dbClient, self.metadata.get(SUBSCRIPTION), H2_SPECIFICS),
-            [API_METADATA]: check new (dbClient, self.metadata.get(API_METADATA), H2_SPECIFICS)
+            [SUBSCRIPTION]: check new (dbClient, self.metadata.get(SUBSCRIPTION).cloneReadOnly(), H2_SPECIFICS),
+            [API_METADATA]: check new (dbClient, self.metadata.get(API_METADATA).cloneReadOnly(), H2_SPECIFICS)
         };
     }
 

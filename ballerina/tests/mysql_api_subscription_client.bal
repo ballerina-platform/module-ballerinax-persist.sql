@@ -30,7 +30,7 @@ public isolated client class MySqlApimClient {
 
     private final map<SQLClient> persistClients;
 
-    private final record {|SQLMetadata...;|} & readonly metadata = {
+    private final record {|SQLMetadata...;|} metadata = {
         [SUBSCRIPTION]: {
             entityName: "Subscription",
             tableName: "Subscription",
@@ -72,8 +72,8 @@ public isolated client class MySqlApimClient {
         }
         self.dbClient = dbClient;
         self.persistClients = {
-            [SUBSCRIPTION]: check new (dbClient, self.metadata.get(SUBSCRIPTION), MYSQL_SPECIFICS),
-            [API_METADATA]: check new (dbClient, self.metadata.get(API_METADATA), MYSQL_SPECIFICS)
+            [SUBSCRIPTION]: check new (dbClient, self.metadata.get(SUBSCRIPTION).cloneReadOnly(), MYSQL_SPECIFICS),
+            [API_METADATA]: check new (dbClient, self.metadata.get(API_METADATA).cloneReadOnly(), MYSQL_SPECIFICS)
         };
     }
 

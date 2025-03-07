@@ -34,7 +34,7 @@ public isolated client class H2HospitalClient {
 
     private final map<SQLClient> persistClients;
 
-    private final record {|SQLMetadata...;|} & readonly metadata = {
+    private final record {|SQLMetadata...;|} metadata = {
         [APPOINTMENT]: {
             entityName: "Appointment",
             tableName: "appointment",
@@ -110,10 +110,30 @@ public isolated client class H2HospitalClient {
             return <persist:Error>error(dbClient.message());
         }
         self.dbClient = dbClient;
+        // Update the metadata with the schema name
+        if h2.defaultSchema != () {
+            lock {
+                foreach string key in self.metadata.keys() {
+                    SQLMetadata metadata = self.metadata.get(key);
+                    if metadata.schemaName == () {
+                        metadata.schemaName = h2.defaultSchema;
+                    }
+                    map<JoinMetadata>? joinMetadataMap = metadata.joinMetadata;
+                    if joinMetadataMap != () {
+                        foreach string joinKey in joinMetadataMap.keys() {
+                            JoinMetadata joinMetadata = joinMetadataMap.get(joinKey);
+                            if joinMetadata.refSchema == () {
+                                joinMetadata.refSchema = h2.defaultSchema;
+                            }
+                        }
+                    }
+                }
+            }
+        }
         self.persistClients = {
-            [APPOINTMENT]: check new (dbClient, self.metadata.get(APPOINTMENT), H2_SPECIFICS),
-            [PATIENT]: check new (dbClient, self.metadata.get(PATIENT), H2_SPECIFICS),
-            [DOCTOR]: check new (dbClient, self.metadata.get(DOCTOR), H2_SPECIFICS)
+            [APPOINTMENT]: check new (dbClient, self.metadata.get(APPOINTMENT).cloneReadOnly(), H2_SPECIFICS),
+            [PATIENT]: check new (dbClient, self.metadata.get(PATIENT).cloneReadOnly(), H2_SPECIFICS),
+            [DOCTOR]: check new (dbClient, self.metadata.get(DOCTOR).cloneReadOnly(), H2_SPECIFICS)
         };
     }
 

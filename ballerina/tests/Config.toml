@@ -27,3 +27,29 @@ database="test"
 url="jdbc:h2:./build/test"
 user="sa"
 password=""
+
+[mssqlWithSchema]
+user="sa"
+password="Test123#"
+host="localhost"
+port=1433
+database="testschema"
+defaultSchema="persist"
+
+[postgresqlWithSchema]
+user="postgres"
+password="postgres"
+host="localhost"
+port=5432
+database="test"
+defaultSchema="persist"
+
+[h2WithSchema]
+url="jdbc:h2:./build/test"
+user="sa"
+password=""
+defaultSchema="persist"
+
+[[ballerina.log.modules]]
+name = "ballerina/persist"
+level = "DEBUG"

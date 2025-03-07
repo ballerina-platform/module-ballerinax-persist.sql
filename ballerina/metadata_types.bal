@@ -18,12 +18,14 @@
 #
 # + entityName - Name of the entity
 # + tableName - Table name of the entity
+# + schemaName - Schema name of the entity
 # + fieldMetadata - Metadata of all the fields of the entity
 # + keyFields - Names of the identity fields
 # + joinMetadata - Metadata of the fields that are used for `JOIN` operations
 public type SQLMetadata record {|
     string entityName;
     string tableName;
+    string schemaName?;
     map<FieldMetadata> fieldMetadata;
     string[] keyFields;
     map<JoinMetadata> joinMetadata?;
@@ -67,7 +69,8 @@ public type RelationMetadata record {|
 # Only used by the generated persist clients and `persist:SQLClient`.
 #
 # + entity - The name of the entity that is being joined  
-# + fieldName - The name of the field in the `entity` that is being joined  
+# + fieldName - The name of the field in the `entity` that is being joined
+# + refSchema - The name of the SQL schema to be joined
 # + refTable - The name of the SQL table to be joined  
 # + refColumns - The names of the referenced columns of the referenced table
 # + joinColumns - The names of the join columns
@@ -78,6 +81,7 @@ public type RelationMetadata record {|
 public type JoinMetadata record {|
     typedesc<record {}> entity;
     string fieldName;
+    string refSchema?;
     string refTable;
     string[] refColumns;
     string[] joinColumns;

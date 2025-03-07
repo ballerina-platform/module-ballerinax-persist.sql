@@ -1,4 +1,4 @@
-// Copyright (c) 2024 WSO2 LLC. (http://www.wso2.com).
+// Copyright (c) 2025 WSO2 LLC. (http://www.wso2.com).
 //
 // WSO2 LLC. licenses this file to you under the Apache License,
 // Version 2.0 (the "License"); you may not use this file except
@@ -27,17 +27,18 @@ const APPOINTMENT = "appointments";
 const PATIENT = "patients";
 const DOCTOR = "doctors";
 
-public isolated client class PostgreSqlHospitalClient {
+public isolated client class PostgreSqlHospitalWithSchemaClient {
     *persist:AbstractPersistClient;
 
     private final postgresql:Client dbClient;
 
     private final map<SQLClient> persistClients;
 
-    private final record {|SQLMetadata...;|} & readonly metadata = {
+    private final record {|SQLMetadata...;|} metadata = {
         [APPOINTMENT]: {
             entityName: "Appointment",
             tableName: "appointment",
+            schemaName: "hospital",
             fieldMetadata: {
                 id: {columnName: "id"},
                 reason: {columnName: "reason"},
@@ -81,7 +82,7 @@ public isolated client class PostgreSqlHospitalClient {
                 "appointments[].doctorId": {relation: {entityName: "appointments", refField: "doctorId"}}
             },
             keyFields: ["id"],
-            joinMetadata: {appointments: {entity: Appointment, fieldName: "appointments", refTable: "appointment", refColumns: ["patient_id"], joinColumns: ["IDP"], 'type: MANY_TO_ONE}}
+            joinMetadata: {appointments: {entity: Appointment, fieldName: "appointments", refTable: "appointment", refSchema: "hospital", refColumns: ["patient_id"], joinColumns: ["IDP"], 'type: MANY_TO_ONE}}
         },
         [DOCTOR]: {
             entityName: "Doctor",
@@ -100,20 +101,41 @@ public isolated client class PostgreSqlHospitalClient {
                 "appointments[].doctorId": {relation: {entityName: "appointments", refField: "doctorId"}}
             },
             keyFields: ["id"],
-            joinMetadata: {appointments: {entity: Appointment, fieldName: "appointments", refTable: "appointment", refColumns: ["doctorId"], joinColumns: ["id"], 'type: MANY_TO_ONE}}
+            joinMetadata: {appointments: {entity: Appointment, fieldName: "appointments", refTable: "appointment", refSchema: "hospital", refColumns: ["doctorId"], joinColumns: ["id"], 'type: MANY_TO_ONE}}
         }
     };
 
     public isolated function init() returns persist:Error? {
-        postgresql:Client|error dbClient = new (host = postgresql.host, username = postgresql.user, password = postgresql.password, database = postgresql.database, port = postgresql.port);
+        postgresql:Client|error dbClient = new (host = postgresqlWithSchema.host, username = postgresqlWithSchema.user, password = postgresqlWithSchema.password, database = postgresqlWithSchema.database, port = postgresqlWithSchema.port);
         if dbClient is error {
             return <persist:Error>error(dbClient.message());
         }
         self.dbClient = dbClient;
+        // Update the metadata with the schema name
+        if postgresqlWithSchema.defaultSchema != () {
+            lock {
+                foreach string key in self.metadata.keys() {
+                    SQLMetadata metadata = self.metadata.get(key);
+                    if metadata.schemaName == () {
+                        metadata.schemaName = postgresqlWithSchema.defaultSchema;
+                    }
+                    map<JoinMetadata>? joinMetadataMap = metadata.joinMetadata;
+                    if joinMetadataMap != () {
+                        foreach string joinKey in joinMetadataMap.keys() {
+                            JoinMetadata joinMetadata = joinMetadataMap.get(joinKey);
+                            if joinMetadata.refSchema == () {
+                                joinMetadata.refSchema = postgresqlWithSchema.defaultSchema;
+                            }
+                        }
+                    }
+                }
+            }
+        }
+
         self.persistClients = {
-            [APPOINTMENT]: check new (dbClient, self.metadata.get(APPOINTMENT), POSTGRESQL_SPECIFICS),
-            [PATIENT]: check new (dbClient, self.metadata.get(PATIENT), POSTGRESQL_SPECIFICS),
-            [DOCTOR]: check new (dbClient, self.metadata.get(DOCTOR), POSTGRESQL_SPECIFICS)
+            [APPOINTMENT]: check new (dbClient, self.metadata.get(APPOINTMENT).cloneReadOnly(), POSTGRESQL_SPECIFICS),
+            [PATIENT]: check new (dbClient, self.metadata.get(PATIENT).cloneReadOnly(), POSTGRESQL_SPECIFICS),
+            [DOCTOR]: check new (dbClient, self.metadata.get(DOCTOR).cloneReadOnly(), POSTGRESQL_SPECIFICS)
         };
     }
 

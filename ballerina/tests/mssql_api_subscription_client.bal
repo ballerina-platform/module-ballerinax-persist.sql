@@ -30,7 +30,7 @@ public isolated client class MsSqlApimClient {
 
     private final map<SQLClient> persistClients;
 
-    private final record {|SQLMetadata...;|} & readonly metadata = {
+    private final record {|SQLMetadata...;|} metadata = {
         [SUBSCRIPTION]: {
             entityName: "Subscription",
             tableName: "Subscription",
@@ -72,8 +72,8 @@ public isolated client class MsSqlApimClient {
         }
         self.dbClient = dbClient;
         self.persistClients = {
-            [SUBSCRIPTION]: check new (dbClient, self.metadata.get(SUBSCRIPTION), MSSQL_SPECIFICS),
-            [API_METADATA]: check new (dbClient, self.metadata.get(API_METADATA), MSSQL_SPECIFICS)
+            [SUBSCRIPTION]: check new (dbClient, self.metadata.get(SUBSCRIPTION).cloneReadOnly(), MSSQL_SPECIFICS),
+            [API_METADATA]: check new (dbClient, self.metadata.get(API_METADATA).cloneReadOnly(), MSSQL_SPECIFICS)
         };
     }
 

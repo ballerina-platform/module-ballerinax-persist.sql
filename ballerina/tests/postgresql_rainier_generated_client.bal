@@ -33,7 +33,7 @@ public isolated client class PostgreSQLRainierClient {
 
     private final map<SQLClient> persistClients;
 
-    private final record {|SQLMetadata...;|} & readonly metadata = {
+    private final record {|SQLMetadata...;|} metadata = {
         [EMPLOYEE] : {
             entityName: "Employee",
             tableName: "Employee",
@@ -141,11 +141,11 @@ public isolated client class PostgreSQLRainierClient {
         }
         self.dbClient = dbClient;
         self.persistClients = {
-            [EMPLOYEE] : check new (dbClient, self.metadata.get(EMPLOYEE), POSTGRESQL_SPECIFICS),
-            [WORKSPACE] : check new (dbClient, self.metadata.get(WORKSPACE), POSTGRESQL_SPECIFICS),
-            [BUILDING] : check new (dbClient, self.metadata.get(BUILDING), POSTGRESQL_SPECIFICS),
-            [DEPARTMENT] : check new (dbClient, self.metadata.get(DEPARTMENT), POSTGRESQL_SPECIFICS),
-            [ORDER_ITEM] : check new (dbClient, self.metadata.get(ORDER_ITEM), POSTGRESQL_SPECIFICS)
+            [EMPLOYEE] : check new (dbClient, self.metadata.get(EMPLOYEE).cloneReadOnly(), POSTGRESQL_SPECIFICS),
+            [WORKSPACE] : check new (dbClient, self.metadata.get(WORKSPACE).cloneReadOnly(), POSTGRESQL_SPECIFICS),
+            [BUILDING] : check new (dbClient, self.metadata.get(BUILDING).cloneReadOnly(), POSTGRESQL_SPECIFICS),
+            [DEPARTMENT] : check new (dbClient, self.metadata.get(DEPARTMENT).cloneReadOnly(), POSTGRESQL_SPECIFICS),
+            [ORDER_ITEM] : check new (dbClient, self.metadata.get(ORDER_ITEM).cloneReadOnly(), POSTGRESQL_SPECIFICS)
         };
     }
 

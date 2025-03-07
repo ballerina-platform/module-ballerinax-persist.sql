@@ -135,7 +135,7 @@ function testGetPatientByIdPostgreSqlWithSchema() returns error? {
 function testGetPatientNotFoundPostgreSqlWithSchema() returns error? {
     PostgreSqlHospitalWithSchemaClient postgresSqlDbHospital = check new();
     Patient|persist:Error patient = postgresSqlDbHospital->/patients/[10].get();
-    if !(patient is persist:NotFoundError) {
+    if patient !is persist:NotFoundError {
         test:assertFail("Patient should be not found");
     }
 }

@@ -102,7 +102,7 @@ function testCreateAppointmentAlreadyExistsH2WithSchema() returns error? {
         reason: "Headache"
     };
     int[]|persist:Error res = h2DbHospital->/appointments.post([appointment]);
-    if !(res is persist:AlreadyExistsError) {
+    if res !is persist:AlreadyExistsError {
         test:assertFail("Appointment should not be created");
     }
 }
@@ -139,7 +139,7 @@ function testGetPatientByIdH2WithSchema() returns error? {
 function testGetPatientNotFoundH2WithSchema() returns error? {
     H2HospitalWithSchemaClient h2DbHospital = check new ();
     Patient|persist:Error patient = h2DbHospital->/patients/[10].get();
-    if !(patient is persist:NotFoundError) {
+    if patient !is persist:NotFoundError {
         test:assertFail("Patient should be not found");
     }
 }
@@ -299,7 +299,7 @@ function testPatchAppointmentH2WithSchema() returns error? {
     ];
     test:assertEquals(filteredAppointments, expected, "Appointment details should be updated");
     Appointment|persist:Error result2 = h2DbHospital->/appointments/[0].put({status: "STARTED"});
-    if !(result2 is persist:NotFoundError) {
+    if result2 !is persist:NotFoundError {
         test:assertFail("Appointment should not be found");
     }
 }

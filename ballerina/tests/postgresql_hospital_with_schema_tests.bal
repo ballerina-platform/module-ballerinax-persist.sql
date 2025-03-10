@@ -1,4 +1,4 @@
-// Copyright (c) 2024 WSO2 LLC. (http://www.wso2.com).
+// Copyright (c) 2025 WSO2 LLC. (http://www.wso2.com).
 //
 // WSO2 LLC. licenses this file to you under the Apache License,
 // Version 2.0 (the "License"); you may not use this file except
@@ -135,7 +135,7 @@ function testGetPatientByIdPostgreSqlWithSchema() returns error? {
 function testGetPatientNotFoundPostgreSqlWithSchema() returns error? {
     PostgreSqlHospitalWithSchemaClient postgresSqlDbHospital = check new();
     Patient|persist:Error patient = postgresSqlDbHospital->/patients/[10].get();
-    if !(patient is persist:NotFoundError) {
+    if patient !is persist:NotFoundError {
         test:assertFail("Patient should be not found");
     }
 }

@@ -1,4 +1,4 @@
-// Copyright (c) 2024 WSO2 LLC. (http://www.wso2.com).
+// Copyright (c) 2025 WSO2 LLC. (http://www.wso2.com).
 //
 // WSO2 LLC. licenses this file to you under the Apache License,
 // Version 2.0 (the "License"); you may not use this file except
@@ -16,7 +16,6 @@
 
 import ballerina/persist;
 import ballerina/test;
-
 
 @test:Config{
   groups: ["annotation", "mssql", "schema"]
@@ -62,7 +61,7 @@ function testCreateDoctorAlreadyExistsMsSqlWithSchema() returns error? {
       salary: 20000.00
     };
     int[]|persist:Error res = mssqlDbHospital->/doctors.post([doctor]);
-    if !(res is persist:AlreadyExistsError) {
+    if res !is persist:AlreadyExistsError {
         test:assertFail("Doctor should not be created");
     }
 }
@@ -99,7 +98,7 @@ function testCreateAppointmentAlreadyExistsMsSqlWithSchema() returns error? {
       reason: "Headache"
     };
     int[]|persist:Error res = mssqlDbHospital->/appointments.post([appointment]);
-    if !(res is persist:AlreadyExistsError) {
+    if res !is persist:AlreadyExistsError {
         test:assertFail("Appointment should not be created");
     }
 }
@@ -135,7 +134,7 @@ function testGetPatientByIdMsSqlWithSchema() returns error? {
 function testGetPatientNotFoundMsSqlWithSchema() returns error? {
     MsSqlHospitalWithSchemaClient mssqlDbHospital = check new();
     Patient|persist:Error patient = mssqlDbHospital->/patients/[10].get();
-    if !(patient is persist:NotFoundError) {
+    if patient !is persist:NotFoundError {
         test:assertFail("Patient should be not found");
     }
 }
@@ -295,7 +294,7 @@ function testPatchAppointmentMsSqlWithSchema() returns error? {
     ];        
     test:assertEquals(filteredAppointments, expected, "Appointment details should be updated");
     Appointment|persist:Error result2 = mssqlDbHospital->/appointments/[0].put({status: "STARTED"});
-    if !(result2 is persist:NotFoundError) {
+    if result2 !is persist:NotFoundError {
         test:assertFail("Appointment should not be found");
     }
 }
@@ -313,7 +312,7 @@ function testDeleteAppointmentByPatientIdMsSqlWithSchema() returns error? {
                 && appointment.appointmentTime.month == 7
                 && appointment.appointmentTime.day == 1
             select appointment;
-    if (result is persist:Error) {
+    if result is persist:Error {
         test:assertFail("Appointment should be found");
     }
     foreach Appointment appointment in result {
@@ -340,7 +339,7 @@ function testDeletePatientMsSqlWithSchema() returns error? {
     MsSqlHospitalWithSchemaClient mssqlDbHospital = check new();
     Patient|persist:Error result = mssqlDbHospital->/patients/[1].delete();
     if result is persist:Error {
-            test:assertFail("Patient should be deleted");
+        test:assertFail("Patient should be deleted");
     }
 }
 

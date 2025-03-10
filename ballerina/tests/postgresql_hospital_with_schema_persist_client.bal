@@ -120,12 +120,12 @@ public isolated client class PostgreSqlHospitalWithSchemaClient {
                         metadata.schemaName = postgresqlWithSchema.defaultSchema;
                     }
                     map<JoinMetadata>? joinMetadataMap = metadata.joinMetadata;
-                    if joinMetadataMap != () {
-                        foreach string joinKey in joinMetadataMap.keys() {
-                            JoinMetadata joinMetadata = joinMetadataMap.get(joinKey);
-                            if joinMetadata.refSchema == () {
-                                joinMetadata.refSchema = postgresqlWithSchema.defaultSchema;
-                            }
+                    if joinMetadataMap == () {
+                        continue;
+                    }
+                    foreach [string, JoinMetadata][_, joinMetadata] in joinMetadataMap.entries() {
+                        if joinMetadata.refSchema == () {
+                            joinMetadata.refSchema = postgresqlWithSchema.defaultSchema;
                         }
                     }
                 }

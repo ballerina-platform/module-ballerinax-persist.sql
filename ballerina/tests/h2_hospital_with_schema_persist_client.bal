@@ -120,12 +120,12 @@ public isolated client class H2HospitalWithSchemaClient {
                         metadata.schemaName = h2WithSchema.defaultSchema;
                     }
                     map<JoinMetadata>? joinMetadataMap = metadata.joinMetadata;
-                    if joinMetadataMap != () {
-                        foreach string joinKey in joinMetadataMap.keys() {
-                            JoinMetadata joinMetadata = joinMetadataMap.get(joinKey);
-                            if joinMetadata.refSchema == () {
-                                joinMetadata.refSchema = h2WithSchema.defaultSchema;
-                            }
+                    if joinMetadataMap == () {
+                        continue;
+                    }
+                    foreach [string, JoinMetadata][_, joinMetadata] in joinMetadataMap.entries() {
+                        if joinMetadata.refSchema == () {
+                            joinMetadata.refSchema = h2WithSchema.defaultSchema;
                         }
                     }
                 }

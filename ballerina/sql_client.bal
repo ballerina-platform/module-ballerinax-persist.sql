@@ -181,7 +181,6 @@ public isolated client class SQLClient {
             rows = check rows.cloneWithType(rowsType);
             return rows;
         } on fail error err {
-            log:printError("Error occurred while fetching rows", err);
             if err is persist:Error {
                 return err;
             }

@@ -160,7 +160,7 @@ public isolated client class SQLClient {
     # Performs an SQL `SELECT` operation to read multiple entity records from the database and return them as a list.
     #
     # + rowsType - The type description of the array of entities to be retrieved
-    # + rowTypeWithIdFields - The type description of the entity to be retrieved with
+    # + rowTypeWithIdFields - The type description of the entity to be retrieved with key fields included
     # + fields - The fields to be retrieved
     # + include - The associations to be retrieved
     # + whereClause - The `WHERE` clause of the query
@@ -176,7 +176,7 @@ public isolated client class SQLClient {
             stream<record {}, sql:Error?> result = check self.runReadQuery(rowTypeWithIdFields, fields, include,
                 whereClause, orderByClause, limitClause, groupByClause);
 
-            record{}[] rows = check from record {} row in result
+            record {}[] rows = check from record {} row in result
                 select row;
             rows = check rows.cloneWithType(rowsType);
             return rows;

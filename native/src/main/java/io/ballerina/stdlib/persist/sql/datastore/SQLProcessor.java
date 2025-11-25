@@ -115,7 +115,9 @@ public class SQLProcessor {
             try {
                 return env.getRuntime().callMethod(
                         // Call `SQLClient.runReadQueryAsList(
-                        //      typedesc<record {}> rowType, string[] fields = [], string[] include = []
+                        //      typedesc<record {}> rowsType, typedesc<record {}> rowTypeWithIdFields,
+                        //      string[] fields = [], string[] include = [], whereClause, orderByClause, limitClause,
+                        //      groupByClause
                         // )`
                         // which returns `record {}[]|persist:Error`
                         persistClient, "runReadQueryAsList", null, rowsType, targetTypeWithIdFields,

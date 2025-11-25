@@ -96,6 +96,36 @@ public class SQLProcessor {
         });
     }
 
+    static Object queryAsList(Environment env, BObject client, BTypedesc targetType, BObject whereClause,
+                              BObject orderByClause, BObject limitClause, BObject groupByClause) {
+        // This method will return `targetType[]|persist:Error`
+        BString entity = getEntity(env);
+        BObject persistClient = getPersistClient(client, entity);
+        BArray keyFields = (BArray) persistClient.get(KEY_FIELDS);
+        RecordType recordType = (RecordType) targetType.getDescribingType();
+
+        RecordType recordTypeWithIdFields = getRecordTypeWithKeyFields(keyFields, recordType);
+        BTypedesc targetTypeWithIdFields = ValueCreator.createTypedescValue(recordTypeWithIdFields);
+        BTypedesc rowsType = ValueCreator.createTypedescValue(TypeCreator.createArrayType(
+                targetType.getDescribingType()));
+        BArray[] metadata = getMetadata(recordType);
+        BArray fields = metadata[0];
+        BArray includes = metadata[1];
+        return env.yieldAndRun(() -> {
+            try {
+                return env.getRuntime().callMethod(
+                        // Call `SQLClient.runReadQueryAsList(
+                        //      typedesc<record {}> rowType, string[] fields = [], string[] include = []
+                        // )`
+                        // which returns `record {}[]|persist:Error`
+                        persistClient, "runReadQueryAsList", null, rowsType, targetTypeWithIdFields,
+                        fields, includes, whereClause, orderByClause, limitClause, groupByClause);
+            } catch (BError bError) {
+                return wrapError(bError);
+            }
+        });
+    }
+
     static Object queryOne(Environment env, BObject client, BArray path, BTypedesc targetType) {
         // This method will return `targetType|persist:Error`
         BString entity = getEntity(env);

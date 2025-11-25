@@ -157,6 +157,38 @@ public isolated client class SQLClient {
         return resultStream;
     }
 
+    # Performs an SQL `SELECT` operation to read multiple entity records from the database and return them as a list.
+    #
+    # + rowsType - The type description of the array of entities to be retrieved
+    # + rowTypeWithIdFields - The type description of the entity to be retrieved with
+    # + fields - The fields to be retrieved
+    # + include - The associations to be retrieved
+    # + whereClause - The `WHERE` clause of the query
+    # + orderByClause - The `ORDER BY` clause of the query
+    # + limitClause - The `LIMIT` clause of the query
+    # + groupByClause - The `GROUP BY` clause of the query
+    # + return - An array of records in the `rowType` type or a `persist:Error` if the operation fails
+    public isolated function runReadQueryAsList(typedesc<record {}[]> rowsType, typedesc<record {}> rowTypeWithIdFields,
+            string[] fields = [], string[] include = [], sql:ParameterizedQuery whereClause = ``,
+            sql:ParameterizedQuery orderByClause = ``, sql:ParameterizedQuery limitClause = ``,
+            sql:ParameterizedQuery groupByClause = ``) returns record {}[]|persist:Error {
+        do {
+            stream<record {}, sql:Error?> result = check self.runReadQuery(rowTypeWithIdFields, fields, include,
+                whereClause, orderByClause, limitClause, groupByClause);
+
+            record{}[] rows = check from record {} row in result
+                select row;
+            rows = check rows.cloneWithType(rowsType);
+            return rows;
+        } on fail error err {
+            log:printError("Error occurred while fetching rows", err);
+            if err is persist:Error {
+                return err;
+            }
+            return <persist:Error>error(err.message(), err.cause());
+        }
+    }
+
     # Performs an SQL `UPDATE` operation to update multiple entity records in the database.
     #
     # + key - the key of the entity

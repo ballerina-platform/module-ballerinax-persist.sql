@@ -7,6 +7,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
 
 ### Added
+
+- [Add support for querying multiple records as a list in SQL processors](https://github.com/ballerina-platform/ballerina-library/issues/8488)
+
+## [1.5.0] - 2025-02-10
+
+### Added
 - [Added schema support for bal persist sql modules](https://github.com/ballerina-platform/ballerina-library/issues/7517)
 
 ## [1.4.1] - 2024-10-31

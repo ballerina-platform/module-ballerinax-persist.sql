@@ -69,6 +69,19 @@ function postgresqlAllTypesReadTest() returns error? {
 }
 
 @test:Config {
+    groups: ["all-types", "postgresql"],
+    dependsOn: [postgresqlAllTypesReadTest]
+}
+function postgresqlAllTypesReadAsListTest() returns error? {
+    PostgreSQLTestEntitiesClient testEntitiesClient = check new ();
+
+    AllTypes[] allTypes = check testEntitiesClient->/alltypes/list;
+
+    test:assertEquals(allTypes, [allTypes3Expected, allTypes4Expected, allTypes1Expected, allTypes2Expected]);
+    check testEntitiesClient.close();
+}
+
+@test:Config {
     groups: ["all-types", "postgresql", "dependent"],
     dependsOn: [postgresqlAllTypesCreateTest, postgresqlAllTypesCreateMixedTest]
 }
@@ -201,7 +214,7 @@ function postgresqlAllTypesReadOneTestNegative() returns error? {
 
 @test:Config {
     groups: ["all-types", "postgresql"],
-    dependsOn: [postgresqlAllTypesReadOneTest, postgresqlAllTypesReadTest, postgresqlAllTypesReadDependentTest]
+    dependsOn: [postgresqlAllTypesReadOneTest, postgresqlAllTypesReadAsListTest, postgresqlAllTypesReadDependentTest]
 }
 function postgresqlAllTypesUpdateTest() returns error? {
     PostgreSQLTestEntitiesClient testEntitiesClient = check new ();

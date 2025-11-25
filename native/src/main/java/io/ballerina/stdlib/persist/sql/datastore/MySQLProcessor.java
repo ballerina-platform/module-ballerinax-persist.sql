@@ -39,6 +39,11 @@ public class MySQLProcessor {
         return SQLProcessor.query(env, client, targetType, whereClause, orderClause, limitClause, groupByClause);
     }
 
+    public static Object queryAsList(Environment env, BObject client, BTypedesc targetType, BObject whereClause,
+                                     BObject orderClause, BObject limitClause, BObject groupByClause) {
+        return SQLProcessor.queryAsList(env, client, targetType, whereClause, orderClause, limitClause, groupByClause);
+    }
+
     public static Object queryOne(Environment env, BObject client, BArray path, BTypedesc targetType) {
         return SQLProcessor.queryOne(env, client, path, targetType);
     }

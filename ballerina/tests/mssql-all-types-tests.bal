@@ -69,6 +69,19 @@ function mssqlAllTypesReadTest() returns error? {
 }
 
 @test:Config {
+    groups: ["all-types", "mssql"],
+    dependsOn: [mssqlAllTypesReadTest]
+}
+function mssqlAllTypesReadAsListTest() returns error? {
+    MSSQLTestEntitiesClient testEntitiesClient = check new ();
+
+    AllTypes[] allTypes = check testEntitiesClient->/alltypes/list;
+
+    test:assertEquals(allTypes, [allTypes1Expected, allTypes2Expected, allTypes3Expected, allTypes4Expected]);
+    check testEntitiesClient.close();
+}
+
+@test:Config {
     groups: ["all-types", "mssql", "dependent"],
     dependsOn: [mssqlAllTypesCreateTest, mssqlAllTypesCreateMixedTest]
 }
@@ -201,7 +214,7 @@ function mssqlAllTypesReadOneTestNegative() returns error? {
 
 @test:Config {
     groups: ["all-types", "mssql"],
-    dependsOn: [mssqlAllTypesReadOneTest, mssqlAllTypesReadTest, mssqlAllTypesReadDependentTest]
+    dependsOn: [mssqlAllTypesReadOneTest, mssqlAllTypesReadAsListTest, mssqlAllTypesReadDependentTest]
 }
 function mssqlAllTypesUpdateTest() returns error? {
     MSSQLTestEntitiesClient testEntitiesClient = check new ();

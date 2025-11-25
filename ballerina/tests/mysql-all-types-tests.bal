@@ -69,6 +69,19 @@ function mysqlAllTypesReadTest() returns error? {
 }
 
 @test:Config {
+    groups: ["all-types", "mysql"],
+    dependsOn: [mysqlAllTypesReadTest]
+}
+function mysqlAllTypesReadAsListTest() returns error? {
+    MySQLTestEntitiesClient testEntitiesClient = check new ();
+
+    AllTypes[] allTypes = check testEntitiesClient->/alltypes/list;
+
+    test:assertEquals(allTypes, [allTypes1Expected, allTypes2Expected, allTypes3Expected, allTypes4Expected]);
+    check testEntitiesClient.close();
+}
+
+@test:Config {
     groups: ["all-types", "mysql", "dependent"],
     dependsOn: [mysqlAllTypesCreateTest, mysqlAllTypesCreateMixedTest]
 }
@@ -201,7 +214,7 @@ function mysqlAllTypesReadOneTestNegative() returns error? {
 
 @test:Config {
     groups: ["all-types", "mysql"],
-    dependsOn: [mysqlAllTypesReadOneTest, mysqlAllTypesReadTest, mysqlAllTypesReadDependentTest]
+    dependsOn: [mysqlAllTypesReadOneTest, mysqlAllTypesReadAsListTest, mysqlAllTypesReadDependentTest]
 }
 function mysqlAllTypesUpdateTest() returns error? {
     MySQLTestEntitiesClient testEntitiesClient = check new ();

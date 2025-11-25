@@ -66,6 +66,19 @@ function h2AllTypesReadTest() returns error? {
 }
 
 @test:Config {
+    groups: ["all-types", "h2"],
+    dependsOn: [h2AllTypesReadTest]
+}
+function h2AllTypesReadAsListTest() returns error? {
+    H2TestEntitiesClient testEntitiesClient = check new ();
+
+    AllTypes[] allTypes = check testEntitiesClient->/alltypes/list;
+
+    test:assertEquals(allTypes, [allTypes1Expected, allTypes2Expected, allTypes3Expected]);
+    check testEntitiesClient.close();
+}
+
+@test:Config {
     groups: ["all-types", "h2", "dependent"],
     dependsOn: [h2AllTypesCreateTest, h2AllTypesCreateOptionalTest]
 }
@@ -176,7 +189,7 @@ function h2AllTypesReadOneTestNegative() returns error? {
 
 @test:Config {
     groups: ["all-types", "h2"],
-    dependsOn: [h2AllTypesReadOneTest, h2AllTypesReadTest, h2AllTypesReadDependentTest]
+    dependsOn: [h2AllTypesReadOneTest, h2AllTypesReadAsListTest, h2AllTypesReadDependentTest]
 }
 function h2AllTypesUpdateTest() returns error? {
     H2TestEntitiesClient testEntitiesClient = check new ();

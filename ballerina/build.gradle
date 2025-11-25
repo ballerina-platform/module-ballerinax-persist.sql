@@ -333,12 +333,12 @@ startPostgreSQLTestDockerContainer.dependsOn createPostgreSQLTestDockerImage
 build.dependsOn "generatePomFileForMavenPublication"
 build.dependsOn ":${packageName}-compiler-plugin:build"
 build.dependsOn ":${packageName}-native:build"
-build.finalizedBy stopMySQLTestDockerContainer
-build.finalizedBy stopMSSQLTestDockerContainer
-build.finalizedBy stopPostgreSQLTestDockerContainer
 
 test.dependsOn ":${packageName}-compiler-plugin:build"
 test.dependsOn ":${packageName}-native:build"
 test.dependsOn startMySQLTestDockerContainer
 test.dependsOn startMSSQLTestDockerContainer
 test.dependsOn startPostgreSQLTestDockerContainer
+test.finalizedBy stopMySQLTestDockerContainer
+test.finalizedBy stopMSSQLTestDockerContainer
+test.finalizedBy stopPostgreSQLTestDockerContainer

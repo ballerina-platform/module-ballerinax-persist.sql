@@ -22,6 +22,7 @@ import io.ballerina.compiler.syntax.tree.AbstractNodeFactory;
 import io.ballerina.compiler.syntax.tree.BasicLiteralNode;
 import io.ballerina.compiler.syntax.tree.BindingPatternNode;
 import io.ballerina.compiler.syntax.tree.CaptureBindingPatternNode;
+import io.ballerina.compiler.syntax.tree.CheckExpressionNode;
 import io.ballerina.compiler.syntax.tree.ClientResourceAccessActionNode;
 import io.ballerina.compiler.syntax.tree.ExpressionNode;
 import io.ballerina.compiler.syntax.tree.FieldAccessExpressionNode;
@@ -160,8 +161,13 @@ public class QueryCodeModifierTask implements ModifierTask<SourceModifierContext
                 return queryPipelineNode;
             }
 
-            ClientResourceAccessActionNode clientResourceAccessActionNode =
-                    (ClientResourceAccessActionNode) fromClauseNode.expression();
+            ExpressionNode expression = fromClauseNode.expression();
+            if (expression instanceof CheckExpressionNode checkExpr) {
+                expression = checkExpr.expression();
+            }
+            if (!(expression instanceof ClientResourceAccessActionNode clientResourceAccessActionNode)) {
+                return queryPipelineNode;
+            }
             SeparatedNodeList<FunctionArgumentNode> queryArguments = query.getArguments();
             List<Node> arguments = new ArrayList<>();
             arguments.add(queryArguments.get(0));

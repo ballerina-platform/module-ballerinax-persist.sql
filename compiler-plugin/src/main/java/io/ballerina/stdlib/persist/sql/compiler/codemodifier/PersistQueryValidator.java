@@ -20,6 +20,7 @@ package io.ballerina.stdlib.persist.sql.compiler.codemodifier;
 
 import io.ballerina.compiler.syntax.tree.BasicLiteralNode;
 import io.ballerina.compiler.syntax.tree.BinaryExpressionNode;
+import io.ballerina.compiler.syntax.tree.CheckExpressionNode;
 import io.ballerina.compiler.syntax.tree.ChildNodeEntry;
 import io.ballerina.compiler.syntax.tree.ChildNodeList;
 import io.ballerina.compiler.syntax.tree.ClientResourceAccessActionNode;
@@ -207,7 +208,12 @@ public class PersistQueryValidator implements AnalysisTask<SyntaxNodeAnalysisCon
     }
 
     private Query isQueryUsingPersistentClient(FromClauseNode fromClauseNode) {
-        if (fromClauseNode.expression() instanceof ClientResourceAccessActionNode remoteCall) {
+        ExpressionNode expression = fromClauseNode.expression();
+        // Handling the client method call with eager loading where client returns a list or error
+        if (expression instanceof CheckExpressionNode checkExpr) {
+            expression = checkExpr.expression();
+        }
+        if (expression instanceof ClientResourceAccessActionNode remoteCall) {
             if (remoteCall.expression().kind() != SyntaxKind.SIMPLE_NAME_REFERENCE) {
                 // This improvement is tracked in
                 // https://github.com/ballerina-platform/ballerina-standard-library/issues/4943

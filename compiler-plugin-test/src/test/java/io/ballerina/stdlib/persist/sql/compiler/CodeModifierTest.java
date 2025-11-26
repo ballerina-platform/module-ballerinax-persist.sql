@@ -130,6 +130,80 @@ public class CodeModifierTest {
         }
     }
 
+    @Test
+    public void testCodeModifierForEagerLoadedClient() {
+
+        Package newPackage = getModifiedPackage("project_6");
+
+        for (DocumentId documentId : newPackage.getDefaultModule().documentIds()) {
+            Document document = newPackage.getDefaultModule().document(documentId);
+
+            if (document.name().equals("main.bal")) {
+                String sourceCode = document.syntaxTree().toSourceCode();
+                String modifiedFunction =
+                        "entities:Product[] products = check from var e in mcClient->/products(" +
+                                "targetType = entities:Product, whereClause = ` Product.id = ${value}  OR " +
+                                "Product.id = 6`, orderByClause = ` Product.id DESC `, limitClause = ` ${value}`)\n" +
+                                "        where e.id == value || e.id == 6\n" +
+                                "        order by e.id descending\n" +
+                                "        limit value\n" +
+                                "        select e;\n";
+                String modifiedFunction1 =
+                        "entities:Product[]|error result = from var e in mcClient->/products(targetType = " +
+                                "entities:Product, whereClause = ` Product.id = ${value}  AND Product.id >= 2 AND " +
+                                "Product.id <= 25`)\n            where e.id == value && e.id >= 2 && e.id <= 25\n" +
+                                "            select e;\n";
+                String modifiedFunction2 = "products = check from var e in mcClient->/products(targetType = " +
+                        "entities:Product, whereClause = ` ( Product.id = ${value}  OR Product.id = 6)  " +
+                        "AND Product.id <> 8`)\n            where (e.id == value || e.id == 6) && e.id != 8\n" +
+                        "            select e;\n";
+                String modifiedFunction3 = "entities:Product[] results1 = check from entities:Product e in " +
+                        "mcClient->/products(targetType = entities:Product, whereClause = ` Product.id = ${value}  " +
+                        "OR Product.id = 6 OR Product.id = 7 OR Product.id <> 1 AND Product.id >= 1 AND " +
+                        "Product.id <= 20 AND Product.name = ${getStringValue(\"Person2\")} `, orderByClause = " +
+                        "` ${getStringValue(\"name\")} ASC , Product.age DESC `, groupByClause = " +
+                        "` ${getValue(4)}, Product.name, Product.age`, limitClause = ` ${getValue(4)}`)\n" +
+                        "            where e.id == value || e.id == 6 || e.id == 7 || e.id != 1  && e.id >= 1 " +
+                        "&& e.id <= 20 && e.name == getStringValue(\"Person2\")\n" +
+                        "            order by getStringValue(\"name\") ascending, e.age descending\n" +
+                        "            limit getValue(4)\n" +
+                        "            group by var id3 = getValue(4), var name = e.name, var age = e.age\n" +
+                        "            select {id: id3, name: name , age: age};\n";
+                String modifiedFunction5 = "entities:Product[] output = check from entities:Product e in " +
+                        "mcClient->/products(targetType = entities:Product, whereClause = ` Product.id = ${value}  " +
+                        "OR Product.id = 6 OR Product.id = 7 OR Product.id <> 1 AND Product.id >= 1 AND " +
+                        "Product.id <= 20 AND Product.name = ${getStringValue(\"Person2\")} `, " +
+                        "orderByClause = ` ${getStringValue(\"name\")} ASC , Product.age DESC `, groupByClause = " +
+                        "` ${getValue(4)}, Product.name, Product.age`, limitClause = ` ${getValue(4)}`)\n" +
+                        "                order by getStringValue(\"name\") ascending, e.age descending\n" +
+                        "                limit getValue(4)\n" +
+                        "                where e.id == value || e.id == 6 || e.id == 7 || e.id != 1  && e.id >= 1 " +
+                        "&& e.id <= 20 && e.name == getStringValue(\"Person2\")\n" +
+                        "                group by var id3 = getValue(4), var name = e.name, var age = e.age\n" +
+                        "                select {id: id3, name: name , age: age};\n";
+                String modifiedFunction6 = "output = check from entities:Product e in mcClient->/products(" +
+                        "targetType = entities:Product, whereClause = ` Product.id = ${value}  OR Product.id = 6 OR " +
+                        "Product.id = 7 OR Product.id <> 1 AND Product.id >= 1 AND Product.id <= 20 AND " +
+                        "Product.name = " +
+                        "${getStringValue(\"Person2\")} `, orderByClause = ` ${getStringValue(\"name\")} ASC , " +
+                        "Product.age ASC `, groupByClause = ` ${getValue(4)}, Product.name, Product.age`, " +
+                        "limitClause = ` ${getValue(4)}`)\n" +
+                        "                order by getStringValue(\"name\"), e.age\n" +
+                        "                limit getValue(4)\n" +
+                        "                where e.id == value || e.id == 6 || e.id == 7 || e.id != 1  && e.id >= 1 " +
+                        "&& e.id <= 20 && e.name == getStringValue(\"Person2\")\n" +
+                        "                group by var id3 = getValue(4), var name = e.name, var age = e.age\n" +
+                        "                select {id: id3, name: name , age: age};\n";
+                Assert.assertTrue(sourceCode.contains(modifiedFunction));
+                Assert.assertTrue(sourceCode.contains(modifiedFunction1));
+                Assert.assertTrue(sourceCode.contains(modifiedFunction2));
+                Assert.assertTrue(sourceCode.contains(modifiedFunction3));
+                Assert.assertTrue(sourceCode.contains(modifiedFunction5));
+                Assert.assertTrue(sourceCode.contains(modifiedFunction6));
+            }
+        }
+    }
+
     @Test(enabled = true)
     public void testCodeModifierWithRelationTables() {
 

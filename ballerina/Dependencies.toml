@@ -473,7 +473,7 @@ modules = [
 [[package]]
 org = "ballerinax"
 name = "persist.sql"
-version = "1.6.1"
+version = "1.7.0"
 dependencies = [
 	{org = "ballerina", name = "jballerina.java"},
 	{org = "ballerina", name = "log"},

@@ -97,7 +97,7 @@ public class SQLProcessor {
     }
 
     static Object queryAsList(Environment env, BObject client, BTypedesc targetType, BObject whereClause,
-                              BObject orderByClause, BObject limitClause, BObject groupByClause) {
+                              BObject orderByClause, BObject limitClause) {
         // This method will return `targetType[]|persist:Error`
         BString entity = getEntity(env);
         BObject persistClient = getPersistClient(client, entity);
@@ -121,7 +121,7 @@ public class SQLProcessor {
                         // )`
                         // which returns `record {}[]|persist:Error`
                         persistClient, "runReadQueryAsList", null, rowsType, targetTypeWithIdFields,
-                        fields, includes, whereClause, orderByClause, limitClause, groupByClause);
+                        fields, includes, whereClause, orderByClause, limitClause);
             } catch (BError bError) {
                 return wrapError(bError);
             }

@@ -166,15 +166,13 @@ public isolated client class SQLClient {
     # + whereClause - The `WHERE` clause of the query
     # + orderByClause - The `ORDER BY` clause of the query
     # + limitClause - The `LIMIT` clause of the query
-    # + groupByClause - The `GROUP BY` clause of the query
     # + return - An array of records in the `rowType` type or a `persist:Error` if the operation fails
     public isolated function runReadQueryAsList(typedesc<record {}[]> rowsType, typedesc<record {}> rowTypeWithIdFields,
             string[] fields = [], string[] include = [], sql:ParameterizedQuery whereClause = ``,
-            sql:ParameterizedQuery orderByClause = ``, sql:ParameterizedQuery limitClause = ``,
-            sql:ParameterizedQuery groupByClause = ``) returns record {}[]|persist:Error {
+            sql:ParameterizedQuery orderByClause = ``, sql:ParameterizedQuery limitClause = ``) returns record {}[]|persist:Error {
         do {
             stream<record {}, sql:Error?> result = check self.runReadQuery(rowTypeWithIdFields, fields, include,
-                whereClause, orderByClause, limitClause, groupByClause);
+                whereClause, orderByClause, limitClause);
 
             record {}[] rows = check from record {} row in result
                 select row;

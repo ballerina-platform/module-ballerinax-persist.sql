@@ -6,6 +6,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Fixed
+
+- [Fix invalid arguments for the new query as list API](https://github.com/ballerina-platform/ballerina-library/issues/8601)
+
+## [1.7.0] - 2025-12-12
+
 ### Added
 
 - [Add support for querying multiple records as a list in SQL processors](https://github.com/ballerina-platform/ballerina-library/issues/8488)

@@ -62,7 +62,7 @@ public isolated client class Client {
     }
 
     isolated resource function get manufactures(ManufactureTargetType targetType = <>,  sql:ParameterizedQuery whereClause = ``, sql:ParameterizedQuery orderByClause = ``,
-                        sql:ParameterizedQuery limitClause = ``, sql:ParameterizedQuery groupByClause = ``) returns targetType[]|persist:Error = @java:Method {
+                        sql:ParameterizedQuery limitClause = ``) returns targetType[]|persist:Error = @java:Method {
         'class: "datastore.io.ballerina.stdlib.persist.sql.MySQLProcessor",
         name: "queryAsList"
     } external;
@@ -102,7 +102,7 @@ public isolated client class Client {
     }
 
     isolated resource function get products(ProductTargetType targetType = <>, sql:ParameterizedQuery whereClause = ``, sql:ParameterizedQuery orderByClause = ``,
-                        sql:ParameterizedQuery limitClause = ``, sql:ParameterizedQuery groupByClause = ``) returns targetType[]|persist:Error = @java:Method {
+                        sql:ParameterizedQuery limitClause = ``) returns targetType[]|persist:Error = @java:Method {
         'class: "datastore.io.ballerina.stdlib.persist.sql.compiler.MySQLProcessor",
         name: "queryAsList"
     } external;

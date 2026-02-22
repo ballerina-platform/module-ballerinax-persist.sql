@@ -286,3 +286,32 @@ function h2BuildingRelationsTest() returns error? {
 
     check rainierClient.close();
 }
+
+@test:Config {
+    groups: ["associations", "h2"],
+    dependsOn: [h2DepartmentRelationsTest]
+}
+function h2DepartmentRelationsReadAsListTest() returns error? {
+    H2RainierClient rainierClient = check new ();
+
+    DepartmentInfo[] departments = check rainierClient->/departments/list.get();
+
+    DepartmentInfo expected = {
+        deptNo: "department-12",
+        deptName: "Marketing",
+        employees: [
+            {
+                firstName: "Tom",
+                lastName: "Scott"
+            },
+            {
+                firstName: "Jane",
+                lastName: "Doe"
+            }
+        ]
+    };
+
+    test:assertTrue(departments.indexOf(expected) is int, "Expected DepartmentInfo not found in list.");
+
+    check rainierClient.close();
+}

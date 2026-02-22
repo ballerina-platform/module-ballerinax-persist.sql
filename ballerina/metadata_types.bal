@@ -94,9 +94,16 @@ public type JoinMetadata record {|
 # Represents the type of the relation used in a `JOIN` operation.
 # Only used by the generated persist clients and `persist:SQLClient`.
 #
-# + ONE_TO_ONE - The association type is a one-to-one association
-# + ONE_TO_MANY - The entity is in the 'one' side of a one-to-many association
-# + MANY_TO_ONE - The entity is in the 'many' side of a one-to-many association
+# **Note:** the names below describe the FK placement, not the cardinality perceived from outside:
+#
+# + ONE_TO_ONE - A one-to-one association. Fetched via a SQL `LEFT JOIN`.
+# + ONE_TO_MANY - The FK resides on *this* entity's table, so this entity references a single
+#                 related record (e.g. `Employee.department` where `Employee` holds `departmentDeptNo`).
+#                 Fetched via a SQL `LEFT JOIN`.
+# + MANY_TO_ONE - The FK resides on the *related* entity's table, so multiple child records can
+#                 reference this entity. The corresponding field is an array type (e.g. `Department.employees`
+#                 where `Employee` holds `departmentDeptNo`). Fetched via a secondary `SELECT` query
+#                 issued per parent row.
 public enum JoinType {
     ONE_TO_ONE,
     ONE_TO_MANY,

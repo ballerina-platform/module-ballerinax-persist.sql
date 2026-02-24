@@ -160,21 +160,31 @@ public isolated client class SQLClient {
     # Performs an SQL `SELECT` operation to read multiple entity records from the database and return them as a list.
     #
     # + rowsType - The type description of the array of entities to be retrieved
+    # + rowType - The type description of the entity to be retrieved
     # + rowTypeWithIdFields - The type description of the entity to be retrieved with key fields included
     # + fields - The fields to be retrieved
     # + include - The associations to be retrieved
     # + whereClause - The `WHERE` clause of the query
     # + orderByClause - The `ORDER BY` clause of the query
     # + limitClause - The `LIMIT` clause of the query
+    # + typeDescriptions - The type descriptions of the relations to be retrieved
     # + return - An array of records in the `rowType` type or a `persist:Error` if the operation fails
-    public isolated function runReadQueryAsList(typedesc<record {}[]> rowsType, typedesc<record {}> rowTypeWithIdFields,
-            string[] fields = [], string[] include = [], sql:ParameterizedQuery whereClause = ``,
-            sql:ParameterizedQuery orderByClause = ``, sql:ParameterizedQuery limitClause = ``) returns record {}[]|persist:Error {
+    public isolated function runReadQueryAsList(typedesc<record {}[]> rowsType, typedesc<record {}> rowType,
+            typedesc<record {}> rowTypeWithIdFields, string[] fields = [], string[] include = [],
+            sql:ParameterizedQuery whereClause = ``, sql:ParameterizedQuery orderByClause = ``,
+            sql:ParameterizedQuery limitClause = ``, typedesc<record {}>[] typeDescriptions = [])
+                returns record {}[]|persist:Error {
         do {
             stream<record {}, sql:Error?> result = check self.runReadQuery(rowTypeWithIdFields, fields, include,
                 whereClause, orderByClause, limitClause);
 
-            record {}[] rows = check from record {} row in result
+            // Wrap the raw SQL stream in a PersistSQLStream so that getManyRelations,
+            // verifyEntityAssociation, and key-field removal are applied per row — identical
+            // to the behaviour of the streaming path in SQLProcessor.query / PersistSQLStream.next().
+            // TODO: consider batching secondary queries with WHERE FK IN (...) when rows is large.
+            PersistSQLStream persistStreamObj = new (result, rowType, fields, include, typeDescriptions, self);
+            stream<record {}, persist:Error?> persistStream = new (persistStreamObj);
+            record {}[] rows = check from record {} row in persistStream
                 select row;
             rows = check rows.cloneWithType(rowsType);
             return rows;

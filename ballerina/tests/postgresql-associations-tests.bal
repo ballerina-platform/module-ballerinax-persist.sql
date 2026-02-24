@@ -286,3 +286,32 @@ function postgresqlBuildingRelationsTest() returns error? {
 
     check rainierClient.close();
 }
+
+@test:Config {
+    groups: ["associations", "postgresql"],
+    dependsOn: [postgresqlDepartmentRelationsTest]
+}
+function postgresqlDepartmentRelationsReadAsListTest() returns error? {
+    PostgreSQLRainierClient rainierClient = check new ();
+
+    DepartmentInfo[] departments = check rainierClient->/departments/list.get();
+
+    DepartmentInfo expected = {
+        deptNo: "department-12",
+        deptName: "Marketing",
+        employees: [
+            {
+                firstName: "Tom",
+                lastName: "Scott"
+            },
+            {
+                firstName: "Jane",
+                lastName: "Doe"
+            }
+        ]
+    };
+
+    test:assertTrue(departments.indexOf(expected) is int, "Expected DepartmentInfo not found in list.");
+
+    check rainierClient.close();
+}

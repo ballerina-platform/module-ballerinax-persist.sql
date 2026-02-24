@@ -111,17 +111,19 @@ public class SQLProcessor {
         BArray[] metadata = getMetadata(recordType);
         BArray fields = metadata[0];
         BArray includes = metadata[1];
+        BArray typeDescriptions = metadata[2];
         return env.yieldAndRun(() -> {
             try {
                 return env.getRuntime().callMethod(
                         // Call `SQLClient.runReadQueryAsList(
-                        //      typedesc<record {}> rowsType, typedesc<record {}> rowTypeWithIdFields,
-                        //      string[] fields = [], string[] include = [], whereClause, orderByClause, limitClause,
-                        //      groupByClause
+                        //      typedesc<record {}[]> rowsType, typedesc<record {}> rowType,
+                        //      typedesc<record {}> rowTypeWithIdFields, string[] fields = [], string[] include = [],
+                        //      whereClause, orderByClause, limitClause, typedesc<record {}>[] typeDescriptions = []
                         // )`
                         // which returns `record {}[]|persist:Error`
-                        persistClient, "runReadQueryAsList", null, rowsType, targetTypeWithIdFields,
-                        fields, includes, whereClause, orderByClause, limitClause);
+                        persistClient, "runReadQueryAsList", null, rowsType, targetType,
+                        targetTypeWithIdFields, fields, includes, whereClause, orderByClause, limitClause,
+                        typeDescriptions);
             } catch (BError bError) {
                 return wrapError(bError);
             }

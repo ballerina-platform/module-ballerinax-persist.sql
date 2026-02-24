@@ -271,6 +271,11 @@ public isolated client class MSSQLRainierClient {
         name: "query"
     } external;
 
+    isolated resource function get departments/list(DepartmentTargetType targetType = <>, sql:ParameterizedQuery whereClause = ``, sql:ParameterizedQuery orderByClause = ``, sql:ParameterizedQuery limitClause = ``) returns targetType[]|persist:Error = @java:Method {
+        'class: "io.ballerina.stdlib.persist.sql.datastore.MSSQLProcessor",
+        name: "queryAsList"
+    } external;
+
     isolated resource function get departments/[string deptNo](DepartmentTargetType targetType = <>) returns targetType|persist:Error = @java:Method {
         'class: "io.ballerina.stdlib.persist.sql.datastore.MSSQLProcessor",
         name: "queryOne"

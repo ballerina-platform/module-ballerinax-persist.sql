@@ -16,7 +16,7 @@ graalvmCompatible = true
 groupId = "io.ballerina.stdlib"
 artifactId = "persist.sql-native"
 version = "1.7.2"
-path = "../native/build/libs/persist.sql-native-1.7.2-SNAPSHOT.jar"
+path = "../native/build/libs/persist.sql-native-1.7.2.jar"
 
 [[platform.java21.dependency]]
 groupId = "io.ballerina.stdlib"

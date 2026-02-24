@@ -175,7 +175,7 @@ public isolated client class H2TestEntitiesClient {
         name: "query"
     } external;
 
-    isolated resource function get alltypes/list(AllTypesTargetType targetType = <>, sql:ParameterizedQuery whereClause = ``, sql:ParameterizedQuery orderByClause = ``, sql:ParameterizedQuery limitClause = ``, sql:ParameterizedQuery groupByClause = ``) returns targetType[]|persist:Error = @java:Method {
+    isolated resource function get alltypes/list(AllTypesTargetType targetType = <>, sql:ParameterizedQuery whereClause = ``, sql:ParameterizedQuery orderByClause = ``, sql:ParameterizedQuery limitClause = ``) returns targetType[]|persist:Error = @java:Method {
         'class: "io.ballerina.stdlib.persist.sql.datastore.H2Processor",
         name: "queryAsList"
     } external;

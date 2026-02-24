@@ -35,8 +35,8 @@ public class H2Processor {
     }
 
     public static Object queryAsList(Environment env, BObject client, BTypedesc targetType, BObject whereClause,
-                                     BObject orderClause, BObject limitClause, BObject groupByClause) {
-        return SQLProcessor.queryAsList(env, client, targetType, whereClause, orderClause, limitClause, groupByClause);
+                                     BObject orderClause, BObject limitClause) {
+        return SQLProcessor.queryAsList(env, client, targetType, whereClause, orderClause, limitClause);
     }
 
     public static Object queryOne(Environment env, BObject client, BArray path, BTypedesc targetType) {

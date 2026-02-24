@@ -286,3 +286,32 @@ function mysqlBuildingRelationsTest() returns error? {
 
     check rainierClient.close();
 }
+
+@test:Config {
+    groups: ["associations", "mysql"],
+    dependsOn: [mysqlDepartmentRelationsTest]
+}
+function mysqlDepartmentRelationsReadAsListTest() returns error? {
+    MySQLRainierClient rainierClient = check new ();
+
+    DepartmentInfo[] departments = check rainierClient->/departments/list.get();
+
+    DepartmentInfo expected = {
+        deptNo: "department-12",
+        deptName: "Marketing",
+        employees: [
+            {
+                firstName: "Tom",
+                lastName: "Scott"
+            },
+            {
+                firstName: "Jane",
+                lastName: "Doe"
+            }
+        ]
+    };
+
+    test:assertTrue(departments.indexOf(expected) is int, "Expected DepartmentInfo not found in list.");
+
+    check rainierClient.close();
+}

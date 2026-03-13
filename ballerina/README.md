@@ -1,8 +1,15 @@
-# Overview
+## Overview
 
-This package provides relational database support for the `bal persist` feature, which provides functionality to store and query data from a relational database through a data model instead of writing SQL.
+Ballerina Persist provides a powerful and type-safe way to interact with relational databases. It simplifies data persistence by providing a high-level API for performing CRUD operations and complex queries. The Persist SQL module enables seamless integration with various SQL databases, allowing you to manage your application's data with ease and efficiency.
 
-Currently, this package supports MySQL, MSSQL, H2 and PostgreSQL databases. However, we are also planning to add support for other relational databases such as Oracle.
+### Key Features
+
+- Type-safe data persistence with relational databases
+- Simplified CRUD operations and complex query support
+- Automatic mapping of data to Ballerina types
+- Support for various SQL databases and dialects
+- Efficient connection management and resource handling
+- GraalVM compatible for native image builds
 
 ## How to use with `bal persist`
 
@@ -13,7 +20,7 @@ By default, `bal persist` utilizes the in-memory data store. Therefore, you must
 1. Initialize `bal persist` and integrate to `bal build` using the following command,
 
     ```
-    $ bal persist add --datastore [mysql/mssql/postgresql/h2] --module <module_name>
+    $ bal persist add --datastore [mysql/mssql/postgresql] --module <module_name>
     ```
 
 2. After defining the entities, build the application using the following command,
@@ -33,7 +40,7 @@ By default, `bal persist` utilizes the in-memory data store. Therefore, you must
 2. Generate the persist client using the following command,
 
     ```
-    $ bal persist generate --datastore [mysql/mssql/postgresql/h2] --module <module_name>
+    $ bal persist generate --datastore [mysql/mssql/postgresql] --module <module_name>
    ```
 
 ## Supported Ballerina Types
@@ -299,3 +306,11 @@ Select one of the methods below to set up a DB server.
 ### Generate the client API
 
 You can generate the client API through either of the ways outlined in the [How to use with `bal persist`](#how-to-use-with-bal-persist) section.
+
+## Report issues
+
+To report bugs, request new features, start new discussions, view project boards, etc., go to the [Ballerina standard library parent repository](https://github.com/ballerina-platform/ballerina-standard-library).
+
+## Useful links
+- Chat live with us via our [Discord server](https://discord.gg/ballerinalang).
+- Post all technical questions on Stack Overflow with the [#ballerina](https://stackoverflow.com/questions/tagged/ballerina) tag.

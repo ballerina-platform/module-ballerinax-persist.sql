@@ -4,6 +4,13 @@ Ballerina Persist provides a powerful and type-safe way to interact with relatio
 
 ### Key Features
 
+- Type-safe data persistence with relational databases
+- Simplified CRUD operations and complex query support
+- Automatic mapping of data to Ballerina types
+- Support for various SQL databases and dialects
+- Efficient connection management and resource handling
+- GraalVM compatible for native image builds
+
 This package provides relational database support for the `bal persist` feature, which provides functionality to store and query data from a relational database through a data model instead of writing SQL.
 
 Currently, this package supports MySQL, MSSQL, and PostgreSQL databases. However, we are also planning to add support for other relational databases such as Oracle.

@@ -361,3 +361,92 @@ function testDeleteDoctorH2() returns error? {
         test:assertFail("Patient should be deleted");
     }
 }
+
+// Regression tests for: MANY_TO_ONE secondary SELECT with snake_case columns (refColumn != refField).
+// The appointment table uses patient_id (SQL column) which maps to patientId (Ballerina field).
+// Without the fix in getManyRelationColumnNames, this caused:
+//   "No mapping field found for SQL table column 'patient_id' in the record type 'AppointmentOptionalized'"
+
+@test:Config {
+    groups: ["annotation", "h2"],
+    dependsOn: [testDeletePatientH2, testDeleteDoctorH2]
+}
+function testPatientWithAppointmentsManyRelationColumnAliasH2() returns error? {
+    H2HospitalClient h2DbHospital = check new ();
+
+    _ = check h2DbHospital->/doctors.post([{id: 50, name: "Dr. Alias Test", specialty: "Neurologist", phoneNumber: "0779990000", salary: 25000}]);
+    int[] patientIds = check h2DbHospital->/patients.post([{name: "Alias Test Patient", age: 28, phoneNumber: "0779990001", gender: "FEMALE", address: "10, Test St, Colombo 03"}]);
+    int patientId = patientIds[0];
+    _ = check h2DbHospital->/appointments.post([{id: 50, patientId: patientId, doctorId: 50, appointmentTime: {year: 2024, month: 3, day: 20, hour: 10, minute: 0}, status: "SCHEDULED", reason: "Routine check"}]);
+
+    // queryOne path: PatientWithRelations triggers MANY_TO_ONE secondary SELECT.
+    // patient_id column must be aliased to patientId for AppointmentOptionalized mapping to succeed.
+    PatientWithRelations patient = check h2DbHospital->/patients/[patientId].get();
+    AppointmentOptionalized[]? appts = patient.appointments;
+    test:assertTrue(appts is AppointmentOptionalized[], "appointments array should be populated");
+    test:assertEquals((<AppointmentOptionalized[]>appts).length(), 1);
+    test:assertEquals((<AppointmentOptionalized[]>appts)[0].patientId, patientId,
+        "patient_id column must be aliased to patientId in MANY_TO_ONE secondary SELECT");
+
+    // stream path: same getManyRelations call is exercised per row via PersistSQLStream.next()
+    stream<PatientWithRelations, persist:Error?> patientStream = h2DbHospital->/patients.get();
+    PatientWithRelations[] patients = check from PatientWithRelations p in patientStream
+        where p.name == "Alias Test Patient"
+        select p;
+    AppointmentOptionalized[]? appointments = patients[0].appointments;
+    if appointments is () {
+        test:assertFail("appointments should be populated in stream path");
+    }
+    if appointments.length() != 1 {
+        test:assertFail("there should be 1 appointment in stream path");
+    }
+    test:assertEquals(appointments[0].patientId, patientId,
+        "patient_id column must be aliased to patientId in stream path");
+
+    check h2DbHospital.close();
+}
+
+@test:Config {
+    groups: ["annotation", "h2"],
+    dependsOn: [testPatientWithAppointmentsManyRelationColumnAliasH2]
+}
+function testDoctorWithAppointmentsManyRelationColumnAliasH2() returns error? {
+    H2HospitalClient h2DbHospital = check new ();
+
+    // queryOne path: DoctorWithRelations triggers MANY_TO_ONE secondary SELECT.
+    // The appointments table's patient_id column must be aliased to patientId.
+    DoctorWithRelations doctor = check h2DbHospital->/doctors/[50].get();
+    AppointmentOptionalized[]? appts = doctor.appointments;
+    test:assertTrue(appts is AppointmentOptionalized[], "doctor appointments should be populated");
+    test:assertEquals((<AppointmentOptionalized[]>appts).length(), 1);
+    test:assertNotEquals((<AppointmentOptionalized[]>appts)[0].patientId, (),
+        "patientId should be mapped from patient_id column in doctor's appointment list");
+
+    // stream path
+    stream<DoctorWithRelations, persist:Error?> doctorStream = h2DbHospital->/doctors.get();
+    DoctorWithRelations[] doctors = check from DoctorWithRelations d in doctorStream
+        where d.name == "Dr. Alias Test"
+        select d;
+    test:assertEquals(doctors.length(), 1);
+    AppointmentOptionalized[]? appointments = doctors[0].appointments;
+    if appointments is () {
+        test:assertFail("appointments should be populated in stream path");
+    }
+    if appointments.length() != 1 {
+        test:assertFail("there should be 1 appointment in stream path");
+    }
+    test:assertNotEquals(appointments[0].patientId, (),
+        "patientId should be correctly mapped in doctor stream path");
+
+    // cleanup
+    _ = check h2DbHospital->/appointments/[50].delete();
+    _ = check h2DbHospital->/doctors/[50].delete();
+    stream<Patient, persist:Error?> patientStream = h2DbHospital->/patients.get();
+    Patient[] patients = check from Patient p in patientStream
+        where p.name == "Alias Test Patient"
+        select p;
+    foreach Patient p in patients {
+        _ = check h2DbHospital->/patients/[p.id].delete();
+    }
+    check h2DbHospital.close();
+}

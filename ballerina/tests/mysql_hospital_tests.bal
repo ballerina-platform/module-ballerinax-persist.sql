@@ -358,3 +358,83 @@ function testDeleteDoctorMySql() returns error? {
             test:assertFail("Patient should be deleted");
     }
 }
+
+@test:Config {
+    groups: ["annotation", "mysql"],
+    dependsOn: [testDeletePatientMySql, testDeleteDoctorMySql]
+}
+function testPatientWithAppointmentsManyRelationColumnAliasMySql() returns error? {
+    MySqlHospitalClient mysqlDbHospital = check new ();
+
+    _ = check mysqlDbHospital->/doctors.post([{id: 50, name: "Dr. Alias Test", specialty: "Neurologist", phoneNumber: "0779990000", salary: 25000}]);
+    int[] patientIds = check mysqlDbHospital->/patients.post([{name: "Alias Test Patient", age: 28, phoneNumber: "0779990001", gender: "FEMALE", address: "10, Test St, Colombo 03"}]);
+    int patientId = patientIds[0];
+    _ = check mysqlDbHospital->/appointments.post([{id: 50, patientId: patientId, doctorId: 50, appointmentTime: {year: 2024, month: 3, day: 20, hour: 10, minute: 0}, status: "SCHEDULED", reason: "Routine check"}]);
+
+    // queryOne: PatientWithRelations triggers MANY_TO_ONE secondary SELECT.
+    // patient_id column must be aliased to patientId for AppointmentOptionalized mapping to succeed.
+    PatientWithRelations patient = check mysqlDbHospital->/patients/[patientId].get();
+    AppointmentOptionalized[]? appts = patient.appointments;
+    test:assertTrue(appts is AppointmentOptionalized[], "appointments array should be populated");
+    test:assertEquals((<AppointmentOptionalized[]>appts).length(), 1);
+    test:assertEquals((<AppointmentOptionalized[]>appts)[0].patientId, patientId,
+        "patient_id column must be aliased to patientId in MANY_TO_ONE secondary SELECT");
+
+    // stream path
+    stream<PatientWithRelations, persist:Error?> patientStream = mysqlDbHospital->/patients.get();
+    PatientWithRelations[] patients = check from PatientWithRelations p in patientStream
+        where p.name == "Alias Test Patient"
+        select p;
+    AppointmentOptionalized[]? apptsFromStream = patients[0].appointments;
+    if apptsFromStream is () {
+        test:assertFail("appointments array should be populated in stream path");
+    }
+    if apptsFromStream.length() != 1 {
+        test:assertFail("there should be 1 appointment in stream path");
+    }
+    test:assertEquals(apptsFromStream[0].patientId, patientId,
+        "patient_id column must be aliased to patientId in stream path");
+
+    check mysqlDbHospital.close();
+}
+
+@test:Config {
+    groups: ["annotation", "mysql"],
+    dependsOn: [testPatientWithAppointmentsManyRelationColumnAliasMySql]
+}
+function testDoctorWithAppointmentsManyRelationColumnAliasMySql() returns error? {
+    MySqlHospitalClient mysqlDbHospital = check new ();
+
+    DoctorWithRelations doctor = check mysqlDbHospital->/doctors/[50].get();
+    AppointmentOptionalized[]? appts = doctor.appointments;
+    test:assertTrue(appts is AppointmentOptionalized[], "doctor appointments should be populated");
+    test:assertEquals((<AppointmentOptionalized[]>appts).length(), 1);
+    test:assertNotEquals((<AppointmentOptionalized[]>appts)[0].patientId, (),
+        "patientId should be mapped from patient_id column in doctor's appointment list");
+
+    stream<DoctorWithRelations, persist:Error?> doctorStream = mysqlDbHospital->/doctors.get();
+    DoctorWithRelations[] doctors = check from DoctorWithRelations d in doctorStream
+        where d.name == "Dr. Alias Test"
+        select d;
+    test:assertEquals(doctors.length(), 1);
+    AppointmentOptionalized[]? appointments = doctors[0].appointments;
+    if appointments is () {
+        test:assertFail("appointments should be populated in stream path");
+    }
+    if appointments.length() != 1 {
+        test:assertFail("there should be 1 appointment in stream path");
+    }
+    test:assertNotEquals(appointments[0].patientId, (),
+        "patientId should be correctly mapped in doctor stream path");
+
+    _ = check mysqlDbHospital->/appointments/[50].delete();
+    _ = check mysqlDbHospital->/doctors/[50].delete();
+    stream<Patient, persist:Error?> patientStream = mysqlDbHospital->/patients.get();
+    Patient[] patients = check from Patient p in patientStream
+        where p.name == "Alias Test Patient"
+        select p;
+    foreach Patient p in patients {
+        _ = check mysqlDbHospital->/patients/[p.id].delete();
+    }
+    check mysqlDbHospital.close();
+}

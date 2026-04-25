@@ -406,8 +406,13 @@ public isolated client class SQLClient {
                 continue;
             }
 
-            string columnName = fieldMetadata.relation.refColumn ?: fieldMetadata.relation.refField;
-            columnNames.push(self.escape(columnName));
+            string refField = fieldMetadata.relation.refField;
+            string refColumn = fieldMetadata.relation.refColumn ?: refField;
+            if refColumn != refField {
+                columnNames.push(self.escape(refColumn) + " AS " + self.escape(refField));
+            } else {
+                columnNames.push(self.escape(refColumn));
+            }
         }
         return arrayToParameterizedQuery(columnNames);
     }

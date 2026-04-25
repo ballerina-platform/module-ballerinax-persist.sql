@@ -385,6 +385,9 @@ function testPatientWithAppointmentsManyRelationColumnAliasMySql() returns error
     PatientWithRelations[] patients = check from PatientWithRelations p in patientStream
         where p.name == "Alias Test Patient"
         select p;
+    if patients.length() != 1 {
+        return error("Expected exactly 1 patient named 'Alias Test Patient' in stream path, got " + patients.length().toString());
+    }
     AppointmentOptionalized[]? apptsFromStream = patients[0].appointments;
     if apptsFromStream is () {
         test:assertFail("appointments array should be populated in stream path");
@@ -416,7 +419,9 @@ function testDoctorWithAppointmentsManyRelationColumnAliasMySql() returns error?
     DoctorWithRelations[] doctors = check from DoctorWithRelations d in doctorStream
         where d.name == "Dr. Alias Test"
         select d;
-    test:assertEquals(doctors.length(), 1);
+    if doctors.length() != 1 {
+        return error("Expected exactly 1 doctor named 'Dr. Alias Test' in stream path, got " + doctors.length().toString());
+    }
     AppointmentOptionalized[]? appointments = doctors[0].appointments;
     if appointments is () {
         test:assertFail("appointments should be populated in stream path");

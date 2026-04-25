@@ -369,34 +369,53 @@ function testPatientWithAppointmentsManyRelationColumnAliasMsSql() returns error
     // MSSQL IDENTITY columns do not return lastInsertId via batchExecute — query to get the generated ID.
     stream<Patient, persist:Error?> pStream = mssqlDbHospital->/patients.get();
     Patient[] pFound = check from Patient p in pStream where p.name == "Alias Test Patient" select p;
+    if pFound.length() == 0 {
+        check mssqlDbHospital.close();
+        return error("Could not find seeded patient 'Alias Test Patient'");
+    }
     int patientId = pFound[0].id;
     _ = check mssqlDbHospital->/appointments.post([{id: 50, patientId: patientId, doctorId: 50, appointmentTime: {year: 2024, month: 3, day: 20, hour: 10, minute: 0}, status: "SCHEDULED", reason: "Routine check"}]);
 
-    // queryOne: PatientWithRelations triggers MANY_TO_ONE secondary SELECT.
-    // patient_id column must be aliased to patientId for AppointmentOptionalized mapping to succeed.
-    PatientWithRelations patient = check mssqlDbHospital->/patients/[patientId].get();
-    AppointmentOptionalized[]? appts = patient.appointments;
-    test:assertTrue(appts is AppointmentOptionalized[], "appointments array should be populated");
-    test:assertEquals((<AppointmentOptionalized[]>appts).length(), 1);
-    test:assertEquals((<AppointmentOptionalized[]>appts)[0].patientId, patientId,
-        "patient_id column must be aliased to patientId in MANY_TO_ONE secondary SELECT");
+    error? testError = ();
+    do {
+        // queryOne: PatientWithRelations triggers MANY_TO_ONE secondary SELECT.
+        // patient_id column must be aliased to patientId for AppointmentOptionalized mapping to succeed.
+        PatientWithRelations patient = check mssqlDbHospital->/patients/[patientId].get();
+        AppointmentOptionalized[]? appts = patient.appointments;
+        if appts is AppointmentOptionalized[] {
+            test:assertEquals(appts.length(), 1);
+            test:assertEquals(appts[0].patientId, patientId,
+                "patient_id column must be aliased to patientId in MANY_TO_ONE secondary SELECT");
+        } else {
+            test:assertFail("appointments array should be populated");
+        }
 
-    // stream path
-    stream<PatientWithRelations, persist:Error?> patientStream = mssqlDbHospital->/patients.get();
-    PatientWithRelations[] patients = check from PatientWithRelations p in patientStream
-        where p.name == "Alias Test Patient"
-        select p;
-    AppointmentOptionalized[]? appointments = patients[0].appointments;
-    if appointments is () {
-        test:assertFail("appointments array should be populated in stream path");
+        // stream path
+        stream<PatientWithRelations, persist:Error?> patientStream = mssqlDbHospital->/patients.get();
+        PatientWithRelations[] patients = check from PatientWithRelations p in patientStream
+            where p.name == "Alias Test Patient"
+            select p;
+        if patients.length() != 1 {
+            check error("Expected exactly 1 patient named 'Alias Test Patient' in stream path, got " + patients.length().toString());
+        }
+        AppointmentOptionalized[]? appointments = patients[0].appointments;
+        if appointments is () {
+            test:assertFail("appointments array should be populated in stream path");
+        }
+        if appointments.length() != 1 {
+            test:assertFail("there should be 1 appointment in stream path");
+        }
+        test:assertEquals(appointments[0].patientId, patientId,
+            "patient_id column must be aliased to patientId in stream path");
+    } on fail error e {
+        testError = e;
     }
-    if appointments.length() != 1 {
-        test:assertFail("there should be 1 appointment in stream path");
-    }
-    test:assertEquals(appointments[0].patientId, patientId,
-        "patient_id column must be aliased to patientId in stream path");
 
+    _ = check mssqlDbHospital->/appointments/[50].delete();
+    _ = check mssqlDbHospital->/doctors/[50].delete();
+    _ = check mssqlDbHospital->/patients/[patientId].delete();
     check mssqlDbHospital.close();
+    return testError;
 }
 
 @test:Config {
@@ -406,36 +425,52 @@ function testPatientWithAppointmentsManyRelationColumnAliasMsSql() returns error
 function testDoctorWithAppointmentsManyRelationColumnAliasMsSql() returns error? {
     MsSqlHospitalClient mssqlDbHospital = check new ();
 
-    DoctorWithRelations doctor = check mssqlDbHospital->/doctors/[50].get();
-    AppointmentOptionalized[]? appts = doctor.appointments;
-    test:assertTrue(appts is AppointmentOptionalized[], "doctor appointments should be populated");
-    test:assertEquals((<AppointmentOptionalized[]>appts).length(), 1);
-    test:assertNotEquals((<AppointmentOptionalized[]>appts)[0].patientId, (),
-        "patientId should be mapped from patient_id column in doctor's appointment list");
+    _ = check mssqlDbHospital->/doctors.post([{id: 50, name: "Dr. Alias Test", specialty: "Neurologist", phoneNumber: "0779990000", salary: 25000}]);
+    _ = check mssqlDbHospital->/patients.post([{name: "Alias Test Patient", age: 28, phoneNumber: "0779990001", gender: "FEMALE", address: "10, Test St, Colombo 03"}]);
+    stream<Patient, persist:Error?> pStream = mssqlDbHospital->/patients.get();
+    Patient[] pFound = check from Patient p in pStream where p.name == "Alias Test Patient" select p;
+    if pFound.length() == 0 {
+        check mssqlDbHospital.close();
+        return error("Could not find seeded patient 'Alias Test Patient'");
+    }
+    int patientId = pFound[0].id;
+    _ = check mssqlDbHospital->/appointments.post([{id: 50, patientId: patientId, doctorId: 50, appointmentTime: {year: 2024, month: 3, day: 20, hour: 10, minute: 0}, status: "SCHEDULED", reason: "Routine check"}]);
 
-    stream<DoctorWithRelations, persist:Error?> doctorStream = mssqlDbHospital->/doctors.get();
-    DoctorWithRelations[] doctors = check from DoctorWithRelations d in doctorStream
-        where d.name == "Dr. Alias Test"
-        select d;
-    test:assertEquals(doctors.length(), 1);
-    AppointmentOptionalized[]? appointments = doctors[0].appointments;
-    if appointments is () {
-        test:assertFail("appointments should be populated in stream path");
+    error? testError = ();
+    do {
+        DoctorWithRelations doctor = check mssqlDbHospital->/doctors/[50].get();
+        AppointmentOptionalized[]? appts = doctor.appointments;
+        if appts is AppointmentOptionalized[] {
+            test:assertEquals(appts.length(), 1);
+            test:assertEquals(appts[0].patientId, patientId,
+                "patientId should be mapped from patient_id column in doctor's appointment list");
+        } else {
+            test:assertFail("doctor appointments should be populated");
+        }
+
+        stream<DoctorWithRelations, persist:Error?> doctorStream = mssqlDbHospital->/doctors.get();
+        DoctorWithRelations[] doctors = check from DoctorWithRelations d in doctorStream
+            where d.name == "Dr. Alias Test"
+            select d;
+        if doctors.length() != 1 {
+            check error("Expected exactly 1 doctor named 'Dr. Alias Test' in stream path, got " + doctors.length().toString());
+        }
+        AppointmentOptionalized[]? appointments = doctors[0].appointments;
+        if appointments is () {
+            test:assertFail("appointments should be populated in stream path");
+        }
+        if appointments.length() != 1 {
+            test:assertFail("there should be 1 appointment in stream path");
+        }
+        test:assertEquals(appointments[0].patientId, patientId,
+            "patientId should be correctly mapped in doctor stream path");
+    } on fail error e {
+        testError = e;
     }
-    if appointments.length() != 1 {
-        test:assertFail("there should be 1 appointment in stream path");
-    }
-    test:assertNotEquals(appointments[0].patientId, (),
-        "patientId should be correctly mapped in doctor stream path");
 
     _ = check mssqlDbHospital->/appointments/[50].delete();
     _ = check mssqlDbHospital->/doctors/[50].delete();
-    stream<Patient, persist:Error?> patientStream = mssqlDbHospital->/patients.get();
-    Patient[] patients = check from Patient p in patientStream
-        where p.name == "Alias Test Patient"
-        select p;
-    foreach Patient p in patients {
-        _ = check mssqlDbHospital->/patients/[p.id].delete();
-    }
+    _ = check mssqlDbHospital->/patients/[patientId].delete();
     check mssqlDbHospital.close();
+    return testError;
 }

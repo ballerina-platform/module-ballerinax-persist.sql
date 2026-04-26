@@ -4,6 +4,22 @@ This file contains all the notable changes done to the Ballerina Persist SQL pac
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [Unreleased]
+
+### Fixed
+
+- [Fix MANY_TO_ONE secondary SELECT not aliasing SQL column names to Ballerina field names when `refColumn` differs from `refField`](https://github.com/ballerina-platform/ballerina-library/issues/8764).
+
+## [1.7.3] - 2026-03-26
+
+Documentation and metadata updates only (README, keywords). No API or behaviour changes.
+
+## [1.7.2] - 2026-02-24
+
+### Fixed
+
+- [Fix array (MANY_TO_ONE) relations not populated in queryAsList](https://github.com/ballerina-platform/module-ballerinax-persist.sql/pull/117)
+
 ## [1.7.1] - 2026-02-12
 
 ### Fixed

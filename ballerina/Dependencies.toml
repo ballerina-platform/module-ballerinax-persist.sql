@@ -252,7 +252,7 @@ modules = [
 [[package]]
 org = "ballerina"
 name = "mime"
-version = "2.12.1"
+version = "2.12.2"
 scope = "testOnly"
 dependencies = [
 	{org = "ballerina", name = "io"},

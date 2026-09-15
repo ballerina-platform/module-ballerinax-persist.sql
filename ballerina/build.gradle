@@ -15,6 +15,12 @@
 // under the License.
 
 import org.apache.tools.ant.taskdefs.condition.Os
+import org.gradle.process.ExecOperations
+import javax.inject.Inject
+
+abstract class BallerinaExecHelper {
+    @Inject abstract ExecOperations getExecOperations()
+}
 
 buildscript {
     repositories {
@@ -32,6 +38,8 @@ buildscript {
 }
 
 description = 'Ballerina Persist - SQL Extension'
+
+def execHelper = project.objects.newInstance(BallerinaExecHelper)
 
 def packageName = 'persist.sql'
 def packageOrg = 'ballerinax'
@@ -98,7 +106,7 @@ task updateTomlFiles {
 
 task commitTomlFiles {
     doLast {
-        project.exec {
+        execHelper.execOperations.exec {
             ignoreExitValue true
             if (Os.isFamily(Os.FAMILY_WINDOWS)) {
                 commandLine 'cmd', '/c', "git commit -m \"[Automated] Update native jar versions in toml files\" Ballerina.toml Dependencies.toml CompilerPlugin.toml"
@@ -157,7 +165,7 @@ task createMySQLTestDockerImage(type: Exec) {
 def checkMySQLTestDockerContainerStatus(dockerName) {
     if (!Os.isFamily(Os.FAMILY_WINDOWS)) {
         try {
-            return exec {
+            return execHelper.execOperations.exec {
                 commandLine 'sh', '-c',
                         "docker exec ${dockerName} mysqladmin ping -hlocalhost -uroot -pTest123# --silent"
             }.exitValue
@@ -192,7 +200,7 @@ task stopMySQLTestDockerContainer() {
         if (!Os.isFamily(Os.FAMILY_WINDOWS)) {
             try {
                 def stdOut = new ByteArrayOutputStream()
-                exec {
+                execHelper.execOperations.exec {
                     commandLine 'sh', '-c', 'docker stop ballerina-persist-mysql'
                     standardOutput = stdOut
                 }
@@ -217,7 +225,7 @@ task createMSSQLTestDockerImage(type: Exec) {
 def checkMSSQLTestDockerContainerStatus(containerName) {
    if (!Os.isFamily(Os.FAMILY_WINDOWS)) {
        try {
-           return exec {
+           return execHelper.execOperations.exec {
                commandLine 'sh', '-c',
                        "docker exec ${containerName} /opt/mssql-tools18/bin/sqlcmd -C -S localhost -U sa -P Test123#"
            }.exitValue
@@ -253,7 +261,7 @@ task stopMSSQLTestDockerContainer() {
        if (!Os.isFamily(Os.FAMILY_WINDOWS)) {
            try {
                def stdOut = new ByteArrayOutputStream()
-               exec {
+               execHelper.execOperations.exec {
                    commandLine 'sh', '-c', "docker stop ballerina-persist-mssql"
                    standardOutput = stdOut
                }
@@ -279,7 +287,7 @@ task createPostgreSQLTestDockerImage(type: Exec) {
 def checkPostgreSQLTestDockerContainerStatus(containerName) {
     if (!Os.isFamily(Os.FAMILY_WINDOWS)) {
         try {
-            return exec {
+            return execHelper.execOperations.exec {
                 commandLine 'sh', '-c', "docker exec ${containerName} psql -U postgres -h localhost -p 5432"
             }.exitValue
         } catch (all) {
@@ -314,7 +322,7 @@ task stopPostgreSQLTestDockerContainer() {
         if (!Os.isFamily(Os.FAMILY_WINDOWS)) {
             try {
                 def stdOut = new ByteArrayOutputStream()
-                exec {
+                execHelper.execOperations.exec {
                     commandLine 'sh', '-c', "docker stop ballerina-persist-postgresql"
                     standardOutput = stdOut
                 }

@@ -1,0 +1,7 @@
+# ballerinax/mysql:1 ("A secure password should be used when connecting to a database") is a false positive.
+# This library does not import ballerinax/mysql or create any database connection or credential. The flagged
+# locations are generic sql:Client / sql:queryConcat usages in the SQLClient that execute queries on a client the
+# generated persist client has already created. Passwords are supplied by users of the generated clients
+# (as required configurables), never in this library.
+[rule]
+exclude = ["ballerinax/mysql:1"]

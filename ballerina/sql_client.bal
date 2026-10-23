@@ -54,8 +54,10 @@ public isolated client class SQLClient {
     # Performs a batch SQL `INSERT` operation to insert entity instances into a table.
     #
     # + insertRecords - The entity records to be inserted into the table
-    # + return - An `sql:ExecutionResult[]` containing the metadata of the query execution
-    # or a `persist:Error` if the operation fails
+    # + return - An `sql:ExecutionResult[]` containing the metadata of the query execution,
+    # a `persist:AlreadyExistsError` if a record with the same key already exists,
+    # a `persist:ConstraintViolationError` if the operation violates a foreign key constraint,
+    # or a `persist:Error` if the operation fails due to another reason
     public isolated function runBatchInsertQuery(record {}[] insertRecords) returns sql:ExecutionResult[]|persist:Error {
         sql:ParameterizedQuery[] insertQueries = self.getInsertQueries(insertRecords);
         logQuery("SQL insert query: ", insertQueries);
@@ -66,7 +68,9 @@ public isolated client class SQLClient {
                 string duplicateKey = check getKeyFromAlreadyExistsErrorMessage(result.message(), self.dataSourceSpecifics.duplicateKeyStartIndicator, self.dataSourceSpecifics.duplicateKeyEndIndicator);
                 return persist:getAlreadyExistsError(self.entityName, duplicateKey);
             }
-
+            if self.isConstraintViolation(result) {
+                return <persist:ConstraintViolationError>error(result.message());
+            }
             return <persist:Error>error(result.message());
         }
 
@@ -209,7 +213,7 @@ public isolated client class SQLClient {
         logQuery("SQL update query: ", query);
         sql:ExecutionResult|sql:Error? e = self.dbClient->execute(query);
         if e is sql:Error {
-            if e.message().indexOf(self.dataSourceSpecifics.constraintViolationErrorMessage) is int {
+            if self.isConstraintViolation(e) {
                 return <persist:ConstraintViolationError>error(e.message());
             }
             else {
@@ -221,16 +225,35 @@ public isolated client class SQLClient {
     # Performs an SQL `DELETE` operation to delete an entity record from the database.
     #
     # + deleteKey - The key used to delete an entity record
-    # + return - `()` if the operation is performed successfully or a `persist:Error` if the operation fails
-    public isolated function runDeleteQuery(anydata deleteKey) returns persist:Error? {
+    # + return - `()` if the operation is performed successfully,
+    # a `persist:ConstraintViolationError` if other records still reference the record through a foreign key,
+    # or a `persist:Error` if the operation fails due to another reason
+    public isolated function runDeleteQuery(anydata deleteKey) returns persist:ConstraintViolationError|persist:Error? {
         sql:ParameterizedQuery query = self.getDeleteQuery();
         query = sql:queryConcat(query, check self.getWhereQuery(deleteKey));
         logQuery("SQL delete query: ", query);
         sql:ExecutionResult|sql:Error e = self.dbClient->execute(query);
 
         if e is sql:Error {
+            if self.isConstraintViolation(e) {
+                return <persist:ConstraintViolationError>error(e.message());
+            }
             return <persist:Error>error(e.message());
         }
+    }
+
+    // Some databases word a violation differently depending on the operation, such as MSSQL for a delete.
+    private isolated function isConstraintViolation(sql:Error e) returns boolean {
+        string message = e.message();
+        if message.includes(self.dataSourceSpecifics.constraintViolationErrorMessage) {
+            return true;
+        }
+        foreach string violationMessage in self.dataSourceSpecifics.constraintViolationErrorMessages {
+            if message.includes(violationMessage) {
+                return true;
+            }
+        }
+        return false;
     }
 
     # Retrieves the values of the 'many' side of an association.

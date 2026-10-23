@@ -249,3 +249,54 @@ function postgresqlWorkspaceDeleteTestNegative() returns error? {
     }
     check rainierClient.close();
 }
+
+@test:Config {
+    groups: ["workspace", "postgresql"]
+}
+function postgresqlWorkspaceCreateTestNegativeForeignKey() returns error? {
+    PostgreSQLRainierClient rainierClient = check new ();
+
+    string[]|error workspaceIds = rainierClient->/workspaces.post([{
+        workspaceId: "workspace-fk-1",
+        workspaceType: "small",
+        locationBuildingCode: "building-fk-missing"
+    }]);
+    if workspaceIds is persist:ConstraintViolationError {
+        test:assertTrue(workspaceIds.message().includes("violates foreign key constraint"), workspaceIds.message());
+    } else {
+        test:assertFail("persist:ConstraintViolationError expected.");
+    }
+    check rainierClient.close();
+}
+
+@test:Config {
+    groups: ["workspace", "postgresql"]
+}
+function postgresqlBuildingDeleteTestNegativeForeignKey() returns error? {
+    PostgreSQLRainierClient rainierClient = check new ();
+    Building building = {
+        buildingCode: "building-fk-1",
+        city: "Colombo",
+        state: "Western Province",
+        country: "Sri Lanka",
+        postalCode: "10370",
+        'type: "rented"
+    };
+    _ = check rainierClient->/buildings.post([building]);
+    _ = check rainierClient->/workspaces.post([{
+        workspaceId: "workspace-fk-2",
+        workspaceType: "small",
+        locationBuildingCode: building.buildingCode
+    }]);
+
+    Building|error deleted = rainierClient->/buildings/[building.buildingCode].delete();
+    if deleted is persist:ConstraintViolationError {
+        test:assertTrue(deleted.message().includes("violates foreign key constraint"), deleted.message());
+    } else {
+        test:assertFail("persist:ConstraintViolationError expected.");
+    }
+
+    _ = check rainierClient->/workspaces/["workspace-fk-2"].delete();
+    _ = check rainierClient->/buildings/[building.buildingCode].delete();
+    check rainierClient.close();
+}

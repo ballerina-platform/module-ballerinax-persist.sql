@@ -9,6 +9,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Fixed
 
 - [Return `persist:AlreadyExistsError` when an update violates a unique constraint](https://github.com/ballerina-platform/ballerina-library/issues/9391)
+- [Return `persist:ConstraintViolationError` for foreign key violations on insert and delete](https://github.com/ballerina-platform/ballerina-library/issues/9359).
 
 ## [1.7.4] - 2026-04-27
 

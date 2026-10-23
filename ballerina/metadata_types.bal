@@ -114,6 +114,7 @@ public type DataSourceSpecifics record {|
     string quoteOpen;
     string quoteClose;
     string constraintViolationErrorMessage;
+    string[] constraintViolationErrorMessages = [];
     string duplicateEntryErrorMessage;
     string duplicateKeyStartIndicator;
     string duplicateKeyEndIndicator;

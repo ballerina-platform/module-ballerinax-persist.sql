@@ -27,6 +27,7 @@ public final DataSourceSpecifics & readonly MSSQL_SPECIFICS = {
     quoteOpen: "[",
     quoteClose: "]",
     constraintViolationErrorMessage: "conflicted with the FOREIGN KEY constraint",
+    constraintViolationErrorMessages: ["conflicted with the REFERENCE constraint"],
     duplicateEntryErrorMessage: "Cannot insert duplicate key",
     duplicateKeyStartIndicator: "The duplicate key value is (",
     duplicateKeyEndIndicator: ").."

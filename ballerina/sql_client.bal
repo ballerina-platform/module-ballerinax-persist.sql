@@ -551,14 +551,14 @@ public isolated client class SQLClient {
     }
 
     private isolated function getUpdateQuery(record {} updateRecord) returns sql:ParameterizedQuery|persist:Error {
-        if self.dataSourceSpecifics == MSSQL_SPECIFICS {
+        if self.dataSourceSpecifics.quoteOpen == MSSQL_SPECIFICS.quoteOpen {
             return sql:queryConcat(`UPDATE `, stringToParameterizedQuery(self.escape(self.entityName)), ` SET `, check self.getSetClauses(updateRecord), ` FROM `, stringToParameterizedQuery(self.getTableName()), ` `, stringToParameterizedQuery(self.escape(self.entityName)));
         }
         return sql:queryConcat(`UPDATE `, stringToParameterizedQuery(self.getTableName()), ` AS `, stringToParameterizedQuery(self.escape(self.entityName)), ` SET `, check self.getSetClauses(updateRecord));
     }
 
     private isolated function getDeleteQuery() returns sql:ParameterizedQuery {
-        if self.dataSourceSpecifics == MSSQL_SPECIFICS {
+        if self.dataSourceSpecifics.quoteOpen == MSSQL_SPECIFICS.quoteOpen {
             return sql:queryConcat(`DELETE `, stringToParameterizedQuery(self.escape(self.entityName)), ` FROM `, stringToParameterizedQuery(self.getTableName()), ` AS `, stringToParameterizedQuery(self.escape(self.entityName)));
         }
         return sql:queryConcat(`DELETE FROM `, stringToParameterizedQuery(self.getTableName()), ` AS `, stringToParameterizedQuery(self.escape(self.entityName)));

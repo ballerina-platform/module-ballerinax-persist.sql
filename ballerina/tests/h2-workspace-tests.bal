@@ -145,7 +145,7 @@ function h2WorkspaceReadManyDependentTest() returns error? {
 
 @test:Config {
     groups: ["workspace", "h2"],
-    dependsOn: [h2WorkspaceReadOneTest, h2WorkspaceReadManyTest, h2WorkspaceReadManyDependentTest]
+    dependsOn: [h2WorkspaceReadOneTest, h2WorkspaceReadManyTest, h2WorkspaceReadManyDependentTest, h2WorkspaceReadWithOffset]
 }
 function h2WorkspaceUpdateTest() returns error? {
     H2RainierClient rainierClient = check new ();
@@ -180,7 +180,7 @@ function h2WorkspaceReadWithClauses() returns error? {
 
 @test:Config {
     groups: ["workspace", "h2"],
-    dependsOn: [h2WorkspaceReadOneTest, h2WorkspaceReadManyTest, h2WorkspaceReadManyDependentTest, h2WorkspaceReadWithClauses]
+    dependsOn: [h2WorkspaceReadOneTest, h2WorkspaceReadManyTest, h2WorkspaceReadManyDependentTest, h2WorkspaceReadWithClauses, h2WorkspaceReadWithOffset]
 }
 function h2WorkspaceUpdateTestNegative1() returns error? {
     H2RainierClient rainierClient = check new ();
@@ -199,7 +199,7 @@ function h2WorkspaceUpdateTestNegative1() returns error? {
 
 @test:Config {
     groups: ["workspace", "h2"],
-    dependsOn: [h2WorkspaceReadOneTest, h2WorkspaceReadManyTest, h2WorkspaceReadManyDependentTest, h2WorkspaceReadWithClauses]
+    dependsOn: [h2WorkspaceReadOneTest, h2WorkspaceReadManyTest, h2WorkspaceReadManyDependentTest, h2WorkspaceReadWithClauses, h2WorkspaceReadWithOffset]
 }
 function h2WorkspaceUpdateTestNegative2() returns error? {
     H2RainierClient rainierClient = check new ();
@@ -299,5 +299,52 @@ function h2BuildingDeleteTestNegativeForeignKey() returns error? {
 
     _ = check rainierClient->/workspaces/["workspace-fk-2"].delete();
     _ = check rainierClient->/buildings/[building.buildingCode].delete();
+    check rainierClient.close();
+}
+
+@test:Config {
+    groups: ["workspace", "h2"],
+    dependsOn: [h2WorkspaceCreateTest, h2WorkspaceCreateTest2]
+}
+function h2WorkspaceReadWithOffset() returns error? {
+    H2RainierClient rainierClient = check new ();
+    int offset = 1;
+
+    stream<Workspace, persist:Error?> workspaceStream = rainierClient->/workspaces.get(orderByClause = `"Workspace"."workspaceId"`, offsetClause = `${offset}`);
+    Workspace[] workspaces = check from Workspace workspace in workspaceStream
+        select workspace;
+    test:assertEquals(workspaces, [workspace2, workspace3]);
+
+    workspaceStream = rainierClient->/workspaces.get(orderByClause = `"Workspace"."workspaceId"`, limitClause = `1`, offsetClause = `${offset}`);
+    workspaces = check from Workspace workspace in workspaceStream
+        select workspace;
+    test:assertEquals(workspaces, [workspace2]);
+
+    workspaceStream = rainierClient->/workspaces.get(whereClause = `"Workspace"."workspaceType" = ${"small"}`, orderByClause = `"Workspace"."workspaceId"`, offsetClause = `1`);
+    workspaces = check from Workspace workspace in workspaceStream
+        select workspace;
+    test:assertEquals(workspaces, [workspace3]);
+
+    workspaces = check rainierClient->/workspaces/list(orderByClause = `"Workspace"."workspaceId"`, limitClause = `1`, offsetClause = `2`);
+    test:assertEquals(workspaces, [workspace3]);
+
+    workspaceStream = rainierClient->/workspaces.get(offsetClause = `${-1}`);
+    Workspace[]|error result = from Workspace workspace in workspaceStream
+        select workspace;
+    if result is persist:Error {
+        test:assertEquals(result.message(), "Invalid 'offsetClause': expected a non-negative integer, found '-1'.");
+    } else {
+        test:assertFail("persist:Error expected.");
+    }
+
+    string offsetText = "0; DROP TABLE Workspace";
+    workspaceStream = rainierClient->/workspaces.get(offsetClause = `${offsetText}`);
+    result = from Workspace workspace in workspaceStream
+        select workspace;
+    if result is persist:Error {
+        test:assertEquals(result.message(), "Invalid 'offsetClause': expected a non-negative integer, found '0; DROP TABLE Workspace'.");
+    } else {
+        test:assertFail("persist:Error expected.");
+    }
     check rainierClient.close();
 }

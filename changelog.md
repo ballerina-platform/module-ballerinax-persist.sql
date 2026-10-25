@@ -6,6 +6,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+
+- [Support skipping rows with `offsetClause` in SQL client queries, including `limit` on MSSQL](https://github.com/ballerina-platform/ballerina-library/issues/5846)
+
 ### Fixed
 
 - [Return `persist:AlreadyExistsError` when an update violates a unique constraint](https://github.com/ballerina-platform/ballerina-library/issues/9391)

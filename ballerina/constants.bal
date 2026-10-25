@@ -22,7 +22,8 @@ public final DataSourceSpecifics & readonly MYSQL_SPECIFICS = {
     duplicateEntryErrorMessage: "Duplicate entry",
     duplicateEntryErrorCodes: [1062],
     duplicateKeyStartIndicator: "Duplicate entry '",
-    duplicateKeyEndIndicator: "' for key"
+    duplicateKeyEndIndicator: "' for key",
+    paginationSyntax: LIMIT_REQUIRED_WITH_OFFSET
 };
 
 public final DataSourceSpecifics & readonly MSSQL_SPECIFICS = {
@@ -33,7 +34,8 @@ public final DataSourceSpecifics & readonly MSSQL_SPECIFICS = {
     duplicateEntryErrorMessage: "Cannot insert duplicate key",
     duplicateEntryErrorCodes: [2601, 2627],
     duplicateKeyStartIndicator: "The duplicate key value is (",
-    duplicateKeyEndIndicator: ").."
+    duplicateKeyEndIndicator: ")..",
+    paginationSyntax: OFFSET_FETCH
 };
 
 public final DataSourceSpecifics & readonly POSTGRESQL_SPECIFICS = {

@@ -145,7 +145,7 @@ function postgresqlWorkspaceReadManyDependentTest() returns error? {
 
 @test:Config {
     groups: ["workspace", "postgresql"],
-    dependsOn: [postgresqlWorkspaceReadOneTest, postgresqlWorkspaceReadManyTest, postgresqlWorkspaceReadManyDependentTest, postgresqlWorkspaceReadWithOffset]
+    dependsOn: [postgresqlWorkspaceReadOneTest, postgresqlWorkspaceReadManyTest, postgresqlWorkspaceReadManyDependentTest, postgresqlWorkspaceReadWithOffset, postgresqlWorkspaceReadWithInterpolatedLimit]
 }
 function postgresqlWorkspaceUpdateTest() returns error? {
     PostgreSQLRainierClient rainierClient = check new ();
@@ -345,5 +345,30 @@ function postgresqlWorkspaceReadWithOffset() returns error? {
     } else {
         test:assertFail("persist:Error expected.");
     }
+    check rainierClient.close();
+}
+
+@test:Config {
+    groups: ["workspace", "postgresql"],
+    dependsOn: [postgresqlWorkspaceCreateTest, postgresqlWorkspaceCreateTest2]
+}
+function postgresqlWorkspaceReadWithInterpolatedLimit() returns error? {
+    PostgreSQLRainierClient rainierClient = check new ();
+    int count = 1;
+
+    stream<Workspace, persist:Error?> workspaceStream = rainierClient->/workspaces.get(whereClause = `"Workspace"."workspaceType" = 'small'`, limitClause = `${count}`);
+    Workspace[] workspaces = check from Workspace workspace in workspaceStream
+        select workspace;
+    test:assertEquals(workspaces.length(), 1);
+
+    workspaceStream = rainierClient->/workspaces.get(orderByClause = `"Workspace"."workspaceId"`, limitClause = `${count} + ${1}`);
+    workspaces = check from Workspace workspace in workspaceStream
+        select workspace;
+    test:assertEquals(workspaces, [workspace1, workspace2]);
+
+    workspaceStream = rainierClient->/workspaces.get(whereClause = `"Workspace"."workspaceType" = 'small'`, orderByClause = `"Workspace"."workspaceId"`, limitClause = `${count}`, offsetClause = `${count}`);
+    workspaces = check from Workspace workspace in workspaceStream
+        select workspace;
+    test:assertEquals(workspaces, [workspace3]);
     check rainierClient.close();
 }

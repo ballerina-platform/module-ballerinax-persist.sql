@@ -145,7 +145,7 @@ function mysqlWorkspaceReadManyDependentTest() returns error? {
 
 @test:Config {
     groups: ["workspace", "mysql"],
-    dependsOn: [mysqlWorkspaceReadOneTest, mysqlWorkspaceReadManyTest, mysqlWorkspaceReadManyDependentTest, mysqlWorkspaceReadWithOffset]
+    dependsOn: [mysqlWorkspaceReadOneTest, mysqlWorkspaceReadManyTest, mysqlWorkspaceReadManyDependentTest, mysqlWorkspaceReadWithOffset, mysqlWorkspaceReadWithInterpolatedLimit]
 }
 function mysqlWorkspaceUpdateTest() returns error? {
     MySQLRainierClient rainierClient = check new ();
@@ -345,5 +345,25 @@ function mysqlWorkspaceReadWithOffset() returns error? {
     } else {
         test:assertFail("persist:Error expected.");
     }
+    check rainierClient.close();
+}
+
+@test:Config {
+    groups: ["workspace", "mysql"],
+    dependsOn: [mysqlWorkspaceCreateTest, mysqlWorkspaceCreateTest2]
+}
+function mysqlWorkspaceReadWithInterpolatedLimit() returns error? {
+    MySQLRainierClient rainierClient = check new ();
+    int count = 1;
+
+    stream<Workspace, persist:Error?> workspaceStream = rainierClient->/workspaces.get(whereClause = `Workspace.workspaceType = 'small'`, limitClause = `${count}`);
+    Workspace[] workspaces = check from Workspace workspace in workspaceStream
+        select workspace;
+    test:assertEquals(workspaces.length(), 1);
+
+    workspaceStream = rainierClient->/workspaces.get(whereClause = `Workspace.workspaceType = 'small'`, orderByClause = `Workspace.workspaceId`, limitClause = `${count}`, offsetClause = `${count}`);
+    workspaces = check from Workspace workspace in workspaceStream
+        select workspace;
+    test:assertEquals(workspaces, [workspace3]);
     check rainierClient.close();
 }

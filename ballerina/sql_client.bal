@@ -454,27 +454,23 @@ public isolated client class SQLClient {
                 return ``;
             }
             // `OFFSET ... FETCH` is only valid after an `ORDER BY`.
-            string clause = isOrdered ? "" : " ORDER BY (SELECT NULL)";
-            clause += string ` OFFSET ${offset ?: 0} ROWS`;
+            sql:ParameterizedQuery clause = isOrdered ? `` : ` ORDER BY (SELECT NULL)`;
+            clause = sql:queryConcat(clause, ` OFFSET ${offset ?: 0} ROWS`);
             if hasLimit {
-                clause += string ` FETCH NEXT ${check getRowCount(limitClause, "limitClause")} ROWS ONLY`;
+                clause = sql:queryConcat(clause, ` FETCH NEXT `, limitClause, ` ROWS ONLY`);
             }
-            return stringToParameterizedQuery(clause);
+            return clause;
         }
         sql:ParameterizedQuery clause = ``;
         if hasLimit {
-            if limitClause.insertions.length() != 0 {
-                clause = stringToParameterizedQuery(" LIMIT " + limitClause.strings[0] +
-                        limitClause.insertions[0].toString());
-            } else {
-                clause = sql:queryConcat(` LIMIT `, limitClause);
-            }
+            clause = sql:queryConcat(` LIMIT `, limitClause);
         } else if offset is int && syntax == LIMIT_REQUIRED_WITH_OFFSET {
-            // The largest `LIMIT` MySQL accepts, which it documents as "all remaining rows".
+            // The largest `LIMIT` MySQL accepts, which it documents as "all remaining rows". It is
+            // above the `BIGINT` range, so it cannot be bound.
             clause = ` LIMIT 18446744073709551615`;
         }
         if offset is int {
-            clause = sql:queryConcat(clause, stringToParameterizedQuery(string ` OFFSET ${offset}`));
+            clause = sql:queryConcat(clause, ` OFFSET ${offset}`);
         }
         return clause;
     }

@@ -145,7 +145,7 @@ function h2WorkspaceReadManyDependentTest() returns error? {
 
 @test:Config {
     groups: ["workspace", "h2"],
-    dependsOn: [h2WorkspaceReadOneTest, h2WorkspaceReadManyTest, h2WorkspaceReadManyDependentTest, h2WorkspaceReadWithOffset]
+    dependsOn: [h2WorkspaceReadOneTest, h2WorkspaceReadManyTest, h2WorkspaceReadManyDependentTest, h2WorkspaceReadWithOffset, h2WorkspaceReadWithInterpolatedLimit]
 }
 function h2WorkspaceUpdateTest() returns error? {
     H2RainierClient rainierClient = check new ();
@@ -346,5 +346,30 @@ function h2WorkspaceReadWithOffset() returns error? {
     } else {
         test:assertFail("persist:Error expected.");
     }
+    check rainierClient.close();
+}
+
+@test:Config {
+    groups: ["workspace", "h2"],
+    dependsOn: [h2WorkspaceCreateTest, h2WorkspaceCreateTest2]
+}
+function h2WorkspaceReadWithInterpolatedLimit() returns error? {
+    H2RainierClient rainierClient = check new ();
+    int count = 1;
+
+    stream<Workspace, persist:Error?> workspaceStream = rainierClient->/workspaces.get(whereClause = `"Workspace"."workspaceType" = 'small'`, limitClause = `${count}`);
+    Workspace[] workspaces = check from Workspace workspace in workspaceStream
+        select workspace;
+    test:assertEquals(workspaces.length(), 1);
+
+    workspaceStream = rainierClient->/workspaces.get(orderByClause = `"Workspace"."workspaceId"`, limitClause = `${count} + ${1}`);
+    workspaces = check from Workspace workspace in workspaceStream
+        select workspace;
+    test:assertEquals(workspaces, [workspace1, workspace2]);
+
+    workspaceStream = rainierClient->/workspaces.get(whereClause = `"Workspace"."workspaceType" = 'small'`, orderByClause = `"Workspace"."workspaceId"`, limitClause = `${count}`, offsetClause = `${count}`);
+    workspaces = check from Workspace workspace in workspaceStream
+        select workspace;
+    test:assertEquals(workspaces, [workspace3]);
     check rainierClient.close();
 }

@@ -145,7 +145,7 @@ function mssqlWorkspaceReadManyDependentTest() returns error? {
 
 @test:Config {
     groups: ["workspace", "mssql"],
-    dependsOn: [mssqlWorkspaceReadOneTest, mssqlWorkspaceReadManyTest, mssqlWorkspaceReadManyDependentTest, mssqlWorkspaceReadWithOffset]
+    dependsOn: [mssqlWorkspaceReadOneTest, mssqlWorkspaceReadManyTest, mssqlWorkspaceReadManyDependentTest, mssqlWorkspaceReadWithOffset, mssqlWorkspaceReadWithInterpolatedLimit]
 }
 function mssqlWorkspaceUpdateTest() returns error? {
     MSSQLRainierClient rainierClient = check new ();
@@ -334,5 +334,30 @@ function mssqlWorkspaceReadWithOffset() returns error? {
     } else {
         test:assertFail("persist:Error expected.");
     }
+    check rainierClient.close();
+}
+
+@test:Config {
+    groups: ["workspace", "mssql"],
+    dependsOn: [mssqlWorkspaceCreateTest, mssqlWorkspaceCreateTest2]
+}
+function mssqlWorkspaceReadWithInterpolatedLimit() returns error? {
+    MSSQLRainierClient rainierClient = check new ();
+    int count = 1;
+
+    stream<Workspace, persist:Error?> workspaceStream = rainierClient->/workspaces.get(whereClause = `[Workspace].[workspaceType] = 'small'`, limitClause = `${count}`);
+    Workspace[] workspaces = check from Workspace workspace in workspaceStream
+        select workspace;
+    test:assertEquals(workspaces.length(), 1);
+
+    workspaceStream = rainierClient->/workspaces.get(orderByClause = `[Workspace].[workspaceId]`, limitClause = `${count} + ${1}`);
+    workspaces = check from Workspace workspace in workspaceStream
+        select workspace;
+    test:assertEquals(workspaces, [workspace1, workspace2]);
+
+    workspaceStream = rainierClient->/workspaces.get(whereClause = `[Workspace].[workspaceType] = 'small'`, orderByClause = `[Workspace].[workspaceId]`, limitClause = `${count}`, offsetClause = `${count}`);
+    workspaces = check from Workspace workspace in workspaceStream
+        select workspace;
+    test:assertEquals(workspaces, [workspace3]);
     check rainierClient.close();
 }

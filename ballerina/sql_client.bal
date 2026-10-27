@@ -245,18 +245,26 @@ public isolated client class SQLClient {
         }
     }
 
-    // Some databases word a violation differently depending on the operation, such as MSSQL for a delete.
     private isolated function isConstraintViolation(sql:Error e) returns boolean {
-        string message = e.message();
-        if message.includes(self.dataSourceSpecifics.constraintViolationErrorMessage) {
-            return true;
+        int[] errorCodes = self.dataSourceSpecifics.constraintViolationErrorCodes;
+        string[] sqlStates = self.dataSourceSpecifics.constraintViolationSqlStates;
+        // A custom `DataSourceSpecifics` without codes or SQL states falls back to message matching.
+        if errorCodes.length() == 0 && sqlStates.length() == 0 {
+            return e.message().includes(self.dataSourceSpecifics.constraintViolationErrorMessage);
         }
-        foreach string violationMessage in self.dataSourceSpecifics.constraintViolationErrorMessages {
-            if message.includes(violationMessage) {
-                return true;
-            }
+        int errorCode;
+        string? sqlState;
+        if e is sql:DatabaseError {
+            errorCode = e.detail().errorCode;
+            sqlState = e.detail().sqlState;
+        } else if e is sql:BatchExecuteError {
+            errorCode = e.detail().errorCode;
+            sqlState = e.detail().sqlState;
+        } else {
+            return false;
         }
-        return false;
+        // PostgreSQL reports no vendor error code, so it is matched on the SQL state instead.
+        return errorCodes.indexOf(errorCode) is int || (sqlState is string && sqlStates.indexOf(sqlState) is int);
     }
 
     # Retrieves the values of the 'many' side of an association.

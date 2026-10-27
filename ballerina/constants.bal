@@ -19,7 +19,7 @@ public final DataSourceSpecifics & readonly MYSQL_SPECIFICS = {
     quoteClose: "`",
     constraintViolationErrorMessage: "a foreign key constraint fails",
     duplicateEntryErrorMessage: "Duplicate entry",
-    duplicateKeyStartIndicator: ".Duplicate entry '",
+    duplicateKeyStartIndicator: "Duplicate entry '",
     duplicateKeyEndIndicator: "' for key"
 };
 

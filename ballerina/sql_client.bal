@@ -54,17 +54,18 @@ public isolated client class SQLClient {
     # Performs a batch SQL `INSERT` operation to insert entity instances into a table.
     #
     # + insertRecords - The entity records to be inserted into the table
-    # + return - An `sql:ExecutionResult[]` containing the metadata of the query execution
-    # or a `persist:Error` if the operation fails
+    # + return - An `sql:ExecutionResult[]` containing the metadata of the query execution,
+    # a `persist:AlreadyExistsError` if a record with the same unique value already exists,
+    # or a `persist:Error` if the operation fails due to another reason
     public isolated function runBatchInsertQuery(record {}[] insertRecords) returns sql:ExecutionResult[]|persist:Error {
         sql:ParameterizedQuery[] insertQueries = self.getInsertQueries(insertRecords);
         logQuery("SQL insert query: ", insertQueries);
         sql:ExecutionResult[]|sql:Error result = self.dbClient->batchExecute(insertQueries);
 
         if result is sql:Error {
-            if result.message().indexOf(self.dataSourceSpecifics.duplicateEntryErrorMessage) != () {
-                string duplicateKey = check getKeyFromAlreadyExistsErrorMessage(result.message(), self.dataSourceSpecifics.duplicateKeyStartIndicator, self.dataSourceSpecifics.duplicateKeyEndIndicator);
-                return persist:getAlreadyExistsError(self.entityName, duplicateKey);
+            persist:Error? alreadyExistsError = self.getAlreadyExistsError(result);
+            if alreadyExistsError is persist:Error {
+                return alreadyExistsError;
             }
 
             return <persist:Error>error(result.message());
@@ -202,8 +203,9 @@ public isolated client class SQLClient {
     # + updateRecord - the record to be updated
     # + return - `()` if the operation is performed successfully.
     # A `persist:ConstraintViolationError` if the operation violates a foreign key constraint.
+    # A `persist:AlreadyExistsError` if another record already has the updated unique value.
     # A `persist:Error` if the operation fails due to another reason.
-    public isolated function runUpdateQuery(anydata key, record {} updateRecord) returns persist:ConstraintViolationError|persist:Error? {
+    public isolated function runUpdateQuery(anydata key, record {} updateRecord) returns persist:ConstraintViolationError|persist:AlreadyExistsError|persist:Error? {
         sql:ParameterizedQuery query = check self.getUpdateQuery(updateRecord);
         query = sql:queryConcat(query, check self.getWhereQuery(self.getKey(key)));
         logQuery("SQL update query: ", query);
@@ -212,9 +214,11 @@ public isolated client class SQLClient {
             if e.message().indexOf(self.dataSourceSpecifics.constraintViolationErrorMessage) is int {
                 return <persist:ConstraintViolationError>error(e.message());
             }
-            else {
-                return <persist:Error>error(e.message());
+            persist:Error? alreadyExistsError = self.getAlreadyExistsError(e);
+            if alreadyExistsError is persist:Error {
+                return alreadyExistsError;
             }
+            return <persist:Error>error(e.message());
         }
     }
 
@@ -328,6 +332,14 @@ public isolated client class SQLClient {
 
     public isolated function getKeyFields() returns string[] {
         return self.keyFields;
+    }
+
+    private isolated function getAlreadyExistsError(sql:Error e) returns persist:Error? {
+        if e.message().indexOf(self.dataSourceSpecifics.duplicateEntryErrorMessage) is () {
+            return;
+        }
+        string duplicateKey = check getKeyFromAlreadyExistsErrorMessage(e.message(), self.dataSourceSpecifics.duplicateKeyStartIndicator, self.dataSourceSpecifics.duplicateKeyEndIndicator);
+        return persist:getAlreadyExistsError(self.entityName, duplicateKey);
     }
 
     private isolated function getKey(anydata|record {} 'object) returns record {} {

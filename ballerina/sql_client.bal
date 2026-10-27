@@ -246,25 +246,8 @@ public isolated client class SQLClient {
     }
 
     private isolated function isConstraintViolation(sql:Error e) returns boolean {
-        int[] errorCodes = self.dataSourceSpecifics.constraintViolationErrorCodes;
-        string[] sqlStates = self.dataSourceSpecifics.constraintViolationSqlStates;
-        // A custom `DataSourceSpecifics` without codes or SQL states falls back to message matching.
-        if errorCodes.length() == 0 && sqlStates.length() == 0 {
-            return e.message().includes(self.dataSourceSpecifics.constraintViolationErrorMessage);
-        }
-        int errorCode;
-        string? sqlState;
-        if e is sql:DatabaseError {
-            errorCode = e.detail().errorCode;
-            sqlState = e.detail().sqlState;
-        } else if e is sql:BatchExecuteError {
-            errorCode = e.detail().errorCode;
-            sqlState = e.detail().sqlState;
-        } else {
-            return false;
-        }
-        // PostgreSQL reports no vendor error code, so it is matched on the SQL state instead.
-        return errorCodes.indexOf(errorCode) is int || (sqlState is string && sqlStates.indexOf(sqlState) is int);
+        return matchesError(e, self.dataSourceSpecifics.constraintViolationErrorCodes,
+                self.dataSourceSpecifics.constraintViolationSqlStates, self.dataSourceSpecifics.constraintViolationErrorMessage);
     }
 
     # Retrieves the values of the 'many' side of an association.
@@ -364,11 +347,15 @@ public isolated client class SQLClient {
         return self.keyFields;
     }
 
-    private isolated function getAlreadyExistsError(sql:Error e) returns persist:Error? {
-        if e.message().indexOf(self.dataSourceSpecifics.duplicateEntryErrorMessage) is () {
+    private isolated function getAlreadyExistsError(sql:Error e) returns persist:AlreadyExistsError? {
+        if !matchesError(e, self.dataSourceSpecifics.duplicateEntryErrorCodes,
+                self.dataSourceSpecifics.duplicateEntrySqlStates, self.dataSourceSpecifics.duplicateEntryErrorMessage) {
             return;
         }
-        string duplicateKey = check getKeyFromAlreadyExistsErrorMessage(e.message(), self.dataSourceSpecifics.duplicateKeyStartIndicator, self.dataSourceSpecifics.duplicateKeyEndIndicator);
+        string|persist:Error duplicateKey = getKeyFromAlreadyExistsErrorMessage(e.message(), self.dataSourceSpecifics.duplicateKeyStartIndicator, self.dataSourceSpecifics.duplicateKeyEndIndicator);
+        if duplicateKey is persist:Error {
+            return <persist:AlreadyExistsError>error(e.message());
+        }
         return persist:getAlreadyExistsError(self.entityName, duplicateKey);
     }
 

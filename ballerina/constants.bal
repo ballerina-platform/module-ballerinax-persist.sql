@@ -20,6 +20,7 @@ public final DataSourceSpecifics & readonly MYSQL_SPECIFICS = {
     constraintViolationErrorMessage: "a foreign key constraint fails",
     constraintViolationErrorCodes: [1451, 1452],
     duplicateEntryErrorMessage: "Duplicate entry",
+    duplicateEntryErrorCodes: [1062],
     duplicateKeyStartIndicator: "Duplicate entry '",
     duplicateKeyEndIndicator: "' for key"
 };
@@ -30,6 +31,7 @@ public final DataSourceSpecifics & readonly MSSQL_SPECIFICS = {
     constraintViolationErrorMessage: "conflicted with the FOREIGN KEY constraint",
     constraintViolationErrorCodes: [547],
     duplicateEntryErrorMessage: "Cannot insert duplicate key",
+    duplicateEntryErrorCodes: [2601, 2627],
     duplicateKeyStartIndicator: "The duplicate key value is (",
     duplicateKeyEndIndicator: ").."
 };
@@ -40,6 +42,7 @@ public final DataSourceSpecifics & readonly POSTGRESQL_SPECIFICS = {
     constraintViolationErrorMessage: "violates foreign key constraint",
     constraintViolationSqlStates: ["23503"],
     duplicateEntryErrorMessage: "duplicate key value violates unique constraint",
+    duplicateEntrySqlStates: ["23505"],
     duplicateKeyStartIndicator: "Detail: Key ",
     duplicateKeyEndIndicator: " already exists."
 };
@@ -50,6 +53,7 @@ public final DataSourceSpecifics & readonly H2_SPECIFICS = {
     constraintViolationErrorMessage: "Referential integrity constraint violation",
     constraintViolationErrorCodes: [23503, 23506],
     duplicateEntryErrorMessage: "Unique index or primary key violation",
+    duplicateEntryErrorCodes: [23505],
     duplicateKeyStartIndicator: "Unique index or primary key violation: \"",
     duplicateKeyEndIndicator: " ON "
 };

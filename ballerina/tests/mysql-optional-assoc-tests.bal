@@ -98,6 +98,30 @@ function MySqlAPMWithRelationsTest() returns error? {
     check apimClient.close();
 }
 
+@test:Config {
+    groups: ["assoc", "mysql"],
+    dependsOn: [MySqlAPMWithRelationsTest]
+}
+function MySqlSubscriptionUpdateUniqueViolationTest() returns error? {
+    MySqlApimClient apimClient = check new ();
+
+    string[] subId = check apimClient->/subscriptions.post([{
+        subscriptionId: "124",
+        userName: "ballerina",
+        apimetadataApiId: "123457",
+        apimetadataOrgId: "wso2"
+    }]);
+    test:assertEquals(subId, ["124"]);
+
+    Subscription|persist:Error result = apimClient->/subscriptions/["124"].put({
+        apimetadataApiId: "123458"
+    });
+    test:assertTrue(result is persist:AlreadyExistsError, "persist:AlreadyExistsError expected");
+
+    _ = check apimClient->/subscriptions/["124"].delete();
+    check apimClient.close();
+}
+
 type MySqlAPIMWithSubscriptions record {|
     string apiId;
     string orgId;

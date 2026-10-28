@@ -23,6 +23,26 @@ isolated function stringToParameterizedQuery(string queryStr) returns sql:Parame
     return query;
 }
 
+// A `DataSourceSpecifics` without error codes or SQL states falls back to matching the error message.
+isolated function matchesError(sql:Error e, int[] errorCodes, string[] sqlStates, string message) returns boolean {
+    if errorCodes.length() == 0 && sqlStates.length() == 0 {
+        return e.message().includes(message);
+    }
+    int errorCode;
+    string? sqlState;
+    if e is sql:DatabaseError {
+        errorCode = e.detail().errorCode;
+        sqlState = e.detail().sqlState;
+    } else if e is sql:BatchExecuteError {
+        errorCode = e.detail().errorCode;
+        sqlState = e.detail().sqlState;
+    } else {
+        return false;
+    }
+    // PostgreSQL reports no vendor error code, so it is matched on the SQL state instead.
+    return errorCodes.indexOf(errorCode) is int || (sqlState is string && sqlStates.indexOf(sqlState) is int);
+}
+
 isolated function getKeyFromAlreadyExistsErrorMessage(string errorMessage, string startIndicator, string endIndicator) returns string|persist:Error {
     int? startIndex = errorMessage.indexOf(startIndicator);
     int? endIndex = errorMessage.indexOf(endIndicator);

@@ -56,6 +56,7 @@ public isolated client class SQLClient {
     # + insertRecords - The entity records to be inserted into the table
     # + return - An `sql:ExecutionResult[]` containing the metadata of the query execution,
     # a `persist:AlreadyExistsError` if a record with the same unique value already exists,
+    # a `persist:ConstraintViolationError` if the operation violates a foreign key constraint,
     # or a `persist:Error` if the operation fails due to another reason
     public isolated function runBatchInsertQuery(record {}[] insertRecords) returns sql:ExecutionResult[]|persist:Error {
         sql:ParameterizedQuery[] insertQueries = self.getInsertQueries(insertRecords);
@@ -67,7 +68,9 @@ public isolated client class SQLClient {
             if alreadyExistsError is persist:Error {
                 return alreadyExistsError;
             }
-
+            if self.isConstraintViolation(result) {
+                return <persist:ConstraintViolationError>error(result.message());
+            }
             return <persist:Error>error(result.message());
         }
 
@@ -211,7 +214,7 @@ public isolated client class SQLClient {
         logQuery("SQL update query: ", query);
         sql:ExecutionResult|sql:Error? e = self.dbClient->execute(query);
         if e is sql:Error {
-            if e.message().indexOf(self.dataSourceSpecifics.constraintViolationErrorMessage) is int {
+            if self.isConstraintViolation(e) {
                 return <persist:ConstraintViolationError>error(e.message());
             }
             persist:Error? alreadyExistsError = self.getAlreadyExistsError(e);
@@ -225,16 +228,26 @@ public isolated client class SQLClient {
     # Performs an SQL `DELETE` operation to delete an entity record from the database.
     #
     # + deleteKey - The key used to delete an entity record
-    # + return - `()` if the operation is performed successfully or a `persist:Error` if the operation fails
-    public isolated function runDeleteQuery(anydata deleteKey) returns persist:Error? {
+    # + return - `()` if the operation is performed successfully,
+    # a `persist:ConstraintViolationError` if other records still reference the record through a foreign key,
+    # or a `persist:Error` if the operation fails due to another reason
+    public isolated function runDeleteQuery(anydata deleteKey) returns persist:ConstraintViolationError|persist:Error? {
         sql:ParameterizedQuery query = self.getDeleteQuery();
         query = sql:queryConcat(query, check self.getWhereQuery(deleteKey));
         logQuery("SQL delete query: ", query);
         sql:ExecutionResult|sql:Error e = self.dbClient->execute(query);
 
         if e is sql:Error {
+            if self.isConstraintViolation(e) {
+                return <persist:ConstraintViolationError>error(e.message());
+            }
             return <persist:Error>error(e.message());
         }
+    }
+
+    private isolated function isConstraintViolation(sql:Error e) returns boolean {
+        return matchesError(e, self.dataSourceSpecifics.constraintViolationErrorCodes,
+                self.dataSourceSpecifics.constraintViolationSqlStates, self.dataSourceSpecifics.constraintViolationErrorMessage);
     }
 
     # Retrieves the values of the 'many' side of an association.
@@ -334,11 +347,15 @@ public isolated client class SQLClient {
         return self.keyFields;
     }
 
-    private isolated function getAlreadyExistsError(sql:Error e) returns persist:Error? {
-        if e.message().indexOf(self.dataSourceSpecifics.duplicateEntryErrorMessage) is () {
+    private isolated function getAlreadyExistsError(sql:Error e) returns persist:AlreadyExistsError? {
+        if !matchesError(e, self.dataSourceSpecifics.duplicateEntryErrorCodes,
+                self.dataSourceSpecifics.duplicateEntrySqlStates, self.dataSourceSpecifics.duplicateEntryErrorMessage) {
             return;
         }
-        string duplicateKey = check getKeyFromAlreadyExistsErrorMessage(e.message(), self.dataSourceSpecifics.duplicateKeyStartIndicator, self.dataSourceSpecifics.duplicateKeyEndIndicator);
+        string|persist:Error duplicateKey = getKeyFromAlreadyExistsErrorMessage(e.message(), self.dataSourceSpecifics.duplicateKeyStartIndicator, self.dataSourceSpecifics.duplicateKeyEndIndicator);
+        if duplicateKey is persist:Error {
+            return <persist:AlreadyExistsError>error(e.message());
+        }
         return persist:getAlreadyExistsError(self.entityName, duplicateKey);
     }
 
@@ -529,14 +546,14 @@ public isolated client class SQLClient {
     }
 
     private isolated function getUpdateQuery(record {} updateRecord) returns sql:ParameterizedQuery|persist:Error {
-        if self.dataSourceSpecifics == MSSQL_SPECIFICS {
+        if self.dataSourceSpecifics.quoteOpen == MSSQL_SPECIFICS.quoteOpen {
             return sql:queryConcat(`UPDATE `, stringToParameterizedQuery(self.escape(self.entityName)), ` SET `, check self.getSetClauses(updateRecord), ` FROM `, stringToParameterizedQuery(self.getTableName()), ` `, stringToParameterizedQuery(self.escape(self.entityName)));
         }
         return sql:queryConcat(`UPDATE `, stringToParameterizedQuery(self.getTableName()), ` AS `, stringToParameterizedQuery(self.escape(self.entityName)), ` SET `, check self.getSetClauses(updateRecord));
     }
 
     private isolated function getDeleteQuery() returns sql:ParameterizedQuery {
-        if self.dataSourceSpecifics == MSSQL_SPECIFICS {
+        if self.dataSourceSpecifics.quoteOpen == MSSQL_SPECIFICS.quoteOpen {
             return sql:queryConcat(`DELETE `, stringToParameterizedQuery(self.escape(self.entityName)), ` FROM `, stringToParameterizedQuery(self.getTableName()), ` AS `, stringToParameterizedQuery(self.escape(self.entityName)));
         }
         return sql:queryConcat(`DELETE FROM `, stringToParameterizedQuery(self.getTableName()), ` AS `, stringToParameterizedQuery(self.escape(self.entityName)));

@@ -125,10 +125,12 @@ public isolated client class SQLClient {
     # + orderByClause - The `ORDER BY` clause of the query
     # + limitClause - The `LIMIT` clause of the query
     # + groupByClause - The `GROUP BY` clause of the query
+    # + offsetClause - The number of rows to skip
     # + return - A stream of records in the `rowType` type or a `persist:Error` if the operation fails
     public isolated function runReadQuery(typedesc<record {}> rowType, string[] fields = [], string[] include = [],
             sql:ParameterizedQuery whereClause = ``, sql:ParameterizedQuery orderByClause = ``,
-            sql:ParameterizedQuery limitClause = ``, sql:ParameterizedQuery groupByClause = ``)
+            sql:ParameterizedQuery limitClause = ``, sql:ParameterizedQuery groupByClause = ``,
+            sql:ParameterizedQuery offsetClause = ``)
                         returns stream<record {}, sql:Error?>|persist:Error|error {
         sql:ParameterizedQuery query;
         if self.getManyRelationFields(include).length() > 0 {
@@ -148,14 +150,8 @@ public isolated client class SQLClient {
         if (orderByClause.strings.length() != 0) {
             query = addClauseToQuery(query, orderByClause, ` ORDER BY `);
         }
-        if (limitClause.strings.length() != 0) {
-            if (limitClause.insertions.length() != 0) {
-                string queryInString = "LIMIT " + limitClause.strings[0] + limitClause.insertions[0].toString();
-                query = sql:queryConcat(query, stringToParameterizedQuery(queryInString));
-            } else {
-                query = sql:queryConcat(query, ` LIMIT `, limitClause);
-            }
-        }
+        query = sql:queryConcat(query, check self.getPaginationClause(limitClause, offsetClause,
+                orderByClause.strings.length() != 0));
         logQuery("SQL select query : ", query);
         stream<record {}, sql:Error?> resultStream = self.dbClient->query(query, rowType);
         return resultStream;
@@ -172,15 +168,17 @@ public isolated client class SQLClient {
     # + orderByClause - The `ORDER BY` clause of the query
     # + limitClause - The `LIMIT` clause of the query
     # + typeDescriptions - The type descriptions of the relations to be retrieved
+    # + offsetClause - The number of rows to skip
     # + return - An array of records in the `rowType` type or a `persist:Error` if the operation fails
     public isolated function runReadQueryAsList(typedesc<record {}[]> rowsType, typedesc<record {}> rowType,
             typedesc<record {}> rowTypeWithIdFields, string[] fields = [], string[] include = [],
             sql:ParameterizedQuery whereClause = ``, sql:ParameterizedQuery orderByClause = ``,
-            sql:ParameterizedQuery limitClause = ``, typedesc<record {}>[] typeDescriptions = [])
+            sql:ParameterizedQuery limitClause = ``, typedesc<record {}>[] typeDescriptions = [],
+            sql:ParameterizedQuery offsetClause = ``)
                 returns record {}[]|persist:Error {
         do {
             stream<record {}, sql:Error?> result = check self.runReadQuery(rowTypeWithIdFields, fields, include,
-                whereClause, orderByClause, limitClause);
+                whereClause, orderByClause, limitClause, offsetClause = offsetClause);
 
             // Wrap the raw SQL stream in a PersistSQLStream so that getManyRelations,
             // verifyEntityAssociation, and key-field removal are applied per row — identical
@@ -444,6 +442,37 @@ public isolated client class SQLClient {
             }
         }
         return arrayToParameterizedQuery(columnNames);
+    }
+
+    private isolated function getPaginationClause(sql:ParameterizedQuery limitClause,
+            sql:ParameterizedQuery offsetClause, boolean isOrdered) returns sql:ParameterizedQuery|persist:Error {
+        boolean hasLimit = limitClause.strings.length() != 0;
+        int? offset = offsetClause.strings.length() != 0 ? check getRowCount(offsetClause, "offsetClause") : ();
+        PaginationSyntax syntax = self.dataSourceSpecifics.paginationSyntax;
+        if syntax == OFFSET_FETCH {
+            if !hasLimit && offset is () {
+                return ``;
+            }
+            // `OFFSET ... FETCH` is only valid after an `ORDER BY`.
+            sql:ParameterizedQuery clause = isOrdered ? `` : ` ORDER BY (SELECT NULL)`;
+            clause = sql:queryConcat(clause, ` OFFSET ${offset ?: 0} ROWS`);
+            if hasLimit {
+                clause = sql:queryConcat(clause, ` FETCH NEXT `, limitClause, ` ROWS ONLY`);
+            }
+            return clause;
+        }
+        sql:ParameterizedQuery clause = ``;
+        if hasLimit {
+            clause = sql:queryConcat(` LIMIT `, limitClause);
+        } else if offset is int && syntax == LIMIT_REQUIRED_WITH_OFFSET {
+            // The largest `LIMIT` MySQL accepts, which it documents as "all remaining rows". It is
+            // above the `BIGINT` range, so it cannot be bound.
+            clause = ` LIMIT 18446744073709551615`;
+        }
+        if offset is int {
+            clause = sql:queryConcat(clause, ` OFFSET ${offset}`);
+        }
+        return clause;
     }
 
     private isolated function getGetKeyWhereClauses(anydata key) returns sql:ParameterizedQuery|persist:Error {

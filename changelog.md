@@ -6,10 +6,15 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+
+- [Support skipping rows with `offsetClause` in SQL client queries, including `limit` on MSSQL](https://github.com/ballerina-platform/ballerina-library/issues/5846)
+
 ### Fixed
 
 - [Return `persist:AlreadyExistsError` when an update violates a unique constraint](https://github.com/ballerina-platform/ballerina-library/issues/9391)
 - [Return `persist:ConstraintViolationError` for foreign key violations on insert and delete](https://github.com/ballerina-platform/ballerina-library/issues/9359).
+- [Fix invalid SQL built from a `limitClause` with an interpolation](https://github.com/ballerina-platform/ballerina-library/issues/9386)
 
 ## [1.7.4] - 2026-04-27
 

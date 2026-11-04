@@ -145,7 +145,7 @@ function mysqlWorkspaceReadManyDependentTest() returns error? {
 
 @test:Config {
     groups: ["workspace", "mysql"],
-    dependsOn: [mysqlWorkspaceReadOneTest, mysqlWorkspaceReadManyTest, mysqlWorkspaceReadManyDependentTest]
+    dependsOn: [mysqlWorkspaceReadOneTest, mysqlWorkspaceReadManyTest, mysqlWorkspaceReadManyDependentTest, mysqlWorkspaceReadWithOffset, mysqlWorkspaceReadWithInterpolatedLimit]
 }
 function mysqlWorkspaceUpdateTest() returns error? {
     MySQLRainierClient rainierClient = check new ();
@@ -179,7 +179,7 @@ function mysqlWorkspaceReadWithClauses() returns error? {
 
 @test:Config {
     groups: ["workspace", "mysql"],
-    dependsOn: [mysqlWorkspaceReadOneTest, mysqlWorkspaceReadManyTest, mysqlWorkspaceReadManyDependentTest, mysqlWorkspaceReadWithClauses]
+    dependsOn: [mysqlWorkspaceReadOneTest, mysqlWorkspaceReadManyTest, mysqlWorkspaceReadManyDependentTest, mysqlWorkspaceReadWithClauses, mysqlWorkspaceReadWithOffset]
 }
 function mysqlWorkspaceUpdateTestNegative1() returns error? {
     MySQLRainierClient rainierClient = check new ();
@@ -198,7 +198,7 @@ function mysqlWorkspaceUpdateTestNegative1() returns error? {
 
 @test:Config {
     groups: ["workspace", "mysql"],
-    dependsOn: [mysqlWorkspaceReadOneTest, mysqlWorkspaceReadManyTest, mysqlWorkspaceReadManyDependentTest, mysqlWorkspaceReadWithClauses]
+    dependsOn: [mysqlWorkspaceReadOneTest, mysqlWorkspaceReadManyTest, mysqlWorkspaceReadManyDependentTest, mysqlWorkspaceReadWithClauses, mysqlWorkspaceReadWithOffset]
 }
 function mysqlWorkspaceUpdateTestNegative2() returns error? {
     MySQLRainierClient rainierClient = check new ();
@@ -298,5 +298,72 @@ function mysqlBuildingDeleteTestNegativeForeignKey() returns error? {
 
     _ = check rainierClient->/workspaces/["workspace-fk-2"].delete();
     _ = check rainierClient->/buildings/[building.buildingCode].delete();
+    check rainierClient.close();
+}
+
+@test:Config {
+    groups: ["workspace", "mysql"],
+    dependsOn: [mysqlWorkspaceCreateTest, mysqlWorkspaceCreateTest2]
+}
+function mysqlWorkspaceReadWithOffset() returns error? {
+    MySQLRainierClient rainierClient = check new ();
+    int offset = 1;
+
+    stream<Workspace, persist:Error?> workspaceStream = rainierClient->/workspaces.get(orderByClause = `Workspace.workspaceId`, offsetClause = `${offset}`);
+    Workspace[] workspaces = check from Workspace workspace in workspaceStream
+        select workspace;
+    test:assertEquals(workspaces, [workspace2, workspace3]);
+
+    workspaceStream = rainierClient->/workspaces.get(orderByClause = `Workspace.workspaceId`, limitClause = `1`, offsetClause = `${offset}`);
+    workspaces = check from Workspace workspace in workspaceStream
+        select workspace;
+    test:assertEquals(workspaces, [workspace2]);
+
+    workspaceStream = rainierClient->/workspaces.get(whereClause = `Workspace.workspaceType = ${"small"}`, orderByClause = `Workspace.workspaceId`, offsetClause = `1`);
+    workspaces = check from Workspace workspace in workspaceStream
+        select workspace;
+    test:assertEquals(workspaces, [workspace3]);
+
+    workspaces = check rainierClient->/workspaces/list(orderByClause = `Workspace.workspaceId`, limitClause = `1`, offsetClause = `2`);
+    test:assertEquals(workspaces, [workspace3]);
+
+    workspaceStream = rainierClient->/workspaces.get(offsetClause = `${-1}`);
+    Workspace[]|error result = from Workspace workspace in workspaceStream
+        select workspace;
+    if result is persist:Error {
+        test:assertEquals(result.message(), "Invalid 'offsetClause': expected a non-negative integer, found '-1'.");
+    } else {
+        test:assertFail("persist:Error expected.");
+    }
+
+    string offsetText = "0; DROP TABLE Workspace";
+    workspaceStream = rainierClient->/workspaces.get(offsetClause = `${offsetText}`);
+    result = from Workspace workspace in workspaceStream
+        select workspace;
+    if result is persist:Error {
+        test:assertEquals(result.message(), "Invalid 'offsetClause': expected a non-negative integer, found '0; DROP TABLE Workspace'.");
+    } else {
+        test:assertFail("persist:Error expected.");
+    }
+    check rainierClient.close();
+}
+
+@test:Config {
+    groups: ["workspace", "mysql"],
+    dependsOn: [mysqlWorkspaceCreateTest, mysqlWorkspaceCreateTest2]
+}
+function mysqlWorkspaceReadWithInterpolatedLimit() returns error? {
+    MySQLRainierClient rainierClient = check new ();
+    int count = 1;
+
+    stream<Workspace, persist:Error?> workspaceStream = rainierClient->/workspaces.get(whereClause = `Workspace.workspaceType = 'small'`, limitClause = `${count}`);
+    Workspace[] workspaces = check from Workspace workspace in workspaceStream
+        select workspace;
+    test:assertEquals(workspaces.length(), 1);
+
+    workspaceStream = rainierClient->/workspaces.get(whereClause = `Workspace.workspaceType = 'small'`, orderByClause = `Workspace.workspaceId`, limitClause = `${count}`, offsetClause = `${count}`);
+    workspaces = check from Workspace workspace in workspaceStream
+        select workspace;
+    test:assertEquals(workspaces, [workspace3]);
     check rainierClient.close();
 }

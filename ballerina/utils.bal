@@ -43,6 +43,28 @@ isolated function matchesError(sql:Error e, int[] errorCodes, string[] sqlStates
     return errorCodes.indexOf(errorCode) is int || (sqlState is string && sqlStates.indexOf(sqlState) is int);
 }
 
+isolated function getRowCount(sql:ParameterizedQuery clause, string clauseName) returns int|persist:Error {
+    string[] strings = clause.strings;
+    sql:Value[] insertions = clause.insertions;
+    int|error count = error("not a single integer");
+    if insertions.length() == 0 {
+        count = int:fromString(strings[0].trim());
+    } else if insertions.length() == 1 && strings[0].trim() == "" && strings[1].trim() == "" {
+        sql:Value insertion = insertions[0];
+        if insertion is int {
+            count = insertion;
+        }
+    }
+    if count is int && count >= 0 {
+        return count;
+    }
+    string text = strings[0];
+    foreach int i in 0 ..< insertions.length() {
+        text += insertions[i].toString() + strings[i + 1];
+    }
+    return <persist:Error>error(string `Invalid '${clauseName}': expected a non-negative integer, found '${text.trim()}'.`);
+}
+
 isolated function getKeyFromAlreadyExistsErrorMessage(string errorMessage, string startIndicator, string endIndicator) returns string|persist:Error {
     int? startIndex = errorMessage.indexOf(startIndicator);
     int? endIndex = errorMessage.indexOf(endIndicator);

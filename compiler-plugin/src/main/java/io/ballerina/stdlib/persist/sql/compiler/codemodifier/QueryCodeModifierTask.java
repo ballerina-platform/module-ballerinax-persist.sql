@@ -36,6 +36,7 @@ import io.ballerina.compiler.syntax.tree.LimitClauseNode;
 import io.ballerina.compiler.syntax.tree.LiteralValueToken;
 import io.ballerina.compiler.syntax.tree.ModulePartNode;
 import io.ballerina.compiler.syntax.tree.NameReferenceNode;
+import io.ballerina.compiler.syntax.tree.NamedArgumentNode;
 import io.ballerina.compiler.syntax.tree.Node;
 import io.ballerina.compiler.syntax.tree.NodeFactory;
 import io.ballerina.compiler.syntax.tree.NodeList;
@@ -61,11 +62,14 @@ import io.ballerina.projects.plugins.ModifierTask;
 import io.ballerina.projects.plugins.SourceModifierContext;
 import io.ballerina.projects.plugins.SyntaxNodeAnalysisContext;
 import io.ballerina.stdlib.persist.sql.compiler.Constants;
+import io.ballerina.stdlib.persist.sql.compiler.DiagnosticsCodes;
 import io.ballerina.stdlib.persist.sql.compiler.exception.NotSupportedExpressionException;
 import io.ballerina.stdlib.persist.sql.compiler.expression.ExpressionBuilder;
 import io.ballerina.stdlib.persist.sql.compiler.expression.ExpressionVisitor;
 import io.ballerina.stdlib.persist.sql.compiler.model.Query;
 import io.ballerina.tools.diagnostics.Diagnostic;
+import io.ballerina.tools.diagnostics.DiagnosticFactory;
+import io.ballerina.tools.diagnostics.DiagnosticInfo;
 import io.ballerina.tools.diagnostics.DiagnosticSeverity;
 import org.ballerinalang.formatter.core.Formatter;
 import org.ballerinalang.formatter.core.FormatterException;
@@ -91,13 +95,15 @@ public class QueryCodeModifierTask implements ModifierTask<SourceModifierContext
         for (ModuleId moduleId : pkg.moduleIds()) {
             Module module = pkg.module(moduleId);
             for (DocumentId documentId : module.documentIds()) {
-                SyntaxTree syntaxTree = getUpdatedSyntaxTree(module, documentId, this.validatedQueries);
+                SyntaxTree syntaxTree = getUpdatedSyntaxTree(module, documentId, this.validatedQueries,
+                        sourceModifierContext);
                 if (syntaxTree != null) {
                     sourceModifierContext.modifySourceFile(syntaxTree.textDocument(), documentId);
                 }
             }
             for (DocumentId documentId : module.testDocumentIds()) {
-                SyntaxTree syntaxTree = getUpdatedSyntaxTree(module, documentId, this.validatedQueries);
+                SyntaxTree syntaxTree = getUpdatedSyntaxTree(module, documentId, this.validatedQueries,
+                        sourceModifierContext);
                 if (syntaxTree != null) {
                     sourceModifierContext.modifyTestSourceFile(syntaxTree.textDocument(), documentId);
                 }
@@ -106,11 +112,13 @@ public class QueryCodeModifierTask implements ModifierTask<SourceModifierContext
     }
 
     private SyntaxTree getUpdatedSyntaxTree(Module module, DocumentId documentId,
-                                            Map<QueryPipelineNode, Query> validatedQueries) {
+                                            Map<QueryPipelineNode, Query> validatedQueries,
+                                            SourceModifierContext sourceModifierContext) {
         Document document = module.document(documentId);
         ModulePartNode rootNode = document.syntaxTree().rootNode();
         QueryConstructModifier queryConstructModifier = new QueryConstructModifier(validatedQueries);
         ModulePartNode newRoot = (ModulePartNode) rootNode.apply(queryConstructModifier);
+        queryConstructModifier.getDiagnostics().forEach(sourceModifierContext::reportDiagnostic);
         if (queryConstructModifier.isSourceCodeModified()) {
             SyntaxTree syntaxTree = document.syntaxTree().modifyWith(newRoot);
             try {
@@ -126,6 +134,7 @@ public class QueryCodeModifierTask implements ModifierTask<SourceModifierContext
     private static class QueryConstructModifier extends TreeModifier {
         private boolean isSourceCodeModified = false;
         private final Map<QueryPipelineNode, Query> validatedQueries;
+        private final List<Diagnostic> diagnostics = new ArrayList<>();
 
         public QueryConstructModifier(Map<QueryPipelineNode, Query> validatedQueries) {
             this.validatedQueries = validatedQueries;
@@ -133,6 +142,21 @@ public class QueryCodeModifierTask implements ModifierTask<SourceModifierContext
 
         @Override
         public QueryPipelineNode transform(QueryPipelineNode queryPipelineNode) {
+            QueryPipelineNode modifiedQuery = rewriteQuery(queryPipelineNode);
+            // The offset is applied in the database, so the clauses that pick and order the rows must be too.
+            if (modifiedQuery == queryPipelineNode && hasOffsetClauseArgument(queryPipelineNode.fromClause()) &&
+                    queryPipelineNode.intermediateClauses().stream().anyMatch(clause ->
+                            clause instanceof WhereClauseNode || clause instanceof OrderByClauseNode ||
+                                    clause instanceof GroupByClauseNode)) {
+                DiagnosticInfo diagnosticInfo = new DiagnosticInfo(DiagnosticsCodes.PERSIST_SQL_207.getCode(),
+                        DiagnosticsCodes.PERSIST_SQL_207.getMessage(), DiagnosticsCodes.PERSIST_SQL_207.getSeverity());
+                this.diagnostics.add(DiagnosticFactory.createDiagnostic(diagnosticInfo,
+                        queryPipelineNode.fromClause().location()));
+            }
+            return modifiedQuery;
+        }
+
+        private QueryPipelineNode rewriteQuery(QueryPipelineNode queryPipelineNode) {
             if (!validatedQueries.containsKey(queryPipelineNode)) {
                 return queryPipelineNode;
             }
@@ -170,7 +194,7 @@ public class QueryCodeModifierTask implements ModifierTask<SourceModifierContext
             }
             SeparatedNodeList<FunctionArgumentNode> queryArguments = query.getArguments();
             List<Node> arguments = new ArrayList<>();
-            arguments.add(queryArguments.get(0));
+            queryArguments.forEach(arguments::add);
             if (isWhereClauseUsed) {
                 List<Node> whereClauseParameterizedQuery = new ArrayList<>();
                 whereClauseParameterizedQuery.add(getStringLiteralToken(Constants.SPACE));
@@ -257,25 +281,15 @@ public class QueryCodeModifierTask implements ModifierTask<SourceModifierContext
                                 Constants.TokenNodes.LIMIT_CLAUSE_NAME), Constants.TokenNodes.EQUAL_TOKEN,
                         parameterizedQueryForOrder.expression()));
             }
-            int argumentSize = arguments.size();
-            SeparatedNodeList<FunctionArgumentNode> separatedNodeList;
-            if (argumentSize == 2) {
-                separatedNodeList = NodeFactory.createSeparatedNodeList(arguments.get(0),
-                        Constants.TokenNodes.COMMA_TOKEN, arguments.get(1));
-            } else if (argumentSize == 3) {
-                separatedNodeList = NodeFactory.createSeparatedNodeList(arguments.get(0),
-                        Constants.TokenNodes.COMMA_TOKEN, arguments.get(1), Constants.TokenNodes.COMMA_TOKEN,
-                        arguments.get(2));
-            } else if (argumentSize == 4) {
-                separatedNodeList = NodeFactory.createSeparatedNodeList(arguments.get(0),
-                        Constants.TokenNodes.COMMA_TOKEN, arguments.get(1), Constants.TokenNodes.COMMA_TOKEN,
-                        arguments.get(2), Constants.TokenNodes.COMMA_TOKEN, arguments.get(3));
-            }  else {
-                separatedNodeList = NodeFactory.createSeparatedNodeList(arguments.get(0),
-                        Constants.TokenNodes.COMMA_TOKEN, arguments.get(1), Constants.TokenNodes.COMMA_TOKEN,
-                        arguments.get(2), Constants.TokenNodes.COMMA_TOKEN, arguments.get(3),
-                        Constants.TokenNodes.COMMA_TOKEN, arguments.get(4));
+            List<Node> argumentsWithCommas = new ArrayList<>();
+            for (Node argument : arguments) {
+                if (!argumentsWithCommas.isEmpty()) {
+                    argumentsWithCommas.add(Constants.TokenNodes.COMMA_TOKEN);
+                }
+                argumentsWithCommas.add(argument);
             }
+            SeparatedNodeList<FunctionArgumentNode> separatedNodeList =
+                    NodeFactory.createSeparatedNodeList(argumentsWithCommas);
 
             ParenthesizedArgList parenthesizedArgList = NodeFactory.createParenthesizedArgList(
                     Constants.TokenNodes.OPEN_PAREN_TOKEN,
@@ -306,6 +320,24 @@ public class QueryCodeModifierTask implements ModifierTask<SourceModifierContext
 
         public boolean isSourceCodeModified() {
             return this.isSourceCodeModified;
+        }
+
+        public List<Diagnostic> getDiagnostics() {
+            return this.diagnostics;
+        }
+
+        private static boolean hasOffsetClauseArgument(FromClauseNode fromClauseNode) {
+            ExpressionNode expression = fromClauseNode.expression();
+            if (expression instanceof CheckExpressionNode checkExpr) {
+                expression = checkExpr.expression();
+            }
+            if (!(expression instanceof ClientResourceAccessActionNode resourceAccess) ||
+                    resourceAccess.arguments().isEmpty()) {
+                return false;
+            }
+            return resourceAccess.arguments().get().arguments().stream().anyMatch(argument ->
+                    argument instanceof NamedArgumentNode namedArgument &&
+                            namedArgument.argumentName().name().text().equals(Constants.OFFSET_CLAUSE));
         }
 
         private List<Node> processWhereClause(WhereClauseNode whereClauseNode, BindingPatternNode bindingPatternNode,

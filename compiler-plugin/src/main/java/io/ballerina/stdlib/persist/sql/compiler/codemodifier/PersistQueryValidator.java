@@ -279,7 +279,7 @@ public class PersistQueryValidator implements AnalysisTask<SyntaxNodeAnalysisCon
                         String argumentsName = namedArgumentNode.argumentName().toString().trim();
                         if (namedArgumentNode.argumentName().toString().trim().equals(Constants.TARGET_TYPE)) {
                             hasTargetType = true;
-                        } else {
+                        } else if (!argumentsName.equals(Constants.OFFSET_CLAUSE)) {
                             hasClauseVariable = true;
                             DiagnosticInfo diagnosticInfo = new DiagnosticInfo(DiagnosticsCodes.
                                     PERSIST_SQL_202.getCode(), MessageFormat.format(

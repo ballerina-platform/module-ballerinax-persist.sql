@@ -145,7 +145,7 @@ function mssqlWorkspaceReadManyDependentTest() returns error? {
 
 @test:Config {
     groups: ["workspace", "mssql"],
-    dependsOn: [mssqlWorkspaceReadOneTest, mssqlWorkspaceReadManyTest, mssqlWorkspaceReadManyDependentTest]
+    dependsOn: [mssqlWorkspaceReadOneTest, mssqlWorkspaceReadManyTest, mssqlWorkspaceReadManyDependentTest, mssqlWorkspaceReadWithOffset, mssqlWorkspaceReadWithInterpolatedLimit]
 }
 function mssqlWorkspaceUpdateTest() returns error? {
     MSSQLRainierClient rainierClient = check new ();
@@ -163,7 +163,7 @@ function mssqlWorkspaceUpdateTest() returns error? {
 
 @test:Config {
     groups: ["workspace", "mssql"],
-    dependsOn: [mssqlWorkspaceReadOneTest, mssqlWorkspaceReadManyTest, mssqlWorkspaceReadManyDependentTest]
+    dependsOn: [mssqlWorkspaceReadOneTest, mssqlWorkspaceReadManyTest, mssqlWorkspaceReadManyDependentTest, mssqlWorkspaceReadWithOffset]
 }
 function mssqlWorkspaceUpdateTestNegative1() returns error? {
     MSSQLRainierClient rainierClient = check new ();
@@ -182,7 +182,7 @@ function mssqlWorkspaceUpdateTestNegative1() returns error? {
 
 @test:Config {
     groups: ["workspace", "mssql"],
-    dependsOn: [mssqlWorkspaceReadOneTest, mssqlWorkspaceReadManyTest, mssqlWorkspaceReadManyDependentTest]
+    dependsOn: [mssqlWorkspaceReadOneTest, mssqlWorkspaceReadManyTest, mssqlWorkspaceReadManyDependentTest, mssqlWorkspaceReadWithOffset]
 }
 function mssqlWorkspaceUpdateTestNegative2() returns error? {
     MSSQLRainierClient rainierClient = check new ();
@@ -282,5 +282,82 @@ function mssqlBuildingDeleteTestNegativeForeignKey() returns error? {
 
     _ = check rainierClient->/workspaces/["workspace-fk-2"].delete();
     _ = check rainierClient->/buildings/[building.buildingCode].delete();
+    check rainierClient.close();
+}
+
+@test:Config {
+    groups: ["workspace", "mssql"],
+    dependsOn: [mssqlWorkspaceCreateTest, mssqlWorkspaceCreateTest2]
+}
+function mssqlWorkspaceReadWithOffset() returns error? {
+    MSSQLRainierClient rainierClient = check new ();
+    int offset = 1;
+
+    stream<Workspace, persist:Error?> workspaceStream = rainierClient->/workspaces.get(orderByClause = `[Workspace].[workspaceId]`, offsetClause = `${offset}`);
+    Workspace[] workspaces = check from Workspace workspace in workspaceStream
+        select workspace;
+    test:assertEquals(workspaces, [workspace2, workspace3]);
+
+    workspaceStream = rainierClient->/workspaces.get(orderByClause = `[Workspace].[workspaceId]`, limitClause = `1`, offsetClause = `${offset}`);
+    workspaces = check from Workspace workspace in workspaceStream
+        select workspace;
+    test:assertEquals(workspaces, [workspace2]);
+
+    workspaceStream = rainierClient->/workspaces.get(whereClause = `[Workspace].[workspaceType] = ${"small"}`, orderByClause = `[Workspace].[workspaceId]`, offsetClause = `1`);
+    workspaces = check from Workspace workspace in workspaceStream
+        select workspace;
+    test:assertEquals(workspaces, [workspace3]);
+
+    workspaces = check rainierClient->/workspaces/list(orderByClause = `[Workspace].[workspaceId]`, limitClause = `1`, offsetClause = `2`);
+    test:assertEquals(workspaces, [workspace3]);
+
+    workspaceStream = rainierClient->/workspaces.get(limitClause = `2`);
+    workspaces = check from Workspace workspace in workspaceStream
+        select workspace;
+    test:assertEquals(workspaces.length(), 2);
+
+    workspaceStream = rainierClient->/workspaces.get(offsetClause = `${-1}`);
+    Workspace[]|error result = from Workspace workspace in workspaceStream
+        select workspace;
+    if result is persist:Error {
+        test:assertEquals(result.message(), "Invalid 'offsetClause': expected a non-negative integer, found '-1'.");
+    } else {
+        test:assertFail("persist:Error expected.");
+    }
+
+    string offsetText = "0; DROP TABLE Workspace";
+    workspaceStream = rainierClient->/workspaces.get(offsetClause = `${offsetText}`);
+    result = from Workspace workspace in workspaceStream
+        select workspace;
+    if result is persist:Error {
+        test:assertEquals(result.message(), "Invalid 'offsetClause': expected a non-negative integer, found '0; DROP TABLE Workspace'.");
+    } else {
+        test:assertFail("persist:Error expected.");
+    }
+    check rainierClient.close();
+}
+
+@test:Config {
+    groups: ["workspace", "mssql"],
+    dependsOn: [mssqlWorkspaceCreateTest, mssqlWorkspaceCreateTest2]
+}
+function mssqlWorkspaceReadWithInterpolatedLimit() returns error? {
+    MSSQLRainierClient rainierClient = check new ();
+    int count = 1;
+
+    stream<Workspace, persist:Error?> workspaceStream = rainierClient->/workspaces.get(whereClause = `[Workspace].[workspaceType] = 'small'`, limitClause = `${count}`);
+    Workspace[] workspaces = check from Workspace workspace in workspaceStream
+        select workspace;
+    test:assertEquals(workspaces.length(), 1);
+
+    workspaceStream = rainierClient->/workspaces.get(orderByClause = `[Workspace].[workspaceId]`, limitClause = `${count} + ${1}`);
+    workspaces = check from Workspace workspace in workspaceStream
+        select workspace;
+    test:assertEquals(workspaces, [workspace1, workspace2]);
+
+    workspaceStream = rainierClient->/workspaces.get(whereClause = `[Workspace].[workspaceType] = 'small'`, orderByClause = `[Workspace].[workspaceId]`, limitClause = `${count}`, offsetClause = `${count}`);
+    workspaces = check from Workspace workspace in workspaceStream
+        select workspace;
+    test:assertEquals(workspaces, [workspace3]);
     check rainierClient.close();
 }

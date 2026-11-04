@@ -34,6 +34,8 @@ import io.ballerina.runtime.api.values.BTypedesc;
 import io.ballerina.stdlib.persist.Constants;
 import io.ballerina.stdlib.persist.sql.Utils;
 
+import java.util.Arrays;
+
 import static io.ballerina.stdlib.persist.Constants.KEY_FIELDS;
 import static io.ballerina.stdlib.persist.ErrorGenerator.wrapError;
 import static io.ballerina.stdlib.persist.Utils.getEntity;
@@ -61,6 +63,12 @@ public class SQLProcessor {
 
     static BStream query(Environment env, BObject client, BTypedesc targetType, BObject whereClause,
                          BObject orderByClause, BObject limitClause, BObject groupByClause) {
+        return query(env, client, targetType, whereClause, orderByClause, limitClause, groupByClause, null);
+    }
+
+    static BStream query(Environment env, BObject client, BTypedesc targetType, BObject whereClause,
+                         BObject orderByClause, BObject limitClause, BObject groupByClause,
+                         BObject offsetClause) {
         // This method will return `stream<targetType, persist:Error?>`
         BString entity = getEntity(env);
         BObject persistClient = getPersistClient(client, entity);
@@ -75,13 +83,14 @@ public class SQLProcessor {
         BArray typeDescriptions = metadata[2];
         return env.yieldAndRun(() -> {
             try {
-                Object result = env.getRuntime().callMethod(
-                        // Call `SQLClient.runReadQuery(
-                        //      typedesc<record {}> rowType, string[] fields = [], string[] include = []
-                        // )`
-                        // which returns `stream<record {}, sql:Error?>|persist:Error`
-                        persistClient, Constants.RUN_READ_QUERY_METHOD, null, targetTypeWithIdFields, fields, includes,
-                        whereClause, orderByClause, limitClause, groupByClause);
+                // Call `SQLClient.runReadQuery(
+                //      typedesc<record {}> rowType, string[] fields = [], string[] include = [],
+                //      whereClause, orderByClause, limitClause, groupByClause, offsetClause
+                // )`
+                // which returns `stream<record {}, sql:Error?>|persist:Error`
+                Object result = env.getRuntime().callMethod(persistClient, Constants.RUN_READ_QUERY_METHOD, null,
+                        withOptional(offsetClause, targetTypeWithIdFields, fields, includes, whereClause,
+                                orderByClause, limitClause, groupByClause));
                 if (result instanceof BStream bStream) { // stream<record {}, sql:Error?>
                     return Utils.createPersistSQLStreamValue(bStream, targetType, fields, includes, typeDescriptions,
                             persistClient, null);
@@ -98,6 +107,11 @@ public class SQLProcessor {
 
     static Object queryAsList(Environment env, BObject client, BTypedesc targetType, BObject whereClause,
                               BObject orderByClause, BObject limitClause) {
+        return queryAsList(env, client, targetType, whereClause, orderByClause, limitClause, null);
+    }
+
+    static Object queryAsList(Environment env, BObject client, BTypedesc targetType, BObject whereClause,
+                              BObject orderByClause, BObject limitClause, BObject offsetClause) {
         // This method will return `targetType[]|persist:Error`
         BString entity = getEntity(env);
         BObject persistClient = getPersistClient(client, entity);
@@ -114,20 +128,30 @@ public class SQLProcessor {
         BArray typeDescriptions = metadata[2];
         return env.yieldAndRun(() -> {
             try {
-                return env.getRuntime().callMethod(
-                        // Call `SQLClient.runReadQueryAsList(
-                        //      typedesc<record {}[]> rowsType, typedesc<record {}> rowType,
-                        //      typedesc<record {}> rowTypeWithIdFields, string[] fields = [], string[] include = [],
-                        //      whereClause, orderByClause, limitClause, typedesc<record {}>[] typeDescriptions = []
-                        // )`
-                        // which returns `record {}[]|persist:Error`
-                        persistClient, "runReadQueryAsList", null, rowsType, targetType,
-                        targetTypeWithIdFields, fields, includes, whereClause, orderByClause, limitClause,
-                        typeDescriptions);
+                // Call `SQLClient.runReadQueryAsList(
+                //      typedesc<record {}[]> rowsType, typedesc<record {}> rowType,
+                //      typedesc<record {}> rowTypeWithIdFields, string[] fields = [], string[] include = [],
+                //      whereClause, orderByClause, limitClause, typedesc<record {}>[] typeDescriptions = [],
+                //      offsetClause
+                // )`
+                // which returns `record {}[]|persist:Error`
+                return env.getRuntime().callMethod(persistClient, "runReadQueryAsList", null,
+                        withOptional(offsetClause, rowsType, targetType, targetTypeWithIdFields, fields, includes,
+                                whereClause, orderByClause, limitClause, typeDescriptions));
             } catch (BError bError) {
                 return wrapError(bError);
             }
         });
+    }
+
+    private static Object[] withOptional(Object optionalArg, Object... args) {
+        // A `null` argument is left out, so the Ballerina parameter takes its default value.
+        if (optionalArg == null) {
+            return args;
+        }
+        Object[] allArgs = Arrays.copyOf(args, args.length + 1);
+        allArgs[args.length] = optionalArg;
+        return allArgs;
     }
 
     static Object queryOne(Environment env, BObject client, BArray path, BTypedesc targetType) {

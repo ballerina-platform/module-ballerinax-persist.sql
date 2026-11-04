@@ -327,6 +327,44 @@ public class CodeModifierTest {
         Assert.assertEquals(errorDiagnosticsList.size(), 12);
     }
 
+    @Test
+    public void testCodeModifierWithOffsetClause() {
+        Package newPackage = getModifiedPackage("project_7");
+        for (DocumentId documentId : newPackage.getDefaultModule().documentIds()) {
+            Document document = newPackage.getDefaultModule().document(documentId);
+            if (document.name().equals("main.bal")) {
+                String sourceCode = document.syntaxTree().toSourceCode();
+                String modifiedQuery = "entities:Product[] products = check from var e in mcClient->/products(" +
+                        "targetType = entities:Product, offsetClause = `${offset}`, whereClause = ` Product.id > 1`, " +
+                        "orderByClause = ` Product.id ASC `, limitClause = `  5`)\n" +
+                        "        where e.id > 1\n" +
+                        "        order by e.id\n" +
+                        "        limit 5\n" +
+                        "        select e;\n";
+                String modifiedLimitOnlyQuery = "entities:Product[] page = check from var e in mcClient->/products(" +
+                        "targetType = entities:Product, offsetClause = `${offset}`, limitClause = `  5`)\n" +
+                        "        limit 5\n" +
+                        "        select e;\n";
+                Assert.assertTrue(sourceCode.contains(modifiedQuery), sourceCode);
+                Assert.assertTrue(sourceCode.contains(modifiedLimitOnlyQuery), sourceCode);
+            }
+        }
+    }
+
+    @Test
+    public void testOffsetClauseWithClausesRunInMemory() {
+        Package currentPackage = loadPackage("project_8");
+        DiagnosticResult diagnosticResult = currentPackage.getCompilation().diagnosticResult();
+        Assert.assertEquals(diagnosticResult.errorCount(), 0, diagnosticResult.errors().toString());
+        CodeModifierResult codeModifierResult = currentPackage.runCodeModifierPlugins();
+        List<Diagnostic> errorDiagnosticsList = codeModifierResult.reportedDiagnostics().diagnostics().stream()
+                .filter(r -> r.diagnosticInfo().severity().equals(DiagnosticSeverity.ERROR))
+                .collect(Collectors.toList());
+        Assert.assertEquals(errorDiagnosticsList.size(), 3, errorDiagnosticsList.toString());
+        errorDiagnosticsList.forEach(diagnostic ->
+                Assert.assertEquals(diagnostic.diagnosticInfo().code(), "PERSIST_207"));
+    }
+
     private Package getModifiedPackage(String path) {
         Package currentPackage = loadPackage(path);
         DiagnosticResult diagnosticResult = currentPackage.getCompilation().diagnosticResult();

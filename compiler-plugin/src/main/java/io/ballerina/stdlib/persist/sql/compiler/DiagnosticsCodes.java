@@ -38,6 +38,8 @@ public enum DiagnosticsCodes {
     PERSIST_SQL_205("PERSIST_205", "''limit'' clause cannot be defined by the field of the entity", ERROR),
     PERSIST_SQL_206("PERSIST_206",  "the ''{0}'' clause cannot be defined by the array field " +
             "of the entity", ERROR),
+    PERSIST_SQL_207("PERSIST_207", "''offsetClause'' needs the query''s ''where'', ''order by'' and " +
+            "''group by'' clauses to run in the database, but this query runs them in memory", ERROR),
     PERSIST_SQL_423("PERSIST_423", "invalid use of the `Relation` annotation. mismatched number of " +
             "reference keys for relation ''{0}'' in entity ''{1}''. expected {2} but found {3}.", ERROR),
     PERSIST_SQL_424("PERSIST_424", "invalid use of the `Relation` annotation. mismatched key types for " +

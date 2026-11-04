@@ -121,4 +121,16 @@ public type DataSourceSpecifics record {|
     string[] duplicateEntrySqlStates = [];
     string duplicateKeyStartIndicator;
     string duplicateKeyEndIndicator;
+    PaginationSyntax paginationSyntax = LIMIT_OFFSET;
 |};
+
+# Represents the syntax a datastore uses to skip and limit rows.
+#
+# + LIMIT_OFFSET - `LIMIT n OFFSET m`, where `OFFSET m` may stand alone
+# + LIMIT_REQUIRED_WITH_OFFSET - `LIMIT n OFFSET m`, where `OFFSET m` needs a `LIMIT`
+# + OFFSET_FETCH - `ORDER BY ... OFFSET m ROWS FETCH NEXT n ROWS ONLY`
+public enum PaginationSyntax {
+    LIMIT_OFFSET,
+    LIMIT_REQUIRED_WITH_OFFSET,
+    OFFSET_FETCH
+}

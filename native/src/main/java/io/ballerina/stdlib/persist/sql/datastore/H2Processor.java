@@ -34,9 +34,23 @@ public class H2Processor {
         return SQLProcessor.query(env, client, targetType, whereClause, orderClause, limitClause, groupByClause);
     }
 
+    public static BStream queryWithOffset(Environment env, BObject client, BTypedesc targetType,
+                                          BObject whereClause, BObject orderClause, BObject limitClause,
+                                          BObject groupByClause, BObject offsetClause) {
+        return SQLProcessor.query(env, client, targetType, whereClause, orderClause, limitClause, groupByClause,
+                offsetClause);
+    }
+
     public static Object queryAsList(Environment env, BObject client, BTypedesc targetType, BObject whereClause,
                                      BObject orderClause, BObject limitClause) {
         return SQLProcessor.queryAsList(env, client, targetType, whereClause, orderClause, limitClause);
+    }
+
+    public static Object queryAsListWithOffset(Environment env, BObject client, BTypedesc targetType,
+                                               BObject whereClause, BObject orderClause, BObject limitClause,
+                                               BObject offsetClause) {
+        return SQLProcessor.queryAsList(env, client, targetType, whereClause, orderClause, limitClause,
+                offsetClause);
     }
 
     public static Object queryOne(Environment env, BObject client, BArray path, BTypedesc targetType) {

@@ -47,6 +47,7 @@ public final class Constants {
     public static final String COLON = ":";
     public static final String GET = "get";
     public static final String TARGET_TYPE = "targetType";
+    public static final String OFFSET_CLAUSE = "offsetClause";
     public static final String WHERE = "where";
     public static final String ORDER_BY = "order by";
     public static final String PERSIST_DIRECTORY = "persist";

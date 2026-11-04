@@ -188,9 +188,14 @@ public isolated client class MSSQLRainierClient {
         return result;
     }
 
-    isolated resource function get workspaces(WorkspaceTargetType targetType = <>, sql:ParameterizedQuery whereClause = ``, sql:ParameterizedQuery orderByClause = ``, sql:ParameterizedQuery limitClause = ``, sql:ParameterizedQuery groupByClause = ``) returns stream<targetType, persist:Error?> = @java:Method {
+    isolated resource function get workspaces(WorkspaceTargetType targetType = <>, sql:ParameterizedQuery whereClause = ``, sql:ParameterizedQuery orderByClause = ``, sql:ParameterizedQuery limitClause = ``, sql:ParameterizedQuery groupByClause = ``, sql:ParameterizedQuery offsetClause = ``) returns stream<targetType, persist:Error?> = @java:Method {
         'class: "io.ballerina.stdlib.persist.sql.datastore.MSSQLProcessor",
-        name: "query"
+        name: "queryWithOffset"
+    } external;
+
+    isolated resource function get workspaces/list(WorkspaceTargetType targetType = <>, sql:ParameterizedQuery whereClause = ``, sql:ParameterizedQuery orderByClause = ``, sql:ParameterizedQuery limitClause = ``, sql:ParameterizedQuery offsetClause = ``) returns targetType[]|persist:Error = @java:Method {
+        'class: "io.ballerina.stdlib.persist.sql.datastore.MSSQLProcessor",
+        name: "queryAsListWithOffset"
     } external;
 
     isolated resource function get workspaces/[string workspaceId](WorkspaceTargetType targetType = <>) returns targetType|persist:Error = @java:Method {

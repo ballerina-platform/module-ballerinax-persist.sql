@@ -211,7 +211,7 @@ The SQL client has the resource methods that the persist specification specifies
 3. The statement has the query clauses that are not the empty template, in this order: ` WHERE <whereClause>`, ` GROUP BY <groupByClause>`, ` ORDER BY <orderByClause>`, then the paging clause of rule 7.
 4. The text of each query clause is written into the statement as given. A query clause refers to a table by the entity alias or a relation alias, and to a column by its column name, quoted as needed by the datastore.
 5. Each insertion in `whereClause` and `limitClause` is bound as a parameter of the statement.
-6. Each insertion in `orderByClause` and `groupByClause` is written into the statement text as the `toString` value of the insertion, and is not bound as a parameter.
+6. Each insertion in `orderByClause` and `groupByClause` is written into the statement text as the `toString` value of the insertion, and is not bound as a parameter, because these clauses hold column names and sort directions, which SQL cannot bind.
 7. When `limitClause` or `offsetClause` is given, the paging clause is as follows, where `l` is the `limitClause` and `o` is the `offsetClause` value, which is bound as a parameter:
 
     | Datastore | `limitClause` only | `offsetClause` only | Both |
@@ -389,7 +389,7 @@ Any other failure of a resource method is returned as a `persist:Error` with the
 
 1. The text of every query clause, and the SQL of the native SQL methods, is written into the SQL statement as given. Text built from untrusted input can change the statement.
 2. The insertions of `whereClause` and `limitClause`, the `offsetClause` value, and the insertions of the native SQL methods are bound as parameters.
-3. The insertions of `orderByClause` and `groupByClause` are written into the SQL statement text as their `toString` values, as specified in [5.2.2](#522-behaviour), and are not bound as parameters. An insertion with an untrusted value can change the statement.
+3. The insertions of `orderByClause` and `groupByClause` are written into the SQL statement text as their `toString` values, as specified in [5.2.2](#522-behaviour), and are not bound as parameters. An application MUST NOT pass an untrusted value as such an insertion, and SHOULD map a caller's choice to a known column name instead.
 4. `offsetClause` is accepted only as a non-negative integer, as specified in [5.2.1](#521-configuration), so text such as `0; DROP TABLE Workspace` is rejected with a `persist:Error`.
 5. The SQL client logs the SQL statements that it builds for the resource methods, with the values of their parameters, at the `DEBUG` log level.
 6. The SQL client connects to the database with the database configuration that the persist tool generates, as specified in the [persist tools specification](https://github.com/ballerina-platform/persist-tools/blob/main/docs/spec/spec.md#9-security-considerations).

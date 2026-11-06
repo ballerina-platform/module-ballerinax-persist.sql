@@ -81,14 +81,14 @@ The package supports four SQL datastores. Each has a constant of the package tha
     | H2 | `h2` | `H2_SPECIFICS` | `"name"` |
 
 2. The SQL client quotes each table, column and alias name that it writes into an SQL statement with the identifier quotes of its datastore. A schema name given by `@sql:Schema` is written without quotes.
-3. The field types that the SQL datastores support are as follows. The `time` types are `time:Date`, `time:TimeOfDay`, `time:Utc` and `time:Civil`.
+3. The types of the non-relation fields that the SQL datastores support are as follows. The `time` types are `time:Date`, `time:TimeOfDay`, `time:Utc` and `time:Civil`.
 
     | Datastore | Simple types | Array types |
     |---|---|---|
     | MySQL, MSSQL, PostgreSQL, H2 | `int`, `boolean`, `decimal`, `float`, `string`, enum types, the `time` types | `byte[]` |
 
 4. A field of a simple type `T`, or of `byte[]`, MAY be declared nillable, `T?`, and is then mapped to a nullable column.
-5. The `persist` compiler plugin rejects any other field type, as specified in the [data model](https://github.com/ballerina-platform/module-ballerina-persist/blob/main/docs/spec/spec.md#3-data-model-definition) of the persist specification.
+5. The `persist` compiler plugin rejects any other type of a non-relation field, as specified in the [data model](https://github.com/ballerina-platform/module-ballerina-persist/blob/main/docs/spec/spec.md#3-data-model-definition) of the persist specification.
 
 ## 4. SQL annotations
 
@@ -106,7 +106,7 @@ The package defines annotations that configure how an entity is stored in an SQL
 | `UniqueIndex` | Non-relation field | `name` | `string\|string[]?` | `()` | The name of the unique index, or the names of the unique indexes, that include the column. `()` gives the name `unique_idx_<lowercased field name>`. |
 | `Varchar` | `string` field | `length` | `int` | `191` | The maximum length of the `VARCHAR` column. `0` is rejected, as specified in [4.4](#44-compile-time-validation). |
 | `Char` | `string` field | `length` | `int` | `10` | The length of the `CHAR` column. `0` is rejected, as specified in [4.4](#44-compile-time-validation). |
-| `Decimal` | `decimal` field | `precision` | `[int, int]` | `[65, 30]` | The precision and the scale of the `DECIMAL` column. A precision of `0`, or a precision less than the scale, is rejected, as specified in [4.4](#44-compile-time-validation). |
+| `Decimal` | `decimal` field | `precision` | `[int, int]` | `[65, 30]` | The precision and the scale of the `DECIMAL` column. A precision of `0`, or a precision less than the scale, is rejected, as specified in [4.4](#44-compile-time-validation). Without `Decimal`, or without `precision`, the persist tool generates `DECIMAL(38,30)` for MSSQL. |
 | `Relation` | Relation field of the owner | `keys` | `string[]` | Required | The fields of the owner that hold the foreign key, in place of the default foreign key fields. |
 | `Generated` | Identity field | None | - | - | The datastore generates the value of the field. |
 
@@ -114,7 +114,7 @@ The package defines annotations that configure how an entity is stored in an SQL
 
 1. The SQL client reads and writes the table named by the `Name` of an entity, and the column named by the `Name` of a field. Without `Name`, the table name is the entity name and the column name is the field name.
 2. The SQL client refers to the table of an entity with a `Schema` as `<schema>.<table>`.
-3. Fields of one entity that give the same `Index` name form one index, and fields that give the same `UniqueIndex` name form one unique index.
+3. Fields of one entity that give the same `Index` name form one index, and fields that give the same `UniqueIndex` name form one unique index. With PostgreSQL, an index name is unique within a schema, so two indexes of different entities of a schema that have the same name, including a default name, cannot both be created.
 4. The `keys` of `Relation` are matched, in order, to the identity fields of the related entity. Each key MUST have the same type, and the same `Char`, `Varchar` or `Decimal` annotation, as its identity field.
 5. A `Generated` field MUST be the only identity field of its entity, and MUST be of type `int`.
 6. The SQL client leaves a `Generated` field out of the `INSERT` statement of `post`, so the datastore generates its value. The insert type of the entity does not have that field, and `post` returns the values that the datastore generated.
@@ -250,7 +250,8 @@ The SQL client has the resource methods that the persist specification specifies
     | `ascending`, `descending`, or no direction in `order by` | `ASC`, `DESC`, `ASC` |
     | A numeric literal, a variable reference or a function call in `limit` | The literal as written, or an insertion of the variable or the call |
 
-4. A query expression that is not rewritten runs its clauses only in memory, on all the records that `get` many returns.
+4. The names that the translation writes are not quoted. With PostgreSQL, which folds an unquoted name to lowercase, a name that has an uppercase letter does not match its quoted alias or column, so the rewritten query fails.
+5. A query expression that is not rewritten runs its clauses only in memory, on all the records that `get` many returns.
 
 #### 5.2.4. Compile-time validation
 

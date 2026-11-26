@@ -1,0 +1,12 @@
+[package]
+org = "wso2"
+name = "ds_client_mysql_core"
+version = "0.0.1"
+
+[build-options]
+cloud = "k8s"
+
+[[platform.java21.dependency]]
+groupId = "io.ballerina.stdlib"
+artifactId = "persist.sql-native"
+version = "1.8.0"

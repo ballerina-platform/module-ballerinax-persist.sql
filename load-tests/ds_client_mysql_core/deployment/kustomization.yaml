@@ -1,0 +1,12 @@
+resources:
+  - ds_client_mysql_core.yaml
+  - service.yaml
+  - ingress.yaml
+  - db.yaml
+patches:
+  - path: deployment-patch.yaml
+    target:
+      group: apps
+      version: v1
+      kind: Deployment
+      labelSelector: app=ds_client_mysql_core

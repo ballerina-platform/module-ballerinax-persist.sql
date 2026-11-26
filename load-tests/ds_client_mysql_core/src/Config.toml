@@ -1,0 +1,7 @@
+[ds_client_mysql_core]
+host = "perf-db"
+port = 3306
+user = "root"
+password = "password"
+database = "perf"
+servicePort = 9090

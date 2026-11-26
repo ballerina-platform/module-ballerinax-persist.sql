@@ -1,0 +1,11 @@
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: perf-app
+spec:
+  ports:
+    - port: 9090
+      targetPort: 9090
+  selector:
+    app: persist_client_mysql

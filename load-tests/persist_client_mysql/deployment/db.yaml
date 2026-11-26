@@ -1,0 +1,179 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: perf-db-init
+data:
+  01-schema.sql: |
+    -- AUTO-GENERATED FILE.
+
+    -- This file is an auto-generated file by Ballerina persistence layer for model.
+    -- Please verify the generated scripts and execute them against the target DB server.
+
+    DROP TABLE IF EXISTS `OrderItem`;
+    DROP TABLE IF EXISTS `SalesOrder`;
+    DROP TABLE IF EXISTS `Product`;
+    DROP TABLE IF EXISTS `Customer`;
+
+    CREATE TABLE `Customer` (
+    	`id` INT NOT NULL,
+    	`name` VARCHAR(191) NOT NULL,
+    	`email` VARCHAR(191) NOT NULL,
+    	`country` VARCHAR(191) NOT NULL,
+    	`tier` INT NOT NULL,
+    	PRIMARY KEY(`id`)
+    );
+
+    CREATE TABLE `Product` (
+    	`id` INT NOT NULL,
+    	`name` VARCHAR(191) NOT NULL,
+    	`description` VARCHAR(1024) NOT NULL,
+    	`attr01` VARCHAR(191) NOT NULL,
+    	`attr02` VARCHAR(191) NOT NULL,
+    	`attr03` VARCHAR(191) NOT NULL,
+    	`attr04` VARCHAR(191) NOT NULL,
+    	`attr05` VARCHAR(191) NOT NULL,
+    	`attr06` VARCHAR(191) NOT NULL,
+    	`attr07` VARCHAR(191) NOT NULL,
+    	`attr08` VARCHAR(191) NOT NULL,
+    	`attr09` VARCHAR(191) NOT NULL,
+    	`attr10` VARCHAR(191) NOT NULL,
+    	`attr11` VARCHAR(191) NOT NULL,
+    	`attr12` VARCHAR(191) NOT NULL,
+    	`attr13` VARCHAR(191) NOT NULL,
+    	`attr14` VARCHAR(191) NOT NULL,
+    	`num01` INT NOT NULL,
+    	`num02` INT NOT NULL,
+    	`num03` INT NOT NULL,
+    	`num04` INT NOT NULL,
+    	`num05` INT NOT NULL,
+    	`num06` INT NOT NULL,
+    	`num07` INT NOT NULL,
+    	`dec01` DECIMAL(65,30) NOT NULL,
+    	`dec02` DECIMAL(65,30) NOT NULL,
+    	`dec03` DECIMAL(65,30) NOT NULL,
+    	`dec04` DECIMAL(65,30) NOT NULL,
+    	`dec05` DECIMAL(65,30) NOT NULL,
+    	`dec06` DECIMAL(65,30) NOT NULL,
+    	PRIMARY KEY(`id`)
+    );
+
+    CREATE TABLE `SalesOrder` (
+    	`id` INT NOT NULL,
+    	`status` VARCHAR(191) NOT NULL,
+    	`total` DECIMAL(65,30) NOT NULL,
+    	`placedOn` DATE NOT NULL,
+    	`customerId` INT NOT NULL,
+    	FOREIGN KEY(`customerId`) REFERENCES `Customer`(`id`),
+    	PRIMARY KEY(`id`)
+    );
+
+    CREATE TABLE `OrderItem` (
+    	`id` INT NOT NULL,
+    	`sku` VARCHAR(191) NOT NULL,
+    	`quantity` INT NOT NULL,
+    	`price` DECIMAL(65,30) NOT NULL,
+    	`salesorderId` INT NOT NULL,
+    	FOREIGN KEY(`salesorderId`) REFERENCES `SalesOrder`(`id`),
+    	`productId` INT NOT NULL,
+    	FOREIGN KEY(`productId`) REFERENCES `Product`(`id`),
+    	PRIMARY KEY(`id`)
+    );
+
+
+
+  02-seed.sql: |
+    SET @orders = 100000;
+    SET @fanout = 10;
+    -- Seeds the perf model. Set @orders (parent rows) and @fanout (items per order) before sourcing;
+    -- customers = @orders / 10, products = @orders.
+    SET @orders = IFNULL(@orders, 100000);
+    SET @fanout = IFNULL(@fanout, 10);
+    SET SESSION cte_max_recursion_depth = 100000000;
+
+    INSERT INTO Customer (id, name, email, country, tier)
+    WITH RECURSIVE seq (n) AS (SELECT 1 UNION ALL SELECT n + 1 FROM seq WHERE n < GREATEST(@orders DIV 10, 1))
+    SELECT n, CONCAT('Customer ', n), CONCAT('customer', n, '@example.com'),
+           ELT(1 + n % 8, 'LK', 'US', 'GB', 'DE', 'IN', 'JP', 'AU', 'BR'), 1 + n % 4
+    FROM seq;
+
+    INSERT INTO SalesOrder (id, status, total, placedOn, customerId)
+    WITH RECURSIVE seq (n) AS (SELECT 1 UNION ALL SELECT n + 1 FROM seq WHERE n < @orders)
+    SELECT n, ELT(1 + n % 5, 'NEW', 'PAID', 'SHIPPED', 'DELIVERED', 'CANCELLED'), (n % 5000) + 0.99,
+           DATE_ADD('2023-01-01', INTERVAL n % 1095 DAY), 1 + (n - 1) % GREATEST(@orders DIV 10, 1)
+    FROM seq;
+
+    INSERT INTO Product
+    WITH RECURSIVE seq (n) AS (SELECT 1 UNION ALL SELECT n + 1 FROM seq WHERE n < @orders)
+    SELECT n, CONCAT('Product ', n), RPAD(CONCAT('Description of product ', n, ' '), 1000, 'lorem ipsum '),
+           CONCAT('a01-', n), CONCAT('a02-', n), CONCAT('a03-', n), CONCAT('a04-', n), CONCAT('a05-', n),
+           CONCAT('a06-', n), CONCAT('a07-', n), CONCAT('a08-', n), CONCAT('a09-', n), CONCAT('a10-', n),
+           CONCAT('a11-', n), CONCAT('a12-', n), CONCAT('a13-', n), CONCAT('a14-', n),
+           n, n % 7, n % 11, n % 13, n % 17, n % 19, n % 23,
+           n + 0.01, n + 0.02, n + 0.03, n + 0.04, n + 0.05, n + 0.06
+    FROM seq;
+
+    INSERT INTO OrderItem (id, sku, quantity, price, salesorderId, productId)
+    WITH RECURSIVE seq (n) AS (SELECT 1 UNION ALL SELECT n + 1 FROM seq WHERE n < @orders * @fanout)
+    SELECT n, CONCAT('SKU-', LPAD(n % 10000, 5, '0')), 1 + n % 9, (n % 300) + 0.50, 1 + (n - 1) DIV @fanout, 1 + (n * 7) % @orders
+    FROM seq;
+
+    CREATE TABLE seed_done (done INT);
+
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: perf-db
+spec:
+  selector:
+    matchLabels:
+      app: perf-db
+  strategy:
+    type: Recreate
+  template:
+    metadata:
+      labels:
+        app: perf-db
+        load: "true"
+    spec:
+      containers:
+        - name: perf-db
+          image: mysql:8.0
+          env:
+            - name: MYSQL_ROOT_PASSWORD
+              value: password
+            - name: MYSQL_DATABASE
+              value: perf
+          ports:
+            - containerPort: 3306
+          readinessProbe:
+            exec:
+              command: ["sh", "-c", "mysql -h127.0.0.1 -uroot -ppassword perf -e 'SELECT 1 FROM seed_done'"]
+            initialDelaySeconds: 20
+            periodSeconds: 10
+            failureThreshold: 360
+          volumeMounts:
+            - name: init
+              mountPath: /docker-entrypoint-initdb.d
+          resources:
+            requests:
+              cpu: "1"
+              memory: 2Gi
+            limits:
+              cpu: "2"
+              memory: 3Gi
+      volumes:
+        - name: init
+          configMap:
+            name: perf-db-init
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: perf-db
+spec:
+  ports:
+    - port: 3306
+      targetPort: 3306
+  selector:
+    app: perf-db

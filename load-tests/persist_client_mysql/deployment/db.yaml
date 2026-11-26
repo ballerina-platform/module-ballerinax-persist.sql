@@ -82,12 +82,10 @@ data:
 
 
   02-seed.sql: |
+    -- Seeds the perf model with @orders parent rows and @fanout items per order;
+    -- customers = @orders / 10, products = @orders.
     SET @orders = 100000;
     SET @fanout = 10;
-    -- Seeds the perf model. Set @orders (parent rows) and @fanout (items per order) before sourcing;
-    -- customers = @orders / 10, products = @orders.
-    SET @orders = IFNULL(@orders, 100000);
-    SET @fanout = IFNULL(@fanout, 10);
     SET SESSION cte_max_recursion_depth = 100000000;
 
     INSERT INTO Customer (id, name, email, country, tier)

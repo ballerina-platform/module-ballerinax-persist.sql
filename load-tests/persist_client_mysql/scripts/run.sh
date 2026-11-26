@@ -11,7 +11,7 @@ orders=100000
 
 echo "Waiting for the service and the seeded database"
 for i in $(seq 360); do
-    code=$(curl -s -o /dev/null -w '%{http_code}' "http://bal.perf.test/bare/get_by_key/1" || true)
+    code=$(curl -s --connect-timeout 5 --max-time 10 -o /dev/null -w '%{http_code}' "http://bal.perf.test/bare/get_by_key/1" || true)
     [[ "$code" == "200" ]] && break
     sleep 10
 done
@@ -30,7 +30,8 @@ while IFS=$'\t' read -r name method path body; do
     jmeter -n -t "$scriptsDir/request.jmx" -l "$jtl" -Jusers="$users" -Jduration="$duration" -JrampUpPeriod=30 \
         -Jhost=bal.perf.test -Jport=80 -Jprotocol=http -Jmethod="$method" \
         -Jpath="${path//ORDERS/$orders}" -Jbody="${body//ORDERS/$orders}" \
-        -Jjmeter.save.saveservice.output_format=csv -Jjmeter.save.saveservice.print_field_names=true
+        -Jjmeter.save.saveservice.output_format=csv -Jjmeter.save.saveservice.print_field_names=true \
+        -Jsampleresult.timestamp.start=true
     # The samples are sorted by elapsed time with sort, since the awk of the JMeter image has no asort.
     row=$(awk -F',' -v warmup="$warmup" '
         NR == 1 { for (i = 1; i <= NF; i++) col[$i] = i; next }
@@ -42,7 +43,7 @@ while IFS=$'\t' read -r name method path body; do
         {
             n++; t = $1; sum += t; sumsq += t * t; times[n] = t; bytes += $3
             if (start == "" || $2 < start) start = $2
-            if ($2 > last) last = $2
+            if ($2 + $1 > last) last = $2 + $1
             if ($4 != "true") errors++
         }
         END {

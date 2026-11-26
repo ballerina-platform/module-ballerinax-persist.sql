@@ -1,0 +1,12 @@
+resources:
+  - persist_client_mysql.yaml
+  - service.yaml
+  - ingress.yaml
+  - db.yaml
+patches:
+  - path: deployment-patch.yaml
+    target:
+      group: apps
+      version: v1
+      kind: Deployment
+      labelSelector: app=persist_client_mysql

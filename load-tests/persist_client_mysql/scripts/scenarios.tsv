@@ -1,0 +1,13 @@
+get_by_key	GET	/bare/get_by_key/${__Random(1,ORDERS)}	
+list_20	GET	/bare/list?size=20&offset=${__Random(0,1000)}	
+list_100	GET	/bare/list?size=100&offset=${__Random(0,1000)}	
+filter_sort	GET	/bare/filter_sort?size=20&offset=${__Random(0,1000)}	
+to_one	GET	/bare/to_one/${__Random(1,ORDERS)}	
+many_to_many	GET	/bare/many_to_many/${__Random(1,ORDERS)}	
+many_to_many_rev	GET	/bare/many_to_many_rev/${__Random(1,ORDERS)}	
+wide_2_fields	GET	/bare/wide_2_fields?size=100&offset=${__Random(0,1000)}	
+wide_all	GET	/bare/wide_all?size=100&offset=${__Random(0,1000)}	
+create	POST	/bare/create	{"id":${__Random(10000000,2000000000)},"name":"n","email":"e@example.com","country":"LK","tier":1}
+patch	PATCH	/bare/patch/${__Random(1,1000)}	{"tier":${__Random(1,4)}}
+to_many_20	GET	/bare/to_many?size=20&offset=${__Random(0,1000)}	
+to_many_100	GET	/bare/to_many?size=100&offset=${__Random(0,1000)}	

@@ -1,0 +1,16 @@
+[container.image]
+repository = "ballerina"
+name = "persist_client_mysql"
+
+[cloud.deployment]
+min_memory = "512Mi"
+max_memory = "1Gi"
+min_cpu = "500m"
+max_cpu = "1000m"
+
+[cloud.deployment.autoscaling]
+min_replicas = 1
+max_replicas = 1
+
+[[cloud.config.files]]
+file = "Config.toml"
